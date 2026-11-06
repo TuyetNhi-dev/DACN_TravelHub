@@ -1,0 +1,66 @@
+.auth-page { min-height: 65vh; padding-block: 56px; }
+.auth-card { width: min(100%, 480px); margin-inline: auto; padding: 28px; border: 1px solid var(--line); border-radius: 16px; background: var(--panel); }
+.auth-card h1 { margin-top: 0; font-size: 26px; }
+.auth-card p, .auth-card small { color: var(--muted); line-height: 1.6; }
+.auth-card form, .auth-card label { display: grid; gap: 8px; }
+.auth-card form { gap: 18px; }
+.auth-card input { min-width: 0; width: 100%; padding: 12px; background: var(--canvas); color: var(--ink); border: 1px solid var(--line-strong); border-radius: 8px; }
+.auth-card input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.auth-card .auth-error { color: #b42318; background: #fff1f0; padding: 12px; border-radius: 8px; }
+.auth-card .auth-success { color: #06603b; background: #ecfdf3; padding: 12px; border-radius: 8px; }
+.auth-card p a { color: var(--blue); text-decoration: underline; }
+.auth-card dt { font-weight: 600; margin-top: 16px; }
+.auth-card dd { margin: 4px 0 16px; overflow-wrap: anywhere; }
+.auth-header-name { max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 13px; }
+@media (max-width: 600px) { .auth-page { padding-block: 28px; } .auth-card { padding: 20px; } }
+
+/* SàiHành identity, with the soft, centered card layout of the references. */
+.auth-stage { position: relative; isolation: isolate; display: flex; align-items: center; justify-content: center; min-height: calc(100svh - 90px); padding: 48px 24px; overflow: hidden; background: radial-gradient(ellipse at 5% 20%, #4677a6 0, transparent 48%), radial-gradient(ellipse at 95% 95%, #346f86 0, transparent 50%), #122e53; }
+.auth-stage::before, .auth-stage::after { content: ""; position: absolute; z-index: -1; width: 580px; height: 580px; border: 1px solid #ffffff16; border-radius: 50%; pointer-events: none; }
+.auth-stage::before { left: -200px; top: 30%; box-shadow: 0 0 0 70px #ffffff04, 0 0 0 140px #ffffff04; }
+.auth-stage::after { right: -330px; top: -300px; box-shadow: 0 0 0 90px #ffffff04; }
+.auth-backdrop-copy { position: absolute; left: max(32px, calc((100vw - 1260px) / 2)); top: 50%; transform: translateY(-50%); color: #fff; max-width: 290px; }
+.auth-backdrop-copy > span { font-size: 11px; font-weight: 600; letter-spacing: 3px; color: #d2e3f0; }
+.auth-backdrop-copy p { margin: 24px 0 32px; font-size: clamp(32px, 4vw, 54px); font-weight: 700; line-height: 1.25; letter-spacing: -2px; }
+.auth-stage .auth-form-card { position: relative; width: min(100%, 550px); padding: 42px 40px 28px; border: 1px solid var(--line); border-radius: 26px; box-shadow: 0 28px 90px #07172f40; }
+.auth-close { position: absolute; top: 18px; right: 18px; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 50%; background: var(--surface); color: var(--muted); transition: background .2s, color .2s; }
+.auth-close:hover { background: var(--blue-soft); color: var(--blue); }
+.auth-close:focus-visible, .auth-password button:focus-visible { outline: 2px solid var(--brand); outline-offset: 3px; }
+.auth-brand { display: flex; justify-content: center; margin-bottom: 28px; }
+.auth-brand .logo.brand-logo { width: 200px; }
+.auth-intro { text-align: center; margin-bottom: 32px; }
+.auth-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 2.4px; color: var(--muted); }
+.auth-form-card .auth-intro h1 { margin: 10px 0 12px; font-size: 32px; font-weight: 800; color: var(--ink); letter-spacing: -.9px; }
+.auth-intro p { margin: 0; font-size: 14px; }
+.auth-form-card form { gap: 22px; }
+.auth-field { display: grid; align-content: start; gap: 9px; min-width: 0; }
+.auth-form-card .auth-field label { display: block; color: var(--text-control); font-size: 14px; font-weight: 600; }
+.auth-field label > span { color: #dc4545; }
+.auth-form-card input { height: 54px; padding: 0 16px; border: 1px solid transparent; border-radius: 13px; background: var(--surface); font-size: 14px; transition: border-color .2s, box-shadow .2s; }
+.auth-form-card input::placeholder { color: var(--muted); opacity: .85; }
+.auth-form-card input:hover { border-color: var(--line); }
+.auth-form-card input:focus-visible { border-color: var(--brand); outline: none; box-shadow: 0 0 0 3px var(--blue-soft); }
+.auth-password { position: relative; }
+.auth-password input { padding-right: 48px; }
+.auth-password button { position: absolute; right: 7px; top: 7px; height: 40px; width: 36px; display: grid; place-items: center; border: 0; border-radius: 8px; background: transparent; color: var(--muted); }
+.auth-password button:hover { color: var(--blue); background: var(--blue-soft); }
+.auth-password-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.auth-form-card .auth-password-hint { font-size: 11px; margin-top: -12px; }
+.auth-form-card .auth-submit { width: 100%; min-height: 56px; margin-top: 2px; border-radius: 13px; font-size: 15px; background: linear-gradient(110deg, #155eef, #2245b8); color: #fff; box-shadow: 0 7px 16px #155eef25; }
+.auth-form-card .auth-submit:hover { background: linear-gradient(110deg, #104fd4, #193992); transform: translateY(-1px); }
+.auth-form-card .auth-submit:disabled { transform: none; }
+.auth-form-card .auth-switch { text-align: center; font-size: 14px; margin: 24px 0; }
+.auth-form-card .auth-switch a { font-weight: 700; text-decoration: none; }
+.auth-form-card .auth-switch a:hover { text-decoration: underline; }
+.auth-card-footer { display: flex; justify-content: center; align-items: center; gap: 7px; border-top: 1px solid var(--line); padding-top: 20px; color: var(--muted); font-size: 11px; }
+@media (min-width: 1200px) { .auth-stage .auth-form-card { margin-left: calc(50% - 180px); margin-right: auto; } }
+@media (max-width: 1199px) { .auth-backdrop-copy { display: none; } }
+@media (max-width: 600px) {
+  .auth-stage { min-height: calc(100svh - 76px); padding: 24px 14px; }
+  .auth-stage .auth-form-card { padding: 38px 22px 24px; border-radius: 22px; }
+  .auth-brand { margin-bottom: 22px; }
+  .auth-brand .logo.brand-logo { width: 180px; }
+  .auth-intro { margin-bottom: 26px; }
+  .auth-form-card .auth-intro h1 { font-size: 29px; }
+  .auth-password-grid { grid-template-columns: 1fr; gap: 22px; }
+}

@@ -1,0 +1,26 @@
+@TravelHub.Api_HostAddress = http://localhost:5108
+
+GET {{TravelHub.Api_HostAddress}}/api/health/database
+Accept: application/json
+
+###
+GET {{TravelHub.Api_HostAddress}}/api/tours
+Accept: application/json
+
+###
+# Replace the ID below with data[0].tourId returned by GET /api/tours.
+GET {{TravelHub.Api_HostAddress}}/api/tours/REPLACE_ID
+Accept: application/json
+
+###
+GET {{TravelHub.Api_HostAddress}}/api/hotels
+Accept: application/json
+
+###
+# Replace the ID below with data[0].hotelId returned by GET /api/hotels.
+GET {{TravelHub.Api_HostAddress}}/api/hotels/REPLACE_ID
+Accept: application/json
+
+###
+GET {{TravelHub.Api_HostAddress}}/api/flights
+Accept: application/json

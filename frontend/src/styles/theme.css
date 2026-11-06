@@ -1,0 +1,41 @@
+/* New UI should consume these tokens rather than adding fixed surface colors. */
+@theme inline {
+  --color-background: var(--canvas);
+  --color-foreground: var(--ink);
+  --color-card: var(--panel);
+  --color-primary: var(--brand);
+  --color-border: var(--line);
+}
+
+button, input, select, textarea { color: inherit; }
+input, select, textarea { color: var(--ink); background-color: var(--panel); border-color: var(--line); }
+option { color: var(--ink); background: var(--panel); }
+.theme-toggle { width:44px; height:44px; flex:0 0 44px; margin-left:auto; display:grid; place-items:center; border:1px solid var(--line); border-radius:12px; color:var(--blue); background:var(--panel); }
+.theme-toggle:hover { background:var(--blue-soft); }
+.theme-sun { display:none; }
+:root[data-theme="dark"] .theme-moon { display:none; }
+:root[data-theme="dark"] .theme-sun { display:block; }
+.menu-btn { color:var(--ink); }
+
+/* Animate only paint colors, not layout, images or every DOM node. */
+body, .header, footer, .nav-links, .theme-toggle, .search-box, .search-field,
+.tour-card, .hotel-card, .flight-card, .floating-card, .filters, .tour-list-card,
+.detail-content > section, .detail-booking, .overview-strip, .benefit, .tour-api-state,
+input, select, textarea {
+  transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
+}
+@media (min-width:901px) and (max-width:1200px) {
+  .nav { gap:12px; }
+  .nav-links { gap:16px; }
+  .nav-actions .btn { padding-inline:10px; }
+}
+@media (max-width:900px) {
+  .nav { gap:12px; }
+  .theme-toggle { margin-left:auto; }
+}
+@media (prefers-reduced-motion:reduce) {
+  body, .header, footer, .nav-links, .theme-toggle, .search-box, .search-field,
+  .tour-card, .hotel-card, .flight-card, .floating-card, .filters, .tour-list-card,
+  .detail-content > section, .detail-booking, .overview-strip, .benefit, .tour-api-state,
+  input, select, textarea { transition:none; }
+}

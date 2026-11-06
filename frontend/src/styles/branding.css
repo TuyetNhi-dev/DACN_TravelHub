@@ -1,0 +1,25 @@
+/* Separate transparent asset; the original PNG remains untouched. */
+.logo.brand-logo { display:block; flex:0 0 auto; width:190px; padding:2px; background:transparent; border-radius:0; }
+.brand-logo .brand-logo-image { display:block; width:100%; height:auto; object-fit:contain; }
+:root[data-theme="dark"] .brand-logo-image, footer .brand-logo-image { filter:drop-shadow(0 0 1px var(--on-brand)); }
+.brand-logo.footer-logo { width:200px; max-width:100%; margin-bottom:17px; }
+.header:has(.brand-logo) { height:90px; }
+html:root { scroll-padding-top:110px; }
+@media(max-width:900px) { .header .nav-links { top:89px; } }
+@media(max-width:600px) {
+ .header:has(.brand-logo) { height:76px; }
+ .logo.brand-logo { width:136px; }
+ .header .nav-links { top:75px; }
+}
+/* Switch to the compact navigation before the wider wordmark crowds the links. */
+@media(max-width:1100px) {
+ .header .nav-links { position:fixed; left:0; right:0; top:89px; height:auto; display:none; flex-direction:column; align-items:stretch; gap:0; padding:15px 24px 24px; background:var(--panel); border-bottom:1px solid var(--line); box-shadow:0 15px 30px var(--nav-shadow); }
+ .header .nav-links.open { display:flex; }
+ .header .nav-links > a { padding:14px 2px; height:auto; }
+ .header .nav-links > a.active::after { display:none; }
+ .header .nav-actions { display:none; }
+ .header .menu-btn { display:grid; place-items:center; border:0; background:none; }
+ .header .mobile-auth { display:flex; margin-top:10px; gap:8px; }
+ .header .mobile-auth .btn { flex:1; }
+}
+@media(max-width:600px) { .header .nav-links { top:75px; } }

@@ -1,0 +1,16 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+.env
+.env.*
+!.env.example
+secrets.json
+appsettings.Local.json
+appsettings.*.local.json
+*.pem
+*.key
+*.pfx
+*.p12
+certs/

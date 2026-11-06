@@ -1,0 +1,99 @@
+/* Base tour layout. Keep this separate from API-specific adaptations. */
+.page-main { min-height:70vh; background:var(--surface); color:var(--ink); }
+.page-banner { background:linear-gradient(135deg,var(--hero-start),var(--surface)); padding:42px 0 0; border-bottom:1px solid var(--line); }
+.breadcrumb,.detail-breadcrumb { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:12px; margin-bottom:20px; }
+.breadcrumb a,.detail-breadcrumb a { color:var(--blue); }
+.page-banner h1 { font-size:34px; line-height:1.25; margin:0 0 12px; letter-spacing:-1px; font-weight:700; }
+.page-banner > .container > p { color:var(--muted); font-size:14px; margin:0; line-height:1.6; }
+.list-search { position:relative; transform:translateY(30px); background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:0 12px 30px var(--search-shadow); display:grid; align-items:stretch; }
+.list-search > label { display:flex; align-items:center; gap:12px; padding:4px 18px; border-right:1px solid var(--line); color:var(--blue); min-width:0; }
+.list-search label > span { display:flex; flex-direction:column; gap:5px; flex:1; min-width:0; color:var(--muted); font-size:11px; }
+.list-search input,.list-search select { width:100%; min-width:0; border:0; padding:0; background:transparent; color:var(--ink); font-size:13px; font-weight:500; }
+.list-search .btn { margin-left:16px; }
+.listing-layout { padding:72px 0 75px; display:grid; grid-template-columns:245px minmax(0,1fr); gap:28px; align-items:start; }
+.filters { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; position:sticky; top:110px; }
+.filter-title { display:flex; justify-content:space-between; align-items:center; gap:10px; padding-bottom:16px; border-bottom:1px solid var(--line); font-size:13px; }
+.filter-title button { border:0; background:none; color:var(--blue); font-size:11px; padding:0; }
+.filter-group { padding:18px 0; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:10px; }
+.filter-group:last-child { border:0; }
+.filter-group > b { font-size:13px; }
+.filter-group label { color:var(--text-secondary); font-size:12px; }
+.filter-group input,.filter-group select { font-size:12px; }
+.filters > .tour-api-note { font-size:11px; margin-top:16px; }
+.listing-results { min-width:0; }
+.results-head { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; }
+.results-head h2 { font-size:24px; line-height:1.3; margin:0 0 6px; font-weight:600; }
+.results-head span { color:var(--muted); font-size:12px; }
+.results-head label { color:var(--muted); font-size:12px; display:flex; align-items:center; gap:10px; }
+.results-head select { border:1px solid var(--line); background:var(--panel); color:var(--ink); border-radius:9px; padding:10px; font-size:12px; max-width:190px; }
+.list-cards { display:grid; gap:18px; }
+.tour-list-card { display:grid; grid-template-columns:235px minmax(0,1fr); background:var(--panel); border:1px solid var(--line); border-radius:14px; overflow:hidden; }
+.list-illustration { align-self:stretch; }
+.list-illustration img { width:100%; min-height:230px; }
+.tour-list-info { padding:20px; display:flex; flex-direction:column; align-items:stretch; }
+.tour-list-info h3 { font-size:19px; line-height:1.45; margin:10px 0 16px; font-weight:600; }
+.tour-list-info .eyebrow { font-size:12px; line-height:1.6; }
+.list-meta { display:flex; gap:16px; flex-wrap:wrap; color:var(--text-secondary); font-size:12px; padding-bottom:16px; }
+.list-meta span { display:flex; align-items:center; gap:6px; }
+.list-bottom { margin-top:auto; padding-top:16px; border-top:1px solid var(--line); display:flex; align-items:flex-end; justify-content:space-between; gap:12px; }
+.list-bottom > div { display:flex; flex-direction:column; gap:5px; min-width:0; }
+.list-bottom small { color:var(--muted); font-size:11px; }
+.list-bottom strong { color:var(--blue); font-size:22px; line-height:1.3; }
+.list-bottom .btn { flex-shrink:0; font-size:13px; }
+.detail-page { padding:30px 0 75px; }
+.detail-title { display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:24px; }
+.detail-title > div:first-child { min-width:0; }
+.detail-title h1 { font-size:32px; line-height:1.35; letter-spacing:-1px; margin:0 0 10px; font-weight:700; }
+.detail-title p { display:flex; align-items:center; gap:6px; color:var(--muted); font-size:14px; margin:0; }
+.detail-price { text-align:right; flex-shrink:0; }
+.detail-price small { display:block; color:var(--muted); font-size:12px; margin-bottom:6px; }
+.detail-price strong { color:var(--blue); font-size:24px; margin-right:5px; }
+.detail-price > span { color:var(--muted); font-size:12px; }
+.detail-layout { display:grid; grid-template-columns:minmax(0,1fr) 340px; gap:28px; align-items:start; }
+.detail-content { min-width:0; }
+.detail-content > section { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:24px; margin-bottom:18px; }
+.detail-content section h2 { font-size:20px; line-height:1.4; margin:0 0 16px; font-weight:600; }
+.detail-content section > p { color:var(--text-secondary); line-height:1.8; margin:0 0 8px; }
+.overview-strip { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:18px; display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); margin-bottom:18px; gap:12px; }
+.overview-strip > span { display:grid; grid-template-columns:24px minmax(0,1fr); column-gap:8px; border-right:1px solid var(--line); padding-right:8px; }
+.overview-strip > span:last-child { border:0; }
+.overview-strip svg { grid-row:1/3; color:var(--blue); align-self:center; }
+.overview-strip small { color:var(--muted); font-size:11px; }
+.overview-strip b { font-size:12px; line-height:1.6; overflow-wrap:anywhere; }
+.detail-booking { position:sticky; top:110px; background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:22px; box-shadow:0 10px 30px var(--card-shadow); }
+.detail-booking h2 { font-size:20px; line-height:1.4; margin:0 0 18px; font-weight:600; }
+.detail-booking > label { display:flex; flex-direction:column; gap:8px; font-size:12px; font-weight:600; }
+.detail-booking select { width:100%; min-width:0; border:1px solid var(--line); border-radius:8px; padding:10px; background:var(--panel); font-size:12px; }
+.detail-total { display:flex; justify-content:space-between; gap:12px; align-items:flex-end; margin:20px 0; }
+.detail-total > span { display:flex; flex-direction:column; font-size:12px; }
+.detail-total small { color:var(--muted); font-size:11px; }
+.detail-total strong { color:var(--blue); font-size:20px; }
+.detail-book-btn { width:100%; margin-bottom:12px; }
+@media(max-width:1000px) {
+ .listing-layout { grid-template-columns:210px minmax(0,1fr); gap:18px; }
+ .tour-list-card { grid-template-columns:180px minmax(0,1fr); }
+ .tour-list-info { padding:16px; }
+ .list-bottom { flex-wrap:wrap; }
+ .detail-layout { grid-template-columns:minmax(0,1fr) 290px; gap:18px; }
+ .overview-strip { grid-template-columns:1fr; }
+ .overview-strip > span { border:0; }
+}
+@media(max-width:700px) {
+ .page-banner { padding-top:28px; }
+ .page-banner h1 { font-size:28px; }
+ .listing-layout { padding-top:54px; grid-template-columns:minmax(0,1fr); }
+ .filters { position:static; }
+ .detail-layout { grid-template-columns:minmax(0,1fr); }
+ .detail-booking { position:static; }
+ .detail-title { align-items:flex-start; flex-direction:column; gap:16px; }
+ .detail-title h1 { font-size:26px; }
+ .detail-price { text-align:left; }
+}
+@media(max-width:500px) {
+ .tour-list-card { grid-template-columns:minmax(0,1fr); }
+ .list-illustration img { height:210px; min-height:0; }
+ .list-search > label { padding:10px; border:0; }
+ .list-search .btn { margin-left:0; }
+ .overview-strip { grid-template-columns:1fr; }
+ .detail-total { flex-wrap:wrap; }
+}

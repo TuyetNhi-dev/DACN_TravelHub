@@ -1,0 +1,38 @@
+
+/* Adapt the prototype to real API fields and accessible mobile filters. */
+.tours-page .list-search { grid-template-columns:minmax(0,1.5fr) minmax(0,1fr) minmax(0,.8fr) auto; }
+.filters input,.filters select { max-width:100%; width:100%; padding:8px; border:1px solid var(--line); border-radius:7px; background:var(--panel); }
+.filters .filter-group label { display:grid; gap:5px; }
+.list-illustration { position:relative; min-height:210px; }
+.list-illustration img { height:100%; object-fit:cover; }
+.tour-list-info { min-width:0; }
+.tour-list-info h3,.detail-title h1 { overflow-wrap:anywhere; }
+.tour-code { align-self:flex-start; font-size:10px; color:var(--blue); background:var(--blue-soft); padding:5px 8px; border-radius:5px; margin-bottom:8px; }
+.pagination { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; margin-top:24px; }
+.pagination button { min-width:34px; min-height:34px; border:1px solid var(--line); border-radius:7px; background:var(--panel); }
+.pagination button.active { background:var(--brand); color:var(--on-brand); }
+.pagination button:disabled { opacity:.4; cursor:not-allowed; }
+.detail-illustration { margin-block:0 28px; }
+.detail-illustration img { height:340px; object-fit:cover; border-radius:16px; }
+.detail-illustration figcaption { font-size:12px; color:var(--muted); margin-top:8px; }
+.tour-itinerary { white-space:pre-line; }
+.departure-table-wrap { overflow-x:auto; }
+.departure-table { width:100%; border-collapse:collapse; font-size:12px; text-align:left; }
+.departure-table caption { text-align:left; color:var(--muted); margin-bottom:10px; }
+.departure-table th,.departure-table td { padding:12px 8px; border-bottom:1px solid var(--line); }
+.detail-booking > p { font-size:12px; line-height:1.7; }
+.detail-content section > p { font-size:13px; }
+@media(min-width:601px) and (max-width:900px) {
+ .tours-page .list-search { grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:12px; }
+ .list-search > label { border:1px solid var(--line); border-radius:8px; padding:10px; }
+ .list-search .btn { margin-left:0; }
+}
+@media(max-width:600px) {
+ .tours-page .list-search { grid-template-columns:1fr; }
+ .tours-page .filter-group { display:flex; }
+ .tours-page .filter-title { padding-bottom:10px; }
+ .detail-illustration img { height:220px; }
+ .results-head { gap:12px; flex-wrap:wrap; }
+ .list-bottom { gap:12px; flex-wrap:wrap; }
+ .list-illustration img { height:210px; }
+}
