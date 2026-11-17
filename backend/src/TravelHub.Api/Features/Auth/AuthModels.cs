@@ -61,16 +61,14 @@ public static class AuthErrorCodes
     public const string PhoneRequired = "phone_required";
 }
 
+/// <summary>Three roles: customers act on their own orders (self); staff and admins see everything (global).</summary>
 public static class RoleCodes
 {
-    public const string SuperAdmin = "SUPER_ADMIN";
-    public const string RegionalManager = "REGIONAL_MANAGER";
-    public const string BranchManager = "BRANCH_MANAGER";
-    public const string Staff = "STAFF";
     public const string Customer = "CUSTOMER";
+    public const string Staff = "STAFF";
+    public const string Admin = "ADMIN";
 
-    public static readonly IReadOnlySet<string> Operators =
-        new HashSet<string> { SuperAdmin, RegionalManager, BranchManager, Staff };
+    public static readonly IReadOnlySet<string> Operators = new HashSet<string> { Staff, Admin };
 }
 
 public static class RoleScopes

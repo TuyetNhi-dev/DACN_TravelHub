@@ -1,13 +1,11 @@
 import type { AuthUser, RoleCode } from "@/types/auth";
 
-const OPERATOR_ROLES: readonly RoleCode[] = ["SUPER_ADMIN", "REGIONAL_MANAGER", "BRANCH_MANAGER", "STAFF"];
+const OPERATOR_ROLES: readonly RoleCode[] = ["STAFF", "ADMIN"];
 
 export const ROLE_LABELS: Record<RoleCode, string> = {
-  SUPER_ADMIN: "Quản trị hệ thống",
-  REGIONAL_MANAGER: "Quản lý khu vực",
-  BRANCH_MANAGER: "Quản lý chi nhánh",
-  STAFF: "Nhân viên điều hành",
   CUSTOMER: "Khách hàng",
+  STAFF: "Nhân viên",
+  ADMIN: "Quản trị viên",
 };
 
 /** UI hint only: the server enforces roles and scopes on every admin request. */

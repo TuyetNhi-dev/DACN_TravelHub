@@ -4,6 +4,9 @@
 - Web đặt tour, khách sạn, vé máy bay (đồ án chuyên ngành, nhóm 3 người). Mô hình: đại lý lữ hành trực tuyến kiểu Saigontourist.
 - frontend/: Next.js + TypeScript + Tailwind. backend/: ASP.NET Core minimal API + MySqlConnector, SQL viết tay trong repository. database/: tài liệu, schema, migration, seed. docs/: tài liệu.
 - Nghiệp vụ cốt lõi: tour có tồn chỗ thật (tour_departures.capacity và reserved_seats). Khách sạn và chuyến bay là BÁO GIÁ của đối tác (hotel_offers, flight_offers), không phải tồn kho. Đơn của chúng ở trạng thái chờ xác nhận (awaiting_supplier), tuyệt đối không hứa còn phòng hay còn ghế.
+- Ngoại lệ duy nhất: vé deal là báo giá chuyến bay có quỹ ghế (flight_offers.allotment_seats, sold_seats) theo hợp đồng của SàiHành. Chỉ vé deal được ghi "Xác nhận ngay" và "Còn N ghế"; đặt vé deal giữ ghế như tour (Booking:DealHoldMinutes, mặc định 10 phút, trừ ghế bằng UPDATE có điều kiện, hết ghế trả 409), thanh toán trong hạn là confirmed, quá hạn thì tác vụ nền trả ghế đúng một lần. Không ghi "rẻ nhất thị trường".
+- Phân quyền 3 vai trò: CUSTOMER (scope self), STAFF và ADMIN (scope global). Không thêm vai trò hay phạm vi chi nhánh/khu vực khi chưa được duyệt.
+- Thanh toán mô phỏng (VNPAY sandbox làm sau). Tour: tạo đơn giữ chỗ trong Booking:TourHoldMinutes phút (mặc định 10, giờ do server tính, lưu bookings.hold_expires_at); thanh toán trong hạn thì đơn sang confirmed; quá hạn thì tác vụ nền hủy đơn và trả chỗ đúng một lần, và hạn được kiểm tra lại khi thanh toán. Khách sạn và vé: nhân viên xác nhận với đối tác trước (awaiting_payment), sau đó khách mới thanh toán.
 
 ## Cách làm việc
 1. Đọc code liên quan trước khi sửa. Sửa nhỏ, đúng phạm vi được yêu cầu. Không refactor hay đổi file không liên quan.
@@ -26,7 +29,7 @@
 - SQL luôn tham số hóa, không nối chuỗi từ dữ liệu người dùng.
 - Kiểm tra dữ liệu ở server. Không tin tổng tiền, giá hay vai trò do frontend gửi lên.
 - Tiền dùng DECIMAL ở database, định dạng ở giao diện. Thời gian lưu UTC.
-- Mật khẩu băm bằng BCrypt. Không log bí mật hoặc thông tin cá nhân.
+- Mật khẩu băm bằng PBKDF2 qua PasswordHasher của ASP.NET Core (Microsoft.AspNetCore.Identity), không dùng BCrypt. Không log bí mật hoặc thông tin cá nhân.
 - KHÔNG chạy lệnh thay đổi database thật (CREATE, ALTER, DROP, INSERT, UPDATE, DELETE) và không deploy khi chưa được yêu cầu rõ. Thay đổi schema phải là file migration đánh số trong database/migrations/ và chờ người dùng duyệt.
 - Không xóa file hay dữ liệu nếu chưa được yêu cầu.
 

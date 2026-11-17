@@ -2,7 +2,7 @@ namespace TravelHub.Api.Features.Bookings;
 
 public static class BookingMapper
 {
-    public static BookingDetailDto ToDetail(BookingDetailRow row, bool canCancel, bool includeCustomer)
+    public static BookingDetailDto ToDetail(BookingDetailRow row, bool canCancel, bool canPay, bool includeCustomer)
     {
         var summary = row.Summary;
         return new BookingDetailDto(
@@ -21,9 +21,12 @@ public static class BookingMapper
             row.ConfirmationCode,
             row.Snapshot?.Terms,
             summary.CreatedAt,
+            summary.HoldExpiresAt,
+            row.PaidAt,
             row.Snapshot?.PriceLines ?? [],
             row.Passengers,
             includeCustomer ? summary.Customer : null,
-            canCancel);
+            canCancel,
+            canPay);
     }
 }

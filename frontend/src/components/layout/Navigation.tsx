@@ -7,17 +7,36 @@ import { navigation } from "@/data/home";
 import { ThemeToggle } from "./ThemeToggle";
 import { HeaderSearch } from "./HeaderSearch";
 import { AuthActions } from "@/components/auth/AuthActions";
+
+/** The longest matching link wins, so /flights/deals marks "Săn vé rẻ" and not also "Vé máy bay". */
+function activeHref(pathname: string): string | undefined {
+  if (pathname === "/") return "/";
+  return navigation
+    .filter(item => item.href !== "/" && !item.href.includes("#"))
+    .filter(item => pathname === item.href || pathname.startsWith(item.href + "/"))
+    .sort((a, b) => b.href.length - a.href.length)[0]?.href;
+}
+
 export function Navigation() {
- const [open, setOpen] = useState(false);
- const pathname = usePathname();
- return <>
- <nav id="main-navigation" aria-label="Điều hướng chính" className={open ? "nav-links open" : "nav-links"}>
- {navigation.map(item => { const active = item.href === "/" ? pathname === "/" : !item.href.includes("#") && (pathname === item.href || pathname.startsWith(item.href + "/")); return <Link key={item.label} href={item.href} aria-current={active ? "page" : undefined} className={active ? "active" : ""} onClick={() => setOpen(false)}>{item.label}</Link>; })}
- <div className="mobile-auth"><AuthActions onNavigate={() => setOpen(false)} /></div>
- </nav>
- <HeaderSearch />
- <div className="nav-actions"><AuthActions /></div>
- <ThemeToggle />
- <button className="menu-btn" aria-expanded={open} aria-controls="main-navigation" aria-label={open ? "Đóng menu" : "Mở menu"} onClick={() => setOpen(!open)} onKeyDown={e => { if(e.key === "Escape") setOpen(false); }}><Icon name={open ? "close" : "menu"} /></button>
- </>;
+  const [open, setOpen] = useState(false);
+  const current = activeHref(usePathname());
+  return <>
+    <nav id="main-navigation" aria-label="Điều hướng chính" className={open ? "nav-links open" : "nav-links"}>
+      {navigation.map(item => (
+        <Link key={item.label} href={item.href} aria-current={item.href === current ? "page" : undefined}
+          className={item.href === current ? "active" : ""} onClick={() => setOpen(false)}>
+          {item.label}
+        </Link>
+      ))}
+      <div className="mobile-auth"><AuthActions onNavigate={() => setOpen(false)} /></div>
+    </nav>
+    <HeaderSearch />
+    <div className="nav-actions"><AuthActions /></div>
+    <ThemeToggle />
+    <button className="menu-btn" aria-expanded={open} aria-controls="main-navigation"
+      aria-label={open ? "Đóng menu" : "Mở menu"} onClick={() => setOpen(!open)}
+      onKeyDown={event => { if (event.key === "Escape") setOpen(false); }}>
+      <Icon name={open ? "close" : "menu"} />
+    </button>
+  </>;
 }

@@ -3,3 +3,16 @@
 @media(max-width:1000px){.sf-search{grid-template-columns:1fr 1fr}.sf-swap{grid-column:1/-1;justify-self:start}.sf-booking-layout{grid-template-columns:minmax(0,1fr) 280px}.sf-card{padding:20px}.sf-timeline{gap:10px}.sf-layout{grid-template-columns:200px minmax(0,1fr)}}
 @media(max-width:760px){.sf-layout,.sf-booking-layout{grid-template-columns:1fr}.sf-filters,.sf-total{position:static}.sf-filters{grid-template-columns:1fr 1fr}.sf-filters h3{grid-column:1/-1}.sf-intro{grid-template-columns:1fr;gap:15px;padding:25px 0}.sf-intro>span{display:none}.sf-card{gap:16px}.sf-price strong{font-size:19px}.sf-results-title{align-items:flex-start;flex-direction:column}.sf-selected .sf-timeline{flex-wrap:wrap}}
 @media(max-width:480px){.sf-search,.sf-filters{grid-template-columns:1fr}.sf-panel{padding:18px}.sf-timeline strong{font-size:20px}.sf-timeline span,.sf-timeline small{font-size:10px}.sf-duration span{font-size:9px}.sf-card{grid-template-columns:1fr}.sf-price{grid-column:1;grid-row:auto;text-align:left}.sf-card-actions{align-items:flex-start;flex-direction:column}.sf-notice{padding:16px}.sf-notice p{min-width:0;flex-basis:100%}.sf-notice .btn{width:100%}.sf-actions .btn{width:100%}.sf-sort{flex-wrap:wrap}.sf-sort select{width:100%}}
+/* Tabs shared by /flights and /flights/deals. */
+.fd-tabs{display:inline-flex;gap:4px;padding:4px;margin-bottom:18px;background:var(--panel);
+  border:1px solid var(--line);border-radius:999px}
+.fd-tab{padding:9px 18px;border-radius:999px;font-size:13px;font-weight:600;color:var(--ink);text-decoration:none}
+.fd-tab.is-active{background:var(--blue);color:#fff}
+.fd-tab:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
+/* Deal / partner-quote badges, shared by search results, booking and deals. */
+.fd-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.fd-pill{font-size:11px;font-weight:600;border-radius:999px;padding:3px 9px;background:var(--blue-soft);color:var(--blue)}
+.fd-pill.is-instant{background:var(--green);color:#fff}
+.fd-pill.is-pending{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
+.fd-pill.is-low{background:var(--accent-warm);color:#fff}
+.fd-shortage{margin:0;font-size:12px;color:var(--accent-warm);font-weight:600}

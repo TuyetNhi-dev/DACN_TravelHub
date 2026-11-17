@@ -30,10 +30,12 @@ public static class BookingStatus
 /// <summary>Service-level status (booking_items.status).</summary>
 public static class BookingItemStatus
 {
-    /// <summary>Tour seats are held; staff still has to confirm with the customer.</summary>
+    /// <summary>Seats are held (tour or flight deal) until the payment deadline.</summary>
     public const string Pending = "pending";
     /// <summary>Hotel/flight quote sent to the partner; nothing is guaranteed until they confirm.</summary>
     public const string AwaitingSupplier = "awaiting_supplier";
+    /// <summary>Hotel/flight: the partner confirmed; the customer still has to pay.</summary>
+    public const string AwaitingPayment = "awaiting_payment";
     public const string Confirmed = "confirmed";
     public const string Cancelled = "cancelled";
     public const string Completed = "completed";
@@ -41,12 +43,24 @@ public static class BookingItemStatus
     public const string Failed = "failed";
 
     public static readonly IReadOnlySet<string> All =
-        new HashSet<string> { Pending, AwaitingSupplier, Confirmed, Cancelled, Completed, Failed };
+        new HashSet<string> { Pending, AwaitingSupplier, AwaitingPayment, Confirmed, Cancelled, Completed, Failed };
 
-    public static readonly IReadOnlySet<string> Open = new HashSet<string> { Pending, AwaitingSupplier };
+    public static readonly IReadOnlySet<string> Open =
+        new HashSet<string> { Pending, AwaitingSupplier, AwaitingPayment };
 
-    public static string InitialFor(string serviceType) =>
-        serviceType == ServiceType.Tour ? Pending : AwaitingSupplier;
+    public static string InitialFor(bool holdsSeats) => holdsSeats ? Pending : AwaitingSupplier;
+}
+
+/// <summary>Simulated payment until the VNPAY sandbox is integrated.</summary>
+public static class PaymentProvider
+{
+    public const string Simulated = "simulated";
+    public const string TransactionPrefix = "SIM-";
+}
+
+public static class PaymentStatus
+{
+    public const string Succeeded = "succeeded";
 }
 
 public static class PassengerType
@@ -65,4 +79,6 @@ public static class BookingLimits
     public const int MaxNameLength = 160;
     public const int MaxConfirmationCodeLength = 120;
     public const int MaxStaffListSize = 200;
+    public const int MaxIdempotencyKeyLength = 160;
+    public const int ExpiredHoldBatchSize = 100;
 }

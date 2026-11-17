@@ -29,6 +29,10 @@ public static class BookingEndpoints
         group.MapGet("/{id}", async (string id, HttpContext http, BookingService service, CancellationToken ct) =>
             Results.Ok(new ItemResponse<BookingDetailDto>(
                 await service.GetForCustomerAsync(http.GetRequiredUserId(), id, ct))));
+        group.MapPost("/{id}/pay", async (string id, PayBookingRequest request, HttpContext http,
+                BookingPaymentService service, CancellationToken ct) => Results.Ok(new ItemResponse<BookingDetailDto>(
+                await service.PayAsync(http.GetRequiredUserId(), id, request, ct))))
+            .RequireRateLimiting(CreateRateLimitPolicy);
         group.MapPost("/{id}/cancel", async (string id, HttpContext http, BookingService service,
             CancellationToken ct) => Results.Ok(new ItemResponse<BookingDetailDto>(
                 await service.CancelForCustomerAsync(http.GetRequiredUserId(), id, ct))));

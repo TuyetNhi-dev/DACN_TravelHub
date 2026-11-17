@@ -1,12 +1,11 @@
 -- 001_reference_data.sql
--- Fixed role codes used by backend authorization (TravelHub.Api.Auth.RoleCodes).
+-- Fixed role codes used by backend authorization (TravelHub.Api.Features.Auth.RoleCodes).
+-- Three roles: CUSTOMER (scope self), STAFF and ADMIN (scope global). See migrations/007.
 -- Safe to re-run: existing codes keep their id and only refresh the display name.
 SET NAMES utf8mb4;
 INSERT INTO roles (code, name) VALUES
-  ('SUPER_ADMIN', 'Quản trị hệ thống'),
-  ('REGIONAL_MANAGER', 'Quản lý khu vực'),
-  ('BRANCH_MANAGER', 'Quản lý chi nhánh'),
-  ('STAFF', 'Nhân viên điều hành'),
-  ('CUSTOMER', 'Khách hàng')
+  ('CUSTOMER', 'Khách hàng'),
+  ('STAFF', 'Nhân viên'),
+  ('ADMIN', 'Quản trị viên')
 AS incoming
 ON DUPLICATE KEY UPDATE name = incoming.name;

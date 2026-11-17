@@ -27,6 +27,7 @@ public sealed record BookingSummaryDto(
     DateOnly? StartDate,
     decimal Total,
     DateTime CreatedAt,
+    DateTime? HoldExpiresAt,
     BookingCustomerDto? Customer);
 
 public sealed record BookingDetailDto(
@@ -45,10 +46,16 @@ public sealed record BookingDetailDto(
     string? SupplierConfirmationCode,
     string? Terms,
     DateTime CreatedAt,
+    DateTime? HoldExpiresAt,
+    DateTime? PaidAt,
     IReadOnlyList<PriceLineDto> PriceLines,
     IReadOnlyList<PassengerDto> Passengers,
     BookingCustomerDto? Customer,
-    bool CanCancel);
+    bool CanCancel,
+    bool CanPay);
+
+/// <summary>IdempotencyKey lets a retried pay request return the same result instead of paying twice.</summary>
+public sealed record PayBookingRequest(string? IdempotencyKey);
 
 /// <summary>
 /// Frozen at order time in booking_items.price_snapshot so later catalogue edits never change an order.

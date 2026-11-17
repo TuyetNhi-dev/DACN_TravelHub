@@ -42,6 +42,8 @@ export const DAY_PERIODS = [
 ] as const;
 
 const HOURS_PER_PERIOD = 6;
+const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
+const FLEXIBLE_FLAG = "1";
 
 export function cabinLabel(value: string): string {
   return CABIN_CLASSES.find(item => item.value === value)?.label ?? value;
@@ -57,12 +59,20 @@ export function airportLabel(code: string): string {
   return airport ? `${airport[1]} (${airport[0]})` : code;
 }
 
+function travelDatesIssue(search: FlightSearch, today: string): string | null {
+  if (!ISO_DATE.test(search.date) || search.date < today) return "Chọn ngày bay từ hôm nay trở đi.";
+  if (search.returnDate === undefined) return null;
+  return ISO_DATE.test(search.returnDate) && search.returnDate >= search.date
+    ? null : "Ngày về phải từ ngày đi trở đi.";
+}
+
 export function validateFlightSearch(search: FlightSearch, today = vietnamToday()): string | null {
   const from = airportCode(search.from);
   const to = airportCode(search.to);
   if (!from || !to) return "Chọn điểm đi và điểm đến trong danh sách sân bay nội địa.";
   if (from === to) return "Điểm đi và điểm đến phải khác nhau.";
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(search.date) || search.date < today) return "Chọn ngày bay từ hôm nay trở đi.";
+  const dateIssue = travelDatesIssue(search, today);
+  if (dateIssue) return dateIssue;
   if (!Number.isInteger(search.passengers) || search.passengers < 1 || search.passengers > MAX_FLIGHT_PASSENGERS)
     return `Chọn từ 1 đến ${MAX_FLIGHT_PASSENGERS} hành khách.`;
   if (!CABIN_CLASSES.some(item => item.value === search.cabin)) return "Chọn hạng vé hợp lệ.";
@@ -78,17 +88,30 @@ export function parseFlightSearch(params: Record<string, string>): FlightSearch 
     date: params.date || "",
     passengers: Number.isSafeInteger(passengers) ? passengers : 1,
     cabin,
+    returnDate: params.returnDate || undefined,
+    flexible: params.returnDate ? params.flex === FLEXIBLE_FLAG : undefined,
   };
 }
 
 export function flightSearchParams(search: FlightSearch): URLSearchParams {
-  return new URLSearchParams({
+  const params = new URLSearchParams({
     from: airportCode(search.from) || search.from,
     to: airportCode(search.to) || search.to,
     date: search.date,
     passengers: String(search.passengers),
     cabin: search.cabin,
   });
+  if (search.returnDate) params.set("returnDate", search.returnDate);
+  if (search.returnDate && search.flexible) params.set("flex", FLEXIBLE_FLAG);
+  return params;
+}
+
+/** The same search flown the other way on the return date, for the return-leg results and booking. */
+export function returnLegSearch(search: FlightSearch): FlightSearch {
+  return {
+    from: search.to, to: search.from, date: search.returnDate ?? "", passengers: search.passengers,
+    cabin: search.cabin,
+  };
 }
 
 function departureHour(offer: FlightOffer): number {

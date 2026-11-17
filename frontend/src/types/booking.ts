@@ -6,6 +6,7 @@ export type BookingStatus = "pending" | "confirmed" | "cancelled" | "completed";
 export type BookingItemStatus =
   | "pending"
   | "awaiting_supplier"
+  | "awaiting_payment"
   | "confirmed"
   | "cancelled"
   | "completed"
@@ -37,6 +38,8 @@ export interface BookingSummary {
   startDate: string | null;
   total: number;
   createdAt: string;
+  /** UTC instant when an unpaid tour hold is released; null for hotels, flights and paid orders. */
+  holdExpiresAt: string | null;
   customer: BookingCustomer | null;
 }
 
@@ -55,7 +58,9 @@ export interface BookingDetail extends BookingSummary {
   terms: string | null;
   priceLines: PriceLine[];
   passengers: PassengerInput[];
+  paidAt: string | null;
   canCancel: boolean;
+  canPay: boolean;
 }
 
 export interface TourBookingRequest {

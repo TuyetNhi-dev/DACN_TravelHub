@@ -7,9 +7,11 @@ import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useRequireSession } from "@/hooks/useRequireSession";
 import { useResource } from "@/hooks/useResource";
 import { ApiError } from "@/lib/api-client";
+import { holdsSeats } from "@/lib/booking-rules";
 import { cancelMyBooking, getMyBooking } from "@/services/bookings";
 import type { BookingDetail } from "@/types/booking";
 import { BookingDetailView } from "./BookingDetailView";
+import { PaymentPanel } from "./PaymentPanel";
 
 export function CustomerBookingPage({ bookingId, justCreated }: { bookingId: string; justCreated: boolean }) {
   const { session } = useRequireSession();
@@ -23,8 +25,8 @@ export function CustomerBookingPage({ bookingId, justCreated }: { bookingId: str
       </div>
       {justCreated && state.status === "ready" && (
         <p className="sh-success" role="status">
-          Đã tạo đơn {state.data.code}. {state.data.serviceType === "tour"
-            ? "Chỗ của bạn đã được giữ, nhân viên SàiHành sẽ liên hệ xác nhận."
+          Đã tạo đơn {state.data.code}. {holdsSeats(state.data)
+            ? "Chỗ của bạn đang được giữ trong thời gian đếm ngược. Thanh toán để xác nhận đơn."
             : "Yêu cầu đã được gửi tới đối tác; chúng tôi sẽ báo lại khi có xác nhận."}
         </p>
       )}
@@ -34,7 +36,12 @@ export function CustomerBookingPage({ bookingId, justCreated }: { bookingId: str
       )}
       {state.status === "ready" && (
         <BookingDetailView booking={state.data}
-          actions={<CustomerActions booking={state.data} onChanged={replace} />} />
+          actions={(
+            <>
+              <PaymentPanel booking={state.data} onChanged={replace} onReload={retry} />
+              <CustomerActions booking={state.data} onChanged={replace} />
+            </>
+          )} />
       )}
     </main>
   );
@@ -68,7 +75,7 @@ function CustomerActions({ booking, onChanged }: { booking: BookingDetail; onCha
         <div className="sh-state" role="alertdialog" aria-labelledby="cancel-title">
           <h3 id="cancel-title">Xác nhận hủy đơn {booking.code}?</h3>
           <p>
-            {booking.serviceType === "tour"
+            {holdsSeats(booking)
               ? "Chỗ đã giữ sẽ được trả lại cho khách khác."
               : "Yêu cầu gửi đối tác sẽ được rút lại."}
           </p>
