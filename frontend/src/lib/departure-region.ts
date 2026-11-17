@@ -1,4 +1,4 @@
-import type { Tour } from "@/types/tour";
+import type { TourSummary } from "@/types/tour";
 
 export const DEPARTURE_STORAGE_KEY = "travelhub-departure-region-v1";
 export const regions = [
@@ -46,9 +46,20 @@ export function departureRegion(value: string | null): Exclude<Region, "all" | "
       return region as Exclude<Region, "all" | "hcm">;
   return null;
 }
-export function filterByDeparture(tours: Tour[], region: Region) {
+/** departureFrom lists every departure city of a tour, comma separated. */
+function departureCities(tour: TourSummary): string[] {
+  return (tour.departureFrom ?? "").split(",").map(city => city.trim()).filter(Boolean);
+}
+
+function departsFromRegion(city: string, region: Exclude<Region, "all">): boolean {
+  return region === "hcm" ? hcm.has(normalize(city)) : departureRegion(city) === region;
+}
+
+export function filterByDeparture(tours: TourSummary[], region: Region): TourSummary[] {
   if (region === "all") return tours;
-  return tours.filter(tour => region === "hcm" ?
-    tour.diemKhoiHanh !== null && hcm.has(normalize(tour.diemKhoiHanh)) :
-    departureRegion(tour.diemKhoiHanh) === region);
+  return tours.filter(tour => departureCities(tour).some(city => departsFromRegion(city, region)));
+}
+
+export function hasUnknownRegion(tours: TourSummary[]): boolean {
+  return tours.some(tour => departureCities(tour).every(city => departureRegion(city) === null));
 }

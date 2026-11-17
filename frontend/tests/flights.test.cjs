@@ -1,76 +1,76 @@
-/* eslint-disable @typescript-eslint/no-require-imports -- Same isolated TypeScript harness as the existing module tests. */
+/* eslint-disable @typescript-eslint/no-require-imports -- CommonJS harness for TypeScript modules. */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const vm = require('node:vm');
-const ts = require('typescript');
-function load(path, dependencies = {}) {
-  const exports = {};
-  const code = ts.transpileModule(readFileSync(path, 'utf8'), { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
-  vm.runInNewContext(code, { exports, require: name => { if (!(name in dependencies)) throw Error(name); return dependencies[name]; } });
-  return exports;
-}
-const format = load('src/lib/format.ts');
-const stay = load('src/lib/hotel-stay.ts');
-const lib = load('src/lib/flight-search.ts', { '@/lib/format': format, '@/lib/hotel-stay': stay });
-const demo = load('src/data/flights-demo.ts', { '@/lib/flight-search': lib });
-const search = { from: 'SGN', to: 'HAN', departure: '2099-12-20', returning: '2099-12-22', roundTrip: true, passengers: 2, cabin: 'Phổ thông' };
-const rows = demo.demoFlights(search);
-const service = (get = async () => { throw Error('offline'); }) => load('src/services/flights.ts', { '@/lib/api-client': { apiGet: get, ApiError: class extends Error {} } });
+const { loadTs, plain } = require('./load-ts.cjs');
 
-test('resolves Vietnamese names with accents, without accents and airport codes', () => {
-  for (const name of ['Đà Nẵng', 'da nang', 'DAD', 'Nha Trang (CXR)', 'tan son nhat']) assert.ok(lib.airportCode(name));
-  assert.equal(lib.airportCode('quoc te khong ton tai'), '');
+const format = loadTs('src/lib/format.ts');
+const lib = loadTs('src/lib/flight-search.ts', { '@/lib/format': format });
+class ApiError extends Error {}
+const service = get => loadTs('src/services/flights.ts', {
+  '@/lib/api-client': { apiGet: get },
+  '@/lib/decode': loadTs('src/lib/decode.ts', { '@/lib/api-client': { ApiError } }),
+  '@/lib/flight-search': lib,
 });
-test('rejects invalid calendar dates, past departures, reversed returns and bad passenger counts', () => {
-  for (const changes of [{ departure: '2099-02-29' }, { departure: '2020-01-01' }, { returning: '2099-12-19' }, { passengers: 0 }, { passengers: 10 }, { passengers: 1.5 }, { from: 'HAN' }, { cabin: 'unknown' }]) assert.ok(lib.validateFlightSearch({ ...search, ...changes }));
-  assert.equal(lib.validateFlightSearch(search), null);
-  assert.equal(lib.validFlightDay('2100-02-29'), false);
-  assert.equal(lib.validFlightDay('2096-02-29'), true);
+
+const today = '2026-11-17';
+const search = { from: 'SGN', to: 'HAN', date: '2026-12-20', passengers: 2, cabin: 'economy' };
+const offer = (id, airline, price, departAt, minutes) => ({
+  flightId: id, offerId: id, flightNumber: id, airline, airlineCode: null, originCode: 'SGN',
+  originCity: 'TP. Hồ Chí Minh', destinationCode: 'HAN', destinationCity: 'Hà Nội', departAt,
+  arriveAt: departAt, durationMinutes: minutes, cabinClass: 'economy', referencePrice: price,
+  baggageTerms: null, changeCancelTerms: null, quoteExpiresAt: null,
 });
-test('matches exact date, route, cabin and reverse leg without modifying API records', () => {
-  assert.equal(lib.matchesFlight(rows[0], search), true);
-  assert.equal(lib.matchesFlight(rows[4], search, true), true);
-  assert.equal(lib.matchesFlight({ ...rows[0], ngayBay: '2099-12-19' }, search), false);
-  assert.equal(lib.matchesFlight({ ...rows[0], hangVe: null }, search), false);
+// UTC instants: 23:30Z is 06:30 next day in Vietnam (morning), 07:00Z is 14:00 (afternoon).
+const offers = [
+  offer('A', 'Vietnam Airlines', 2_000_000, '2026-12-19T23:30:00Z', 130),
+  offer('B', 'Vietjet Air', 1_200_000, '2026-12-20T07:00:00Z', 125),
+  offer('C', 'Vietjet Air', 1_500_000, '2026-12-20T13:00:00Z', 140),
+];
+
+test('airports resolve from codes, city names and names without accents', () => {
+  for (const text of ['DAD', 'Đà Nẵng', 'da nang', 'tan son nhat', 'Hà Nội'])
+    assert.ok(lib.airportCode(text), text);
+  assert.equal(lib.airportCode('Tân Sơn Nhất'), 'SGN');
+  assert.equal(lib.airportCode('khong ton tai'), '');
+  assert.equal(lib.airportLabel('PQC'), 'Phú Quốc (PQC)');
 });
-test('quote includes both legs and all passengers; unknown/unsafe values cannot produce totals', () => {
-  assert.equal(lib.flightTotal([rows[0], rows[4]], 2), 4200000);
-  assert.equal(lib.flightTotal([{ ...rows[0], giaVnd: null }], 1), null);
-  assert.equal(lib.flightTotal([{ ...rows[0], giaVnd: Number.MAX_SAFE_INTEGER }], 2), null);
-  assert.equal(lib.flightTotal([{ ...rows[0], giaVnd: 0 }], 1), 0);
-  assert.equal(lib.flightTotal([], 1), null);
+
+test('search validation rejects same airports, past dates, bad passenger counts and cabins', () => {
+  assert.equal(lib.validateFlightSearch(search, today), null);
+  for (const change of [{ to: 'SGN' }, { from: 'XYZ' }, { date: '2026-11-16' }, { date: '20-12-2026' },
+    { passengers: 0 }, { passengers: 10 }, { passengers: 1.5 }, { cabin: 'luxury' }])
+    assert.ok(lib.validateFlightSearch({ ...search, ...change }, today), JSON.stringify(change));
 });
-test('booking requires exact legs, sufficient catalogue stock and valid return chronology', () => {
-  assert.equal(lib.flightBookingIssue([rows[0], rows[4]], search), null);
-  assert.ok(lib.flightBookingIssue([rows[0]], search));
-  assert.ok(lib.flightBookingIssue([rows[0], rows[3]], search));
-  assert.ok(lib.flightBookingIssue([rows[3], rows[4]], search));
-  const sameDay = { ...search, returning: search.departure };
-  assert.ok(lib.flightBookingIssue([rows[0], { ...rows[4], ngayBay: search.departure }], sameDay));
-  assert.equal(lib.flightBookingIssue([rows[0], { ...rows[5], ngayBay: search.departure }], sameDay), null);
+
+test('URL parameters round-trip and fall back to safe defaults', () => {
+  const params = lib.flightSearchParams({ ...search, from: 'Đà Nẵng' });
+  assert.equal(params.get('from'), 'DAD');
+  assert.deepEqual(plain(lib.parseFlightSearch(Object.fromEntries(params))), { ...search, from: 'DAD' });
+  const fallback = lib.parseFlightSearch({ passengers: '1e400', cabin: 'luxury' });
+  assert.equal(fallback.passengers, 1);
+  assert.equal(fallback.cabin, 'economy');
 });
-test('demo is separated, explicitly labelled, supports cabin and both selected dates', () => {
-  assert.equal(rows.length, 8);
-  assert.ok(rows.every(f => /demo/.test(f.nguonThamKhao)));
-  assert.equal(demo.demoFlights({ ...search, roundTrip: false }).length, 4);
-  assert.equal(demo.demoFlights({ ...search, cabin: 'Thương gia' })[0].hangVe, 'Thương gia');
-  assert.equal(service().decodeFlights({ data: rows, count: rows.length }).length, 8);
+
+test('filters by airline, price ceiling and Vietnam-time day period, then sorts', () => {
+  const ids = filters => lib.applyFlightFilters(offers, { ...lib.EMPTY_FLIGHT_FILTERS, ...filters })
+    .map(o => o.flightId);
+  assert.deepEqual(plain(ids({})), ['B', 'C', 'A']);
+  assert.deepEqual(plain(ids({ airline: 'Vietjet Air', sort: 'duration' })), ['B', 'C']);
+  assert.deepEqual(plain(ids({ maxPrice: '1500000', sort: 'departure' })), ['B', 'C']);
+  assert.deepEqual(plain(ids({ period: '1' })), ['A']);
+  assert.deepEqual(plain(ids({ period: '2' })), ['B']);
+  assert.equal(offers[0].flightId, 'A', 'the input list is not reordered');
 });
-test('API decoding preserves unknowns and rejects malformed, duplicate and negative data', () => {
-  const api = service();
-  const unknown = { ...rows[0], giaVnd: null, soGheCon: null };
-  assert.equal(api.decodeFlights({ data: [unknown], count: 1 })[0].giaVnd, null);
-  for (const payload of [null, { data: rows, count: 1 }, { data: [rows[0], rows[0]], count: 2 }, { data: [{ ...rows[0], giaVnd: -1 }], count: 1 }, { data: [{ flightId: 'X' }], count: 1 }]) assert.throws(() => api.decodeFlights(payload));
+
+test('totals multiply by passengers and the flight day is the Vietnam calendar day', () => {
+  assert.equal(lib.flightTotal(offers[0], 3), 6_000_000);
+  assert.equal(lib.flightDay(offers[0]), '2026-12-20');
 });
-test('uses only GET /api/flights and forwards cancellation; errors never return synthetic rows', async () => {
-  const marker = {};
-  await service(async (path, signal) => { assert.equal(path, '/api/flights'); assert.equal(signal, marker); return { data: [], count: 0 }; }).getFlights(marker);
-  await assert.rejects(service().getFlights(), /offline/);
-});
-test('passenger/contact values never use storage, URLs or backend mutations', () => {
-  const ui = readFileSync('src/components/flights/FlightPage.tsx', 'utf8');
-  assert.doesNotMatch(ui, /localStorage\.(setItem|getItem)|sessionStorage\.|method:\s*["']POST/);
-  const urlBody = ui.slice(ui.indexOf('function url('), ui.indexOf('function submitSearch('));
-  assert.doesNotMatch(urlBody, /contact|names|email|phone/);
+
+test('the service decodes offers and rejects an unknown cabin class', async () => {
+  const row = offer('A', 'Vietnam Airlines', 2_000_000, '2026-12-19T23:30:00Z', 130);
+  const ok = service(async () => ({ data: [row], count: 1 }));
+  assert.equal((await ok.getUpcomingFlights())[0].referencePrice, 2_000_000);
+  const bad = service(async () => ({ data: [{ ...row, cabinClass: 'luxury' }], count: 1 }));
+  await assert.rejects(bad.getUpcomingFlights(), /chuyến bay/);
 });

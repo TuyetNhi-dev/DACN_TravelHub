@@ -50,5 +50,5 @@ process.on('SIGTERM', () => stop(0));
 
 console.log('Frontend: http://localhost:3000 | Backend: http://localhost:5108');
 console.log('Nhan Ctrl+C de dung ca hai.');
-start('dotnet', ['run', '--project', 'backend/TravelHub.Api.csproj', '--launch-profile', 'http'], root);
+start('dotnet', ['run', '--project', 'backend/src/TravelHub.Api/TravelHub.Api.csproj', '--launch-profile', 'http'], root);
 start(process.execPath, [next, 'dev'], path.join(root, 'frontend'));

@@ -1,27 +1,44 @@
-export const photos = {
-  hero: "https://images.unsplash.com/photo-1643029891412-92f9a81a8c16?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=85&w=1400",
-  halong: "https://images.unsplash.com/photo-1561461221-959c3f16234b?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900",
-  hoian: "https://images.unsplash.com/photo-1596401057633-54a8fe8ef647?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900",
-  danang: "https://images.unsplash.com/photo-1723142282970-1fd415eec1ad?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900",
-  resort: "https://images.unsplash.com/photo-1601972888880-3ad2df3ee0a0?crop=entropy&cs=tinysrgb&fit=crop&fm=jpg&q=80&w=900",
-};
+import type { IconName } from "@/components/ui/Icon";
 
-export const destinations = [
- { name: "Vịnh Hạ Long", count: "Khám phá vịnh biển", image: photos.halong },
- { name: "Hội An", count: "Khám phá phố cổ", image: photos.hoian },
- { name: "Đà Nẵng", count: "Khám phá thành phố biển", image: photos.danang },
- { name: "Nha Trang", count: "Khám phá đảo và biển", image: photos.resort },
-];
-export const benefits = [
- { icon: "shield", title: "Thông tin rõ ràng", text: "Phân biệt dữ liệu tham khảo và lịch khởi hành trong hệ thống." },
- { icon: "wallet", title: "Giá tham khảo minh bạch", text: "Xem giá trước khi lựa chọn hành trình phù hợp." },
- { icon: "headphones", title: "Hỗ trợ tận tâm", text: "Xem thông tin liên hệ ở cuối trang để được tư vấn." },
+/** Hero banner slides. `query` opens the tour list filtered to that destination. Photos come from media.ts. */
+export const heroSlides = [
+  { place: "Hạ Long", query: "Hạ Long", region: "Miền Bắc",
+    tagline: "Hàng nghìn đảo đá vôi giữa làn nước ngọc bích, đẹp nhất khi bình minh trên vịnh." },
+  { place: "Hội An", query: "Hội An", region: "Miền Trung",
+    tagline: "Phố cổ vàng ươm, đèn lồng lung linh bên dòng Hoài mỗi tối." },
+  { place: "Đà Nẵng", query: "Đà Nẵng", region: "Miền Trung",
+    tagline: "Biển Mỹ Khê, cầu Rồng và Bà Nà Hills trong một thành phố đáng sống." },
+  { place: "Phú Quốc", query: "Phú Quốc", region: "Miền Nam",
+    tagline: "Đảo ngọc nắng vàng, cát trắng và hoàng hôn đỏ rực cuối ngày." },
 ] as const;
-export const navigation = [
- { label: "Trang chủ", href: "/" },
- { label: "Tour du lịch", href: "/tours" },
- { label: "Khách sạn", href: "/hotels" },
- { label: "Vé máy bay", href: "/flights" },
- { label: "Ưu đãi", href: "/#services" },
+
+export type HeroSlide = (typeof heroSlides)[number];
+
+/** Home mosaic. The first entry is the large tile; tour counts come from the API at runtime. */
+export const featuredDestinations = [
+  { name: "Hạ Long", region: "Miền Bắc", note: "Vịnh biển di sản" },
+  { name: "Hội An", region: "Miền Trung", note: "Phố cổ đèn lồng" },
+  { name: "Đà Lạt", region: "Tây Nguyên", note: "Thành phố sương mù" },
+  { name: "Phú Quốc", region: "Miền Nam", note: "Đảo ngọc biển xanh" },
+  { name: "Sa Pa", region: "Miền Bắc", note: "Ruộng bậc thang, biển mây" },
+] as const;
+
+/** Only claims the booking system actually enforces. */
+export const promises: { icon: IconName; title: string; text: string }[] = [
+  { icon: "ticket", title: "Giữ chỗ tour ngay khi đặt",
+    text: "Số chỗ của lịch khởi hành được trừ ngay trong hệ thống, không bán quá sức chứa." },
+  { icon: "wallet", title: "Giá tham khảo ghi rõ",
+    text: "Khách sạn và vé máy bay là báo giá đối tác, luôn gắn nhãn chờ xác nhận." },
+  { icon: "shield", title: "Không thu tiền khi chưa xác nhận",
+    text: "Đơn khách sạn, vé máy bay chỉ được xác nhận khi đối tác báo còn phòng hoặc còn chỗ." },
+  { icon: "clock", title: "Theo dõi đơn trong tài khoản",
+    text: "Xem trạng thái từng dịch vụ trong đơn và hủy đơn khi chính sách cho phép." },
 ];
 
+export const navigation = [
+  { label: "Trang chủ", href: "/" },
+  { label: "Tour du lịch", href: "/tours" },
+  { label: "Khách sạn", href: "/hotels" },
+  { label: "Vé máy bay", href: "/flights" },
+  { label: "Văn phòng", href: "/branches" },
+];

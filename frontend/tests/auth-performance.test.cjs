@@ -1,21 +1,9 @@
-/* eslint-disable @typescript-eslint/no-require-imports -- Isolated TypeScript harness, same as the existing adapter tests. */
+/* eslint-disable @typescript-eslint/no-require-imports -- CommonJS harness for TypeScript modules. */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { readFileSync } = require('node:fs');
-const vm = require('node:vm');
-const ts = require('typescript');
+const { loadTs } = require('./load-ts.cjs');
 
-function load(path, globals = {}, dependencies = {}) {
-  const exports = {};
-  const code = ts.transpileModule(readFileSync(path, 'utf8'), {
-    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX },
-  }).outputText;
-  vm.runInNewContext(code, { exports, ...globals, require: name => {
-    if (!(name in dependencies)) throw Error(name);
-    return dependencies[name];
-  } });
-  return exports;
-}
+const REQUEST_TIMEOUT_MS = 12000;
 
 function deferred() {
   let resolve;
@@ -23,81 +11,120 @@ function deferred() {
   return { promise, resolve };
 }
 
-// Exercise provider callbacks with persistent hook state, without a browser or database writes.
-function provider(authRequest) {
-  const slots = []; let cursor = 0;
-  const react = {
-    createContext: () => ({ Provider: 'provider' }),
-    useState: initial => { const slot = cursor++; if (!(slot in slots)) slots[slot] = initial;
-      return [slots[slot], value => { slots[slot] = typeof value === 'function' ? value(slots[slot]) : value; }]; },
-    useRef: initial => { const slot = cursor++; return slots[slot] ||= { current: initial }; },
-    useCallback: callback => callback,
-    useEffect: () => {},
-  };
-  const { AuthProvider } = load('src/components/auth/AuthProvider.tsx', {}, {
-    react, 'react/jsx-runtime': { jsx: (type, props) => ({ type, props }) }, '@/lib/auth': { authRequest },
-  });
-  return () => { cursor = 0; return AuthProvider({ children: null }).props.value; };
+/** api-client with a controllable deadline signal and a fake fetch. */
+function client(fetch, deadline = new AbortController()) {
+  const AbortSignal = { timeout: ms => { assert.equal(ms, REQUEST_TIMEOUT_MS); return deadline.signal; } };
+  return loadTs('src/lib/api-client.ts', {}, { fetch, AbortSignal });
 }
 
-test('focus/poll refreshes share one pending session request', async () => {
-  const reply = deferred(); let calls = 0;
-  const render = provider(() => { calls++; return reply.promise; });
-  const value = render();
-  const first = value.refresh(); const second = value.refresh();
-  assert.equal(first, second); assert.equal(calls, 1);
-  reply.resolve(null); await first;
-  assert.equal(render().loading, false);
+const json = (body, status = 200) => ({ ok: status < 400, status, json: async () => body });
+
+test('requests stop at the deadline instead of leaving the page loading forever', async () => {
+  const deadline = new AbortController();
+  const api = client((url, options) => new Promise((resolve, reject) => {
+    options.signal.addEventListener('abort', () => reject(options.signal.reason), { once: true });
+  }), deadline);
+  const pending = api.apiGet('/api/auth/me');
+  deadline.abort(new Error('deadline'));
+  await assert.rejects(pending, { name: 'ApiError', message: /Không thể kết nối/ });
 });
 
-test('a pending session response cannot restore a user after logout', async () => {
-  const reply = deferred();
-  const render = provider(path => path === 'me' ? reply.promise : Promise.resolve({}));
-  const value = render(); const pending = value.refresh();
-  await value.logout(); reply.resolve({ user: { id: 'old-user' } }); await pending;
-  assert.equal(render().session, null);
-});
-
-test('post-login refresh ignores an older anonymous response', async () => {
-  const old = deferred(); const fresh = deferred(); let calls = 0;
-  const render = provider(() => (++calls === 1 ? old.promise : fresh.promise));
-  const value = render(); const beforeLogin = value.refresh(); const afterLogin = value.refresh(true);
-  fresh.resolve({ user: { id: 'current-user' } }); await afterLogin;
-  old.resolve(null); await beforeLogin;
-  assert.equal(render().session.user.id, 'current-user');
-});
-
-test('auth requests stop on the deadline instead of leaving the Header loading forever', async () => {
-  const controller = new AbortController();
-  const auth = load('src/lib/auth.ts', {
-    AbortSignal: { timeout: ms => { assert.equal(ms, 12000); return controller.signal; } },
-    fetch: (url, options) => new Promise((resolve, reject) => {
-      options.signal.addEventListener('abort', () => reject(options.signal.reason), { once: true });
-    }),
-  });
-  const pending = auth.authRequest('me'); controller.abort(new Error('deadline'));
-  await assert.rejects(pending, /deadline/);
-});
-
-test('CSRF and login share a deadline and preserve the CSRF header', async () => {
-  const signal = new AbortController().signal; const requests = [];
-  const auth = load('src/lib/auth.ts', {
-    AbortSignal: { timeout: () => signal },
-    fetch: async (url, options) => { requests.push({ url, options }); return { ok: true, json: async () => ({ token: 'test-csrf' }) }; },
-  });
-  await auth.authRequest('login', { email: 'test@example.invalid' });
-  assert.equal(requests.length, 2);
-  assert.equal(requests[0].options.signal, signal);
-  assert.equal(requests[1].options.signal, signal);
+test('CSRF and the POST share one deadline and the POST carries the CSRF header', async () => {
+  const deadline = new AbortController();
+  const requests = [];
+  const api = client(async (url, options) => {
+    requests.push({ url, options });
+    return json(url === '/api/auth/csrf' ? { token: 'test-csrf' } : { ok: true });
+  }, deadline);
+  await api.apiPost('/api/auth/login', { email: 'test@example.invalid' });
+  assert.deepEqual(requests.map(request => request.url), ['/api/auth/csrf', '/api/auth/login']);
+  assert.equal(requests[0].options.signal, deadline.signal);
+  assert.equal(requests[1].options.signal, deadline.signal);
   assert.equal(requests[1].options.headers['X-CSRF-Token'], 'test-csrf');
   assert.equal(requests[1].options.credentials, 'same-origin');
 });
 
-test('body read timeouts are not mistaken for a successful empty response', async () => {
-  const controller = new AbortController();
-  const auth = load('src/lib/auth.ts', {
-    AbortSignal: { timeout: () => controller.signal },
-    fetch: async () => ({ ok: true, json: async () => { controller.abort(); throw Error('body timeout'); } }),
+test('a body cut off by the deadline is an error, not a successful empty response', async () => {
+  const deadline = new AbortController();
+  const api = client(async () => ({
+    ok: true, status: 200, json: async () => { deadline.abort(); throw Error('body timeout'); },
+  }), deadline);
+  await assert.rejects(api.apiGet('/api/tours'), { name: 'ApiError', message: /quá lâu/ });
+});
+
+test('an empty body on success still reads as null', async () => {
+  const api = client(async () => ({ ok: true, status: 204, json: async () => { throw SyntaxError('empty'); } }));
+  assert.equal(await api.apiGet('/api/auth/logout'), null);
+});
+
+test('problem JSON keeps status, code and the first field error; 5xx details are hidden', async () => {
+  const problem = { detail: 'Email chưa được xác nhận.', code: 'email_not_verified' };
+  const forbidden = client(async () => json(problem, 403));
+  await assert.rejects(forbidden.apiGet('/api/x'),
+    { status: 403, code: 'email_not_verified', message: problem.detail });
+  const invalid = client(async () => json({ detail: 'x', errors: { phone: ['Số điện thoại sai.'] } }, 400));
+  await assert.rejects(invalid.apiGet('/api/x'), { status: 400, message: 'Số điện thoại sai.' });
+  const broken = client(async () => json({ detail: 'MySqlException at line 42' }, 500));
+  await assert.rejects(broken.apiGet('/api/x'), { status: 500, message: /gián đoạn/ });
+});
+
+/** Renders AuthProvider with persistent hook slots, so callbacks can be driven without a browser. */
+function provider(services) {
+  const slots = [];
+  let cursor = 0;
+  const react = {
+    createContext: () => ({ Provider: 'provider' }),
+    useState: initial => {
+      const slot = cursor++;
+      if (!(slot in slots)) slots[slot] = initial;
+      return [slots[slot], value => { slots[slot] = typeof value === 'function' ? value(slots[slot]) : value; }];
+    },
+    useRef: initial => { const slot = cursor++; return slots[slot] ||= { current: initial }; },
+    useCallback: callback => callback,
+    useContext: () => null,
+    useEffect: () => {},
+  };
+  const { AuthProvider } = loadTs('src/components/auth/AuthProvider.tsx', {
+    react, 'react/jsx-runtime': { jsx: (type, props) => ({ type, props }) }, '@/services/auth': services,
   });
-  await assert.rejects(auth.authRequest('me'), /body timeout/);
+  return () => { cursor = 0; return AuthProvider({ children: null }).props.value; };
+}
+
+test('a pending session response cannot restore a user after logout', async () => {
+  const reply = deferred();
+  const render = provider({ getSession: () => reply.promise, logout: async () => {} });
+  const pending = render().refresh();
+  await render().logout();
+  reply.resolve({ user: { id: 'old-user' } });
+  await pending;
+  assert.equal(render().session, null);
+});
+
+test('a newer refresh wins over an older, slower one', async () => {
+  const old = deferred();
+  const fresh = deferred();
+  let calls = 0;
+  const render = provider({ getSession: () => (++calls === 1 ? old.promise : fresh.promise), logout: async () => {} });
+  const beforeLogin = render().refresh();
+  const afterLogin = render().refresh();
+  fresh.resolve({ user: { id: 'current-user' } });
+  await afterLogin;
+  old.resolve(null);
+  await beforeLogin;
+  assert.equal(render().session.user.id, 'current-user');
+  assert.equal(render().loading, false);
+});
+
+test('a failed refresh reports an error and stops loading without signing the user out', async () => {
+  let fail = false;
+  const render = provider({
+    getSession: async () => { if (fail) throw Error('offline'); return { user: { id: 'u1' } }; },
+    logout: async () => {},
+  });
+  await render().refresh();
+  fail = true;
+  await render().refresh();
+  assert.equal(render().session.user.id, 'u1');
+  assert.match(render().error, /phiên đăng nhập/);
+  assert.equal(render().loading, false);
 });

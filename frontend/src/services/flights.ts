@@ -1,23 +1,45 @@
-import { apiGet, ApiError } from "@/lib/api-client";
-import type { Flight } from "@/types/flight";
+import { apiGet } from "@/lib/api-client";
+import { invalid, listEnvelope, num, optStr, str, type Row } from "@/lib/decode";
+import { CABIN_CLASSES } from "@/lib/flight-search";
+import type { CabinClass, FlightOffer, FlightSearch } from "@/types/flight";
 
-export function decodeFlights(value: unknown): Flight[] {
-  if (!value || typeof value !== "object" || !("data" in value) || !("count" in value)
-    || !Array.isArray(value.data) || value.count !== value.data.length) throw new ApiError("Dữ liệu chuyến bay không hợp lệ.");
-  const strings = ["soHieuDemo", "hangBayThamKhao", "maSanBayDi", "noiDi", "maSanBayDen", "noiDen", "ngayBay", "gioDi", "gioDen", "hangVe", "ghiChu", "nguonThamKhao"];
-  const numbers = ["thoiGianPhut", "giaVnd", "soGheCon"];
-  const rows: Flight[] = [];
-  for (const item of value.data as unknown[]) {
-    if (!item || typeof item !== "object" || Array.isArray(item)) throw new ApiError("Dữ liệu chuyến bay không hợp lệ.");
-    const row = item as Record<string, unknown>;
-    if (typeof row.flightId !== "string" || !row.flightId.trim()
-      || !strings.every(k => row[k] === null || typeof row[k] === "string")
-      || !numbers.every(k => row[k] === null || (typeof row[k] === "number" && Number.isSafeInteger(row[k]) && row[k] >= 0))) throw new ApiError("Dữ liệu chuyến bay không hợp lệ.");
-    rows.push(row as unknown as Flight);
-  }
-  if (new Set(rows.map(f => f.flightId)).size !== rows.length) throw new ApiError("Mã chuyến bay bị trùng.");
-  return rows;
+const RESOURCE = "chuyến bay";
+
+function cabin(row: Row): CabinClass {
+  const value = str(row, "cabinClass", RESOURCE);
+  return CABIN_CLASSES.some(item => item.value === value) ? (value as CabinClass) : invalid(RESOURCE);
 }
-export async function getFlights(signal?: AbortSignal) {
-  return decodeFlights(await apiGet("/api/flights", signal));
+
+export function decodeFlightOffer(row: Row): FlightOffer {
+  return {
+    flightId: str(row, "flightId", RESOURCE),
+    offerId: str(row, "offerId", RESOURCE),
+    flightNumber: str(row, "flightNumber", RESOURCE),
+    airline: str(row, "airline", RESOURCE),
+    airlineCode: optStr(row, "airlineCode", RESOURCE),
+    originCode: str(row, "originCode", RESOURCE),
+    originCity: str(row, "originCity", RESOURCE),
+    destinationCode: str(row, "destinationCode", RESOURCE),
+    destinationCity: str(row, "destinationCity", RESOURCE),
+    departAt: str(row, "departAt", RESOURCE),
+    arriveAt: str(row, "arriveAt", RESOURCE),
+    durationMinutes: num(row, "durationMinutes", RESOURCE),
+    cabinClass: cabin(row),
+    referencePrice: num(row, "referencePrice", RESOURCE),
+    baggageTerms: optStr(row, "baggageTerms", RESOURCE),
+    changeCancelTerms: optStr(row, "changeCancelTerms", RESOURCE),
+    quoteExpiresAt: optStr(row, "quoteExpiresAt", RESOURCE),
+  };
+}
+
+/** Route/date filtering happens on the server; the client only refines the returned page. */
+export async function searchFlights(search: Pick<FlightSearch, "from" | "to" | "date" | "cabin">,
+  signal?: AbortSignal): Promise<FlightOffer[]> {
+  const params = new URLSearchParams({ from: search.from, to: search.to, cabin: search.cabin });
+  if (search.date) params.set("date", search.date);
+  return listEnvelope(await apiGet("/api/flights?" + params, signal), decodeFlightOffer, RESOURCE);
+}
+
+export async function getUpcomingFlights(signal?: AbortSignal): Promise<FlightOffer[]> {
+  return listEnvelope(await apiGet("/api/flights", signal), decodeFlightOffer, RESOURCE);
 }

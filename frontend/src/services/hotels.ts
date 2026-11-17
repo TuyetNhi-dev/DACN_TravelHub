@@ -1,36 +1,70 @@
-import { apiGet, ApiError } from "@/lib/api-client";
-import type { Hotel, HotelDetail, HotelRoom } from "@/types/hotel";
+import { apiGet } from "@/lib/api-client";
+import {
+  bool, invalid, isRecord, itemEnvelope, list, listEnvelope, num, optNum, optStr, str, type Row,
+} from "@/lib/decode";
+import type { HotelAmenity, HotelDetail, HotelPolicy, HotelSummary, HouseRules, RoomType } from "@/types/hotel";
 
-const record = (value: unknown): value is Record<string, unknown> =>
-  value !== null && typeof value === "object" && !Array.isArray(value);
-const strings = (r: Record<string, unknown>, keys: string[]) =>
-  keys.every(k => r[k] === null || typeof r[k] === "string");
-const numbers = (r: Record<string, unknown>, keys: string[]) =>
-  keys.every(k => r[k] === null || (typeof r[k] === "number" && Number.isSafeInteger(r[k]) && r[k] >= 0));
-const id = (v: unknown): v is string => typeof v === "string" && v.trim().length > 0 && v.length <= 12;
-function isHotel(v: unknown): v is Hotel {
-  return record(v) && id(v.hotelId) && strings(v, ["tenKhachSan", "thanhPho", "diaChi", "tienNghi", "ghiChu", "nguonThamKhao"])
-    && numbers(v, ["hangSaoDemo", "giaTuVndDem"]) && (v.hangSaoDemo === null || (v.hangSaoDemo as number) <= 5);
+const RESOURCE = "khách sạn";
+
+export function decodeHotel(row: Row): HotelSummary {
+  return {
+    id: str(row, "id", RESOURCE),
+    name: str(row, "name", RESOURCE),
+    city: str(row, "city", RESOURCE),
+    address: optStr(row, "address", RESOURCE),
+    starRating: optNum(row, "starRating", RESOURCE),
+    description: optStr(row, "description", RESOURCE),
+    referencePricePerNight: optNum(row, "referencePricePerNight", RESOURCE),
+  };
 }
-function isRoom(v: unknown): v is HotelRoom {
-  return record(v) && id(v.roomId) && id(v.hotelId) && strings(v, ["loaiPhong", "loaiDuLieu"])
-    && numbers(v, ["sucChua", "giaVndDem", "soPhongCon"]);
+
+function decodeRoomType(row: Row): RoomType {
+  return {
+    id: str(row, "id", RESOURCE),
+    name: str(row, "name", RESOURCE),
+    maxGuests: num(row, "maxGuests", RESOURCE),
+    description: optStr(row, "description", RESOURCE),
+    referencePricePerNight: optNum(row, "referencePricePerNight", RESOURCE),
+    offerTerms: optStr(row, "offerTerms", RESOURCE),
+  };
 }
-function invalid(): never { throw new ApiError("Dữ liệu khách sạn chưa đúng định dạng."); }
-export function decodeHotels(v: unknown): Hotel[] {
-  if (!record(v) || !Array.isArray(v.data) || !v.data.every(isHotel) || v.count !== v.data.length
-    || new Set(v.data.map(h => h.hotelId)).size !== v.data.length) return invalid();
-  return v.data;
+
+function decodeAmenity(row: Row): HotelAmenity {
+  return {
+    code: str(row, "code", RESOURCE),
+    name: str(row, "name", RESOURCE),
+    category: str(row, "category", RESOURCE),
+    isHighlight: bool(row, "isHighlight", RESOURCE),
+    isPaid: bool(row, "isPaid", RESOURCE),
+  };
 }
-export function decodeHotel(v: unknown, hotelId: string): HotelDetail {
-  if (!record(v) || !record(v.data) || !isHotel(v.data.hotel) || v.data.hotel.hotelId !== hotelId
-    || !Array.isArray(v.data.rooms) || !v.data.rooms.every(isRoom)
-    || !v.data.rooms.every(r => r.hotelId === hotelId)
-    || new Set(v.data.rooms.map(r => r.roomId)).size !== v.data.rooms.length) return invalid();
-  return { hotel: v.data.hotel, rooms: v.data.rooms };
+
+function decodePolicy(row: Row): HotelPolicy {
+  return { type: str(row, "type", RESOURCE), content: str(row, "content", RESOURCE) };
 }
-export async function getHotels(signal?: AbortSignal) { return decodeHotels(await apiGet("/api/hotels", signal)); }
-export async function getHotel(hotelId: string, signal?: AbortSignal) {
-  if (!id(hotelId)) throw new ApiError("Không tìm thấy khách sạn.", 404);
-  return decodeHotel(await apiGet("/api/hotels/" + encodeURIComponent(hotelId), signal), hotelId);
+
+function decodeHouseRules(row: Row): HouseRules {
+  return {
+    checkInFrom: optStr(row, "checkInFrom", RESOURCE),
+    checkOutUntil: optStr(row, "checkOutUntil", RESOURCE),
+    policies: list(row.policies, decodePolicy, RESOURCE),
+  };
+}
+
+export function decodeHotelDetail(row: Row): HotelDetail {
+  return {
+    hotel: isRecord(row.hotel) ? decodeHotel(row.hotel) : invalid(RESOURCE),
+    roomTypes: list(row.roomTypes, decodeRoomType, RESOURCE),
+    amenities: list(row.amenities, decodeAmenity, RESOURCE),
+    houseRules: isRecord(row.houseRules) ? decodeHouseRules(row.houseRules) : invalid(RESOURCE),
+  };
+}
+
+export async function getHotels(signal?: AbortSignal): Promise<HotelSummary[]> {
+  return listEnvelope(await apiGet("/api/hotels", signal), decodeHotel, RESOURCE);
+}
+
+export async function getHotel(id: string, signal?: AbortSignal): Promise<HotelDetail> {
+  const value = await apiGet("/api/hotels/" + encodeURIComponent(id), signal);
+  return itemEnvelope(value, decodeHotelDetail, RESOURCE);
 }

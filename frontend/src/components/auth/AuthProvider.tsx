@@ -1,54 +1,70 @@
 "use client";
-import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
-import { authRequest, type Session } from "@/lib/auth";
 
-type AuthState = { session: Session | null; loading: boolean; error: string; refresh: (force?: boolean) => Promise<void>; logout: () => Promise<void> };
+import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
+import { getSession, logout as logoutRequest } from "@/services/auth";
+import type { Session } from "@/types/auth";
+
+const REFRESH_INTERVAL_MS = 60_000;
+export const AUTH_CHANGE_EVENT = "saihanh-auth-change";
+
+interface AuthState {
+  session: Session | null;
+  loading: boolean;
+  error: string;
+  refresh: () => Promise<void>;
+  logout: () => Promise<void>;
+}
+
 const AuthContext = createContext<AuthState | null>(null);
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const pending = useRef<Promise<void> | null>(null);
+  // A newer refresh or a logout invalidates answers from older, slower requests.
   const generation = useRef(0);
-  const refresh = useCallback((force = false) => {
-    if (!force && pending.current) return pending.current;
-    if (force) generation.current++;
-    const current = generation.current;
-    const request = (async () => {
-      try {
-        const value = await authRequest<Session | null>("me");
-        if (current === generation.current) { setSession(value); setError(""); }
-      } catch {
-        if (current === generation.current) setError("Không thể kiểm tra phiên đăng nhập. Vui lòng thử lại.");
-      } finally {
-        if (current === generation.current) setLoading(false);
-      }
-    })();
-    pending.current = request;
-    void request.finally(() => { if (pending.current === request) pending.current = null; });
-    return request;
+
+  const refresh = useCallback(async () => {
+    const current = ++generation.current;
+    try {
+      const value = await getSession();
+      if (current === generation.current) { setSession(value); setError(""); }
+    } catch {
+      if (current === generation.current) setError("Không thể kiểm tra phiên đăng nhập. Vui lòng thử lại.");
+    } finally {
+      if (current === generation.current) setLoading(false);
+    }
   }, []);
+
   const logout = useCallback(async () => {
-    await authRequest("logout", {});
-    generation.current++; pending.current = null;
-    setSession(null); setError(""); setLoading(false);
+    await logoutRequest();
+    generation.current++;
+    setSession(null);
+    setError("");
   }, []);
+
   useEffect(() => {
-    const refreshSession = () => { void refresh(); };
-    const initial = window.setTimeout(refreshSession, 0);
-    const timer = window.setInterval(refreshSession, 60_000);
-    window.addEventListener("focus", refreshSession);
-    window.addEventListener("saihanh-auth-change", refreshSession);
-    return () => { clearTimeout(initial); clearInterval(timer); window.removeEventListener("focus", refreshSession); window.removeEventListener("saihanh-auth-change", refreshSession); };
+    const onChange = () => { void refresh(); };
+    const initial = window.setTimeout(onChange, 0);
+    const timer = window.setInterval(onChange, REFRESH_INTERVAL_MS);
+    window.addEventListener("focus", onChange);
+    window.addEventListener(AUTH_CHANGE_EVENT, onChange);
+    return () => {
+      clearTimeout(initial);
+      clearInterval(timer);
+      window.removeEventListener("focus", onChange);
+      window.removeEventListener(AUTH_CHANGE_EVENT, onChange);
+    };
   }, [refresh]);
-  useEffect(() => {
-    if (!session?.expiresAt) return;
-    const timer = window.setTimeout(() => { setSession(null); void refresh(); }, Math.max(0, Date.parse(session.expiresAt) - Date.now()));
-    return () => clearTimeout(timer);
-  }, [session, refresh]);
-  return <AuthContext.Provider value={{ session, loading, error, refresh, logout }}>{children}</AuthContext.Provider>;
+
+  return (
+    <AuthContext.Provider value={{ session, loading, error, refresh, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
-export function useAuth() {
+
+export function useAuth(): AuthState {
   const value = useContext(AuthContext);
   if (!value) throw new Error("AuthProvider is required");
   return value;
