@@ -11,7 +11,7 @@ const RESOURCE = "đơn đặt chỗ";
 const SERVICE_TYPES: ServiceType[] = ["tour", "hotel", "flight"];
 const BOOKING_STATUSES: BookingStatus[] = ["pending", "confirmed", "cancelled", "completed"];
 const ITEM_STATUSES: BookingItemStatus[] =
-  ["pending", "awaiting_supplier", "confirmed", "cancelled", "completed", "failed"];
+  ["pending", "awaiting_supplier", "awaiting_payment", "confirmed", "cancelled", "completed", "failed"];
 const PASSENGER_TYPES: PassengerType[] = ["adult", "child"];
 
 function oneOf<T extends string>(row: Row, key: string, allowed: readonly T[]): T {
@@ -40,6 +40,7 @@ export function decodeBookingSummary(row: Row): BookingSummary {
     startDate: optIsoDate(row, "startDate", RESOURCE),
     total: num(row, "total", RESOURCE),
     createdAt: str(row, "createdAt", RESOURCE),
+    holdExpiresAt: optStr(row, "holdExpiresAt", RESOURCE),
     customer: decodeCustomer(row.customer),
   };
 }
@@ -69,7 +70,9 @@ export function decodeBookingDetail(row: Row): BookingDetail {
     terms: optStr(row, "terms", RESOURCE),
     priceLines: list(row.priceLines, decodePriceLine, RESOURCE),
     passengers: list(row.passengers, decodePassenger, RESOURCE),
+    paidAt: optStr(row, "paidAt", RESOURCE),
     canCancel: bool(row, "canCancel", RESOURCE),
+    canPay: bool(row, "canPay", RESOURCE),
   };
 }
 
@@ -97,4 +100,15 @@ export async function getMyBooking(id: string, signal?: AbortSignal): Promise<Bo
 
 export async function cancelMyBooking(id: string): Promise<BookingDetail> {
   return detail(await apiPost(`/api/bookings/${encodeURIComponent(id)}/cancel`));
+}
+
+/** Problem JSON code when a tour hold ran out before payment; the order has been cancelled. */
+export const HOLD_EXPIRED = "hold_expired";
+
+/**
+ * Simulated payment. The same idempotency key must be reused when retrying one payment attempt, so a
+ * timed-out request that actually succeeded is never charged twice.
+ */
+export async function payBooking(id: string, idempotencyKey: string): Promise<BookingDetail> {
+  return detail(await apiPost(`/api/bookings/${encodeURIComponent(id)}/pay`, { idempotencyKey }));
 }

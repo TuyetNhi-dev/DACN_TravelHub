@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { cabinLabel } from "@/lib/flight-search";
 import { formatCurrency, formatDate, formatDuration, formatTime, vietnamDay } from "@/lib/format";
 import type { FlightOffer } from "@/types/flight";
+import { ConfirmationBadges } from "./DealBadges";
 
 interface FlightCardProps {
   offer: FlightOffer;
@@ -18,6 +19,7 @@ export function FlightCard({ offer, passengers, action, showTerms = false }: Fli
         <div>
           <b>{offer.airline}</b>
           <small>{offer.flightNumber} · {cabinLabel(offer.cabinClass)}</small>
+          <div className="fd-pills"><ConfirmationBadges remainingSeats={offer.remainingSeats} /></div>
         </div>
       </div>
       <div className="sf-timeline">
@@ -34,7 +36,7 @@ export function FlightCard({ offer, passengers, action, showTerms = false }: Fli
       </div>
       <div className="sf-price">
         <strong>{formatCurrency(offer.referencePrice)}</strong>
-        <small>/ khách · giá tham khảo</small>
+        <small>{offer.remainingSeats === null ? "/ khách · giá tham khảo" : "/ khách · giá deal"}</small>
         {passengers > 1 && <small>{formatCurrency(offer.referencePrice * passengers)} cho {passengers} khách</small>}
       </div>
       {showTerms && (

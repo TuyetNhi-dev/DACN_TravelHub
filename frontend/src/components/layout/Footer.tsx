@@ -11,6 +11,7 @@ const COLUMNS = [
     { label: "Tour du lịch", href: "/tours" },
     { label: "Khách sạn", href: "/hotels" },
     { label: "Vé máy bay", href: "/flights" },
+    { label: "Săn vé rẻ", href: "/flights/deals" },
     { label: "Hệ thống văn phòng", href: "/branches" },
   ] },
   { title: "Tài khoản", links: [

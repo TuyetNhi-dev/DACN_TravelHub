@@ -5,12 +5,14 @@ import { validateFlightSearch } from "@/lib/flight-search";
 import type { FlightSearch } from "@/types/flight";
 import { FlightResults } from "./FlightResults";
 import { FlightSearchForm } from "./FlightSearchForm";
+import { FlightTabs } from "./FlightTabs";
 
 export function FlightPage({ search }: { search: FlightSearch }) {
   const hasSearch = Boolean(search.date) && validateFlightSearch(search) === null;
   return (
     <main id="main-content" className="sf">
       <section className="sf-hero"><div className="container">
+        <FlightTabs current="search" />
         <span className="kicker">SÀIHÀNH · VÉ MÁY BAY NỘI ĐỊA</span>
         <h1>Chạm mây trời,<br /><em>mở lối hành trình.</em></h1>
         <p>So sánh giá vé tham khảo từ các đối tác và gửi yêu cầu đặt chỗ trong vài bước.</p>

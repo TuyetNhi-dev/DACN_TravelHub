@@ -24,6 +24,7 @@ export function FlightSearchForm({ initial }: { initial: FlightSearch }) {
 
   return (
     <form className="sf-panel sf-search" onSubmit={submit} aria-label="Tìm chuyến bay">
+      <TripTypeFields search={search} onChange={setSearch} />
       <AirportField id="sf-from" label="Điểm đi" value={search.from}
         onChange={from => setSearch({ ...search, from })} />
       <button type="button" className="btn btn-outline sf-swap" aria-label="Đổi điểm đi và điểm đến"
@@ -34,6 +35,13 @@ export function FlightSearchForm({ initial }: { initial: FlightSearch }) {
         <input required type="date" min={vietnamToday()} value={search.date}
           onChange={event => setSearch({ ...search, date: event.target.value })} />
       </label>
+      {search.returnDate !== undefined && (
+        <label>
+          Ngày về
+          <input required type="date" min={search.date || vietnamToday()} value={search.returnDate}
+            onChange={event => setSearch({ ...search, returnDate: event.target.value })} />
+        </label>
+      )}
       <label>
         Hành khách
         <select value={search.passengers}
@@ -43,13 +51,46 @@ export function FlightSearchForm({ initial }: { initial: FlightSearch }) {
       </label>
       <label>
         Hạng vé
-        <select value={search.cabin} onChange={event => setSearch({ ...search, cabin: event.target.value as CabinClass })}>
+        <select value={search.cabin}
+          onChange={event => setSearch({ ...search, cabin: event.target.value as CabinClass })}>
           {CABIN_CLASSES.map(cabin => <option key={cabin.value} value={cabin.value}>{cabin.label}</option>)}
         </select>
       </label>
       <button className="btn btn-primary" type="submit">Tìm chuyến bay</button>
       {error && <p role="alert" className="sf-error sf-wide">{error}</p>}
     </form>
+  );
+}
+
+interface TripTypeFieldsProps {
+  search: FlightSearch;
+  onChange: (search: FlightSearch) => void;
+}
+
+/** A round trip is searched together but booked as two one-way orders, which the results page explains. */
+function TripTypeFields({ search, onChange }: TripTypeFieldsProps) {
+  const roundTrip = search.returnDate !== undefined;
+  return (
+    <fieldset className="sf-trip">
+      <legend className="sr-only">Loại hành trình</legend>
+      <label>
+        <input type="radio" name="trip" checked={!roundTrip}
+          onChange={() => onChange({ ...search, returnDate: undefined, flexible: undefined })} />
+        Một chiều
+      </label>
+      <label>
+        <input type="radio" name="trip" checked={roundTrip}
+          onChange={() => onChange({ ...search, returnDate: search.returnDate ?? "" })} />
+        Khứ hồi
+      </label>
+      {roundTrip && (
+        <label>
+          <input type="checkbox" checked={search.flexible === true}
+            onChange={event => onChange({ ...search, flexible: event.target.checked })} />
+          So sánh ±3 ngày (bảng giá đi × về)
+        </label>
+      )}
+    </fieldset>
   );
 }
 

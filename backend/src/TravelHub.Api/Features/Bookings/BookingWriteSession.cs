@@ -99,7 +99,8 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
                 origin.code AS origin_code, COALESCE(oc.name, origin.name) AS origin_city,
                 destination.code AS destination_code, COALESCE(dc.name, destination.name) AS destination_city,
                 f.depart_at, f.arrive_at, o.cabin_class, o.quoted_price,
-                CONCAT_WS(' ', o.baggage_terms, o.change_cancel_terms) AS terms
+                CONCAT_WS(' ', o.baggage_terms, o.change_cancel_terms) AS terms,
+                o.allotment_seats - o.sold_seats AS remaining_seats
             FROM flight_offers o
             JOIN flights f ON f.id = o.flight_id
             JOIN airlines a ON a.id = f.airline_id
@@ -109,6 +110,7 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
             LEFT JOIN locations dc ON dc.id = destination.parent_id
             WHERE o.id = @id AND o.status = 'active' AND o.currency = 'VND'
               AND (o.expires_at IS NULL OR o.expires_at > @now) AND f.depart_at > @now
+              AND (o.allotment_seats IS NULL OR o.sold_seats < o.allotment_seats)
             """);
         command.Parameters.AddWithValue("@id", offerId);
         command.Parameters.AddWithValue("@now", nowUtc);
@@ -139,7 +141,7 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
             """);
         command.Parameters.AddWithValue("@bookingId", bookingId);
         command.Parameters.AddWithValue("@type", booking.ServiceType);
-        command.Parameters.AddWithValue("@status", BookingItemStatus.InitialFor(booking.ServiceType));
+        command.Parameters.AddWithValue("@status", BookingItemStatus.InitialFor(booking.HoldsSeats));
         command.Parameters.AddWithValue("@quantity", booking.Quote.Quantity);
         command.Parameters.AddWithValue("@unitPrice", booking.Quote.UnitPrice);
         command.Parameters.AddWithValue("@total", booking.Quote.Total);
@@ -179,6 +181,43 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
         await command.ExecuteNonQueryAsync(ct);
     }
 
+    /// <summary>
+    /// Takes seats from a deal's allotment. The guarded UPDATE is the concurrency control: two customers can never
+    /// oversell the last seats. False means fewer than `seats` remain.
+    /// </summary>
+    public async Task<bool> TryTakeAllotmentSeatsAsync(ulong offerId, int seats, CancellationToken ct)
+    {
+        await using var command = Command("""
+            UPDATE flight_offers SET sold_seats = sold_seats + @seats
+            WHERE id = @id AND allotment_seats IS NOT NULL AND sold_seats + @seats <= allotment_seats
+            """);
+        command.Parameters.AddWithValue("@id", offerId);
+        command.Parameters.AddWithValue("@seats", seats);
+        return await command.ExecuteNonQueryAsync(ct) == 1;
+    }
+
+    public async Task ReleaseAllotmentSeatsAsync(ulong offerId, int seats, CancellationToken ct)
+    {
+        await using var command = Command("""
+            UPDATE flight_offers SET sold_seats = sold_seats - @seats
+            WHERE id = @id AND allotment_seats IS NOT NULL AND sold_seats >= @seats
+            """);
+        command.Parameters.AddWithValue("@id", offerId);
+        command.Parameters.AddWithValue("@seats", seats);
+        await command.ExecuteNonQueryAsync(ct);
+    }
+
+    /// <summary>Seats left on a deal right now, for the "only N left" message; null when it is not a deal.</summary>
+    public async Task<int?> FindRemainingAllotmentAsync(ulong offerId, CancellationToken ct)
+    {
+        await using var command = Command("""
+            SELECT allotment_seats - sold_seats AS remaining_seats FROM flight_offers WHERE id = @id
+            """);
+        command.Parameters.AddWithValue("@id", offerId);
+        var value = await command.ExecuteScalarAsync(ct);
+        return value is null or DBNull ? null : Convert.ToInt32(value);
+    }
+
     public async Task InsertFlightDetailAsync(ulong itemId, FlightQuoteRow quote, CancellationToken ct)
     {
         await using var command = Command("""
@@ -213,10 +252,12 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
     {
         await using var command = Command("""
             SELECT b.id AS booking_id, i.id AS item_id, b.customer_id, b.selling_branch_id, i.service_type,
-                i.status, td.tour_departure_id, i.quantity, i.price_snapshot
+                i.status, td.tour_departure_id, i.quantity, i.price_snapshot, b.hold_expires_at, b.total,
+                fd.flight_offer_id
             FROM bookings b
             JOIN booking_items i ON i.booking_id = b.id
             LEFT JOIN tour_booking_details td ON td.booking_item_id = i.id
+            LEFT JOIN flight_booking_details fd ON fd.booking_item_id = i.id
             WHERE b.id = @id
             ORDER BY i.id LIMIT 1
             FOR UPDATE
@@ -248,6 +289,50 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
         return true;
     }
 
+    /// <summary>
+    /// Records a succeeded simulated payment. Returns false when the idempotency key was already used, so a
+    /// retried request never charges twice.
+    /// </summary>
+    public async Task<bool> TryInsertPaymentAsync(ulong bookingId, decimal amount, string idempotencyKey,
+        DateTime nowUtc, CancellationToken ct)
+    {
+        await using var command = Command("""
+            INSERT INTO payments (booking_id, provider, provider_transaction_id, idempotency_key, amount, currency,
+                status, paid_at)
+            VALUES (@booking, @provider, @transaction, @key, @amount, 'VND', @status, @now)
+            """);
+        command.Parameters.AddWithValue("@booking", bookingId);
+        command.Parameters.AddWithValue("@provider", PaymentProvider.Simulated);
+        var transactionId = PaymentProvider.TransactionPrefix + Guid.NewGuid().ToString("N");
+        command.Parameters.AddWithValue("@transaction", transactionId);
+        command.Parameters.AddWithValue("@key", idempotencyKey);
+        command.Parameters.AddWithValue("@amount", amount);
+        command.Parameters.AddWithValue("@status", PaymentStatus.Succeeded);
+        command.Parameters.AddWithValue("@now", nowUtc);
+        try
+        {
+            await command.ExecuteNonQueryAsync(ct);
+            return true;
+        }
+        catch (MySqlException ex) when (ex.Number == DuplicateKeyError)
+        {
+            return false;
+        }
+    }
+
+    public async Task<bool> HasPaymentAsync(ulong bookingId, string idempotencyKey, CancellationToken ct)
+    {
+        await using var command = Command(
+            """
+            SELECT COUNT(*) FROM payments
+            WHERE booking_id = @booking AND idempotency_key = @key AND status = @status
+            """);
+        command.Parameters.AddWithValue("@booking", bookingId);
+        command.Parameters.AddWithValue("@key", idempotencyKey);
+        command.Parameters.AddWithValue("@status", PaymentStatus.Succeeded);
+        return Convert.ToInt64(await command.ExecuteScalarAsync(ct)) > 0;
+    }
+
     public Task CommitAsync(CancellationToken ct) => transaction.CommitAsync(ct);
 
     public async ValueTask DisposeAsync()
@@ -260,14 +345,15 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
     {
         await using var command = Command("""
             INSERT INTO bookings (booking_code, customer_id, selling_branch_id, status, currency, subtotal,
-                discount_total, total)
-            VALUES (@code, @customer, @branch, @status, 'VND', @total, 0, @total)
+                discount_total, total, hold_expires_at)
+            VALUES (@code, @customer, @branch, @status, 'VND', @total, 0, @total, @holdExpiresAt)
             """);
         command.Parameters.AddWithValue("@code", code);
         command.Parameters.AddWithValue("@customer", booking.CustomerId);
         command.Parameters.AddWithValue("@branch", booking.SellingBranchId);
         command.Parameters.AddWithValue("@status", BookingStatus.Pending);
         command.Parameters.AddWithValue("@total", booking.Quote.Total);
+        command.Parameters.AddWithValue("@holdExpiresAt", booking.HoldExpiresAt);
         await command.ExecuteNonQueryAsync(ct);
         return (ulong)command.LastInsertedId;
     }
@@ -278,7 +364,8 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
         r.GetUInt64("flight_id"), r.GetUInt64("offer_id"), r.GetString("flight_number"), r.GetString("airline"),
         r.GetString("origin_code"), r.GetString("origin_city"), r.GetString("destination_code"),
         r.GetString("destination_city"), r.GetUtcDateTime("depart_at"), r.GetUtcDateTime("arrive_at"),
-        r.GetString("cabin_class"), r.GetDecimal("quoted_price"), r.GetNullableString("terms"));
+        r.GetString("cabin_class"), r.GetDecimal("quoted_price"), r.GetNullableString("terms"),
+        r.GetNullableInt("remaining_seats"));
 
     private static LockedItem ReadLockedItem(MySqlDataReader r)
     {
@@ -287,7 +374,9 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
             r.IsDBNull(r.GetOrdinal("selling_branch_id")) ? null : r.GetUInt64("selling_branch_id"),
             r.GetString("service_type"), r.GetString("status"),
             r.IsDBNull(r.GetOrdinal("tour_departure_id")) ? null : r.GetUInt64("tour_departure_id"),
-            r.GetInt32("quantity"), snapshot?.StartDate, snapshot?.EndDate);
+            r.GetInt32("quantity"), snapshot?.StartDate, snapshot?.EndDate,
+            r.GetNullableUtcDateTime("hold_expires_at"), r.GetDecimal("total"),
+            r.IsDBNull(r.GetOrdinal("flight_offer_id")) ? null : r.GetUInt64("flight_offer_id"));
     }
 }
 

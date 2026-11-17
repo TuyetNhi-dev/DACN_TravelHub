@@ -74,3 +74,26 @@ test('the service decodes offers and rejects an unknown cabin class', async () =
   const bad = service(async () => ({ data: [{ ...row, cabinClass: 'luxury' }], count: 1 }));
   await assert.rejects(bad.getUpcomingFlights(), /chuyến bay/);
 });
+
+test('round trips keep the return date and flexible flag in the URL, one-way searches do not', () => {
+  const round = { ...search, returnDate: '2026-12-24', flexible: true };
+  const params = lib.flightSearchParams(round);
+  assert.equal(params.get('returnDate'), '2026-12-24');
+  assert.equal(params.get('flex'), '1');
+  assert.deepEqual(plain(lib.parseFlightSearch(Object.fromEntries(params))), round);
+  const oneWay = lib.flightSearchParams({ ...search, flexible: true });
+  assert.equal(oneWay.has('returnDate'), false);
+  assert.equal(oneWay.has('flex'), false);
+  assert.equal(lib.parseFlightSearch({ flex: '1' }).flexible, undefined);
+});
+
+test('a return date must be a valid day on or after departure', () => {
+  assert.equal(lib.validateFlightSearch({ ...search, returnDate: search.date }, today), null);
+  assert.ok(lib.validateFlightSearch({ ...search, returnDate: '2026-12-19' }, today));
+  assert.ok(lib.validateFlightSearch({ ...search, returnDate: '' }, today));
+});
+
+test('the return leg flies the route the other way on the return date', () => {
+  const back = lib.returnLegSearch({ ...search, returnDate: '2026-12-24', flexible: true });
+  assert.deepEqual(plain(back), { from: 'HAN', to: 'SGN', date: '2026-12-24', passengers: 2, cabin: 'economy' });
+});

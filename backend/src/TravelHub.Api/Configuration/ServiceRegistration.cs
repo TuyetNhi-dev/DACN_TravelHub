@@ -33,6 +33,9 @@ public static class ServiceRegistration
         services.AddScoped<FlightRepository>().AddScoped<FlightService>();
         services.AddScoped<BranchRepository>().AddScoped<BranchService>();
         services.Configure<EmailOptions>(config.GetSection("Email"));
+        services.Configure<BookingOptions>(config.GetSection(BookingOptions.SectionName));
+        services.AddScoped<BookingPaymentService>();
+        services.AddHostedService<TourHoldExpiryJob>();
         services.AddSingleton<IEmailSender, SmtpEmailSender>();
         services.AddScoped<AuthRepository>().AddScoped<AuthService>();
         services.AddScoped<EmailVerificationRepository>().AddScoped<EmailVerificationService>();

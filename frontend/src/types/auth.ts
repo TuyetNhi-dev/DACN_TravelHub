@@ -1,5 +1,6 @@
 /** Mirrors TravelHub.Api.Features.Auth DTOs. */
-export type RoleCode = "SUPER_ADMIN" | "REGIONAL_MANAGER" | "BRANCH_MANAGER" | "STAFF" | "CUSTOMER";
+/** Three roles: customers (scope self), staff and admins (scope global). */
+export type RoleCode = "CUSTOMER" | "STAFF" | "ADMIN";
 
 export interface RoleAssignment {
   code: string;

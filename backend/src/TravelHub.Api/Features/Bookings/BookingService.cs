@@ -1,11 +1,17 @@
 using TravelHub.Api.Common.Errors;
 using TravelHub.Api.Common.Http;
+using Microsoft.Extensions.Options;
 using TravelHub.Api.Common.Time;
+using TravelHub.Api.Configuration;
 
 namespace TravelHub.Api.Features.Bookings;
 
-/// <summary>Customer-side ordering. Tours hold real seats; hotels and flights only request a partner quote.</summary>
-public sealed class BookingService(BookingRepository repository, VietnamClock clock, ILogger<BookingService> logger)
+/// <summary>
+/// Customer-side ordering. Tours hold real seats until a server-computed deadline; hotels and flights only
+/// request a partner quote.
+/// </summary>
+public sealed class BookingService(BookingRepository repository, VietnamClock clock, IOptions<BookingOptions> options,
+    ILogger<BookingService> logger)
 {
     public async Task<BookingDetailDto> CreateTourAsync(ulong customerId, CreateTourBookingRequest request,
         CancellationToken ct)
@@ -21,7 +27,7 @@ public sealed class BookingService(BookingRepository repository, VietnamClock cl
             var pricing = await session.GetTourPricingAsync(tour.DepartureId, ct);
             var quote = BookingPricing.ForTour(pricing.AdultPrice, pricing.ChildPrice, tour.Adults, tour.Children);
             var booking = new NewBooking(customerId, pricing.OperatingBranchId, ServiceType.Tour, quote,
-                BookingSnapshots.Tour(pricing, quote));
+                BookingSnapshots.Tour(pricing, quote), clock.UtcNow + options.Value.TourHold);
             bookingId = await session.InsertBookingAsync(booking, today, ct);
             var itemId = await session.InsertItemAsync(bookingId, booking, ct);
             await session.InsertTourDetailAsync(itemId, tour, ct);
@@ -73,15 +79,18 @@ public sealed class BookingService(BookingRepository repository, VietnamClock cl
             var quoteRow = await session.FindSellableFlightQuoteAsync(flight.OfferId, clock.UtcNow, ct)
                 ?? throw ApiException.Conflict("Báo giá chuyến bay đã hết hạn hoặc không còn bán. Vui lòng tìm lại.");
             var quote = BookingPricing.ForFlight(quoteRow.Price, flight.Passengers.Count);
+            if (quoteRow.IsDeal) await TakeAllotmentSeatsAsync(session, quoteRow.OfferId, quote.Quantity, ct);
+            // Only a deal gets a hold deadline; that deadline is what marks the order as holding allotment seats.
+            DateTime? holdUntil = quoteRow.IsDeal ? clock.UtcNow + options.Value.DealHold : null;
             var booking = new NewBooking(customerId, null, ServiceType.Flight, quote,
-                BookingSnapshots.Flight(quoteRow, quote));
+                BookingSnapshots.Flight(quoteRow, quote), holdUntil);
             bookingId = await session.InsertBookingAsync(booking, clock.Today, ct);
             var itemId = await session.InsertItemAsync(bookingId, booking, ct);
             await session.InsertFlightDetailAsync(itemId, quoteRow, ct);
             await session.InsertPassengersAsync(itemId, flight.Passengers, ct);
             await session.CommitAsync(ct);
         }
-        logger.LogInformation("Flight booking {BookingId} sent to partner, offer {OfferId}", bookingId, flight.OfferId);
+        logger.LogInformation("Flight booking {BookingId} created, offer {OfferId}", bookingId, flight.OfferId);
         return await GetForCustomerAsync(customerId, bookingId, ct);
     }
 
@@ -112,8 +121,22 @@ public sealed class BookingService(BookingRepository repository, VietnamClock cl
     {
         var row = await repository.FindDetailAsync(bookingId, ct);
         if (row is null || row.CustomerId != customerId) throw NotFound();
-        var canCancel = BookingLifecycle.CustomerCanCancel(row.Summary.ItemStatus, row.Summary.StartDate, clock.Today);
-        return BookingMapper.ToDetail(row, canCancel, includeCustomer: false);
+        var summary = row.Summary;
+        var canCancel = BookingLifecycle.CustomerCanCancel(summary.ItemStatus, summary.StartDate, clock.Today);
+        var holdsSeats = BookingLifecycle.HoldsSeats(summary.ServiceType, summary.HoldExpiresAt);
+        var canPay = BookingLifecycle.CanPay(holdsSeats, summary.ItemStatus, summary.HoldExpiresAt, clock.UtcNow);
+        return BookingMapper.ToDetail(row, canCancel, canPay, includeCustomer: false);
+    }
+
+    /// <summary>Takes deal seats or explains, with the live count, why there are not enough left.</summary>
+    private static async Task TakeAllotmentSeatsAsync(BookingWriteSession session, ulong offerId, int seats,
+        CancellationToken ct)
+    {
+        if (await session.TryTakeAllotmentSeatsAsync(offerId, seats, ct)) return;
+        var remaining = await session.FindRemainingAllotmentAsync(offerId, ct) ?? 0;
+        throw ApiException.Conflict(remaining > 0
+            ? $"Chỉ còn {remaining} ghế giá này, không đủ cho {seats} hành khách."
+            : "Vé giá này vừa hết ghế. Vui lòng chọn chuyến khác.");
     }
 
     private static async Task<ApiException> ExplainReservationFailureAsync(BookingWriteSession session,

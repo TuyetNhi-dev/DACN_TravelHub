@@ -1,5 +1,5 @@
 import type {
-  BookingItemStatus, PassengerInput, PassengerType, ServiceType,
+  BookingItemStatus, BookingSummary, PassengerInput, PassengerType, ServiceType,
 } from "@/types/booking";
 
 export const MAX_TOUR_TRAVELERS = 20;
@@ -19,12 +19,16 @@ export type StatusTone = "info" | "warning" | "success" | "danger" | "neutral";
 /** Customer-facing wording: partner quotes are never presented as confirmed until they are. */
 export const ITEM_STATUS: Record<BookingItemStatus, { label: string; tone: StatusTone; hint: string }> = {
   pending: {
-    label: "Đang giữ chỗ", tone: "info",
-    hint: "Chỗ đã được giữ. Nhân viên SàiHành sẽ liên hệ xác nhận và hướng dẫn thanh toán.",
+    label: "Đang giữ chỗ, chờ thanh toán", tone: "info",
+    hint: "Chỗ chỉ được giữ trong thời gian đếm ngược. Thanh toán trước khi hết giờ để xác nhận đơn.",
   },
   awaiting_supplier: {
     label: "Chờ đối tác xác nhận", tone: "warning",
     hint: "Giá tham khảo, chưa phải xác nhận. Đơn chỉ có hiệu lực khi đối tác xác nhận còn chỗ.",
+  },
+  awaiting_payment: {
+    label: "Chờ thanh toán", tone: "info",
+    hint: "Đối tác đã xác nhận còn chỗ. Vui lòng thanh toán để hoàn tất đơn.",
   },
   confirmed: { label: "Đã xác nhận", tone: "success", hint: "Dịch vụ đã được xác nhận." },
   completed: { label: "Đã hoàn thành", tone: "neutral", hint: "Dịch vụ đã sử dụng xong." },
@@ -37,6 +41,14 @@ export const ITEM_STATUS_OPTIONS = Object.entries(ITEM_STATUS)
 
 export function itemStatusMeta(status: string) {
   return ITEM_STATUS[status as BookingItemStatus] ?? { label: status, tone: "neutral" as const, hint: "" };
+}
+
+/**
+ * Mirrors BookingLifecycle.HoldsSeats: tours, and flight deals (orders with a hold deadline), hold seats until
+ * the payment deadline; hotels and ordinary flight quotes wait for the partner instead.
+ */
+export function holdsSeats(booking: Pick<BookingSummary, "serviceType" | "holdExpiresAt">): boolean {
+  return booking.serviceType === "tour" || booking.holdExpiresAt !== null;
 }
 
 export function emptyPassengers(adults: number, children: number): PassengerInput[] {

@@ -4,6 +4,7 @@ import { FlightPage } from "@/components/flights/FlightPage";
 import { parseFlightSearch } from "@/lib/flight-search";
 import { firstParam, isResourceId } from "@/lib/route-params";
 import "@/styles/flights.css";
+import "@/styles/flight-prices.css";
 
 export const metadata = {
   title: "Vé máy bay nội địa | SàiHành",
@@ -22,7 +23,11 @@ export default async function FlightsPage({ params, searchParams }: { params: Pa
   const search = parseFlightSearch(values);
   if (step.length === 0) return <FlightPage key={JSON.stringify(search)} search={search} />;
   if (step.length === 1 && step[0] === BOOKING_STEP && isResourceId(values.offer ?? "")) {
-    return <FlightBookingPage key={values.offer} search={search} offerId={values.offer} />;
+    const returnOfferId = search.returnDate && isResourceId(values.returnOffer ?? "") ? values.returnOffer : undefined;
+    return (
+      <FlightBookingPage key={`${values.offer}:${returnOfferId ?? ""}`} search={search} offerId={values.offer}
+        returnOfferId={returnOfferId} />
+    );
   }
   notFound();
 }

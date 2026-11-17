@@ -1,12 +1,11 @@
 using System.Text;
 using MySqlConnector;
 using TravelHub.Api.Data;
-using TravelHub.Api.Features.Admin;
 
 namespace TravelHub.Api.Features.Bookings;
 
 public sealed record BookingDetailRow(BookingSummaryDto Summary, decimal Subtotal, decimal DiscountTotal,
-    ulong CustomerId, ulong? SellingBranchId, ulong? BranchRegionId, string? ConfirmationCode,
+    ulong CustomerId, ulong? SellingBranchId, string? ConfirmationCode, DateTime? PaidAt,
     BookingSnapshot? Snapshot, IReadOnlyList<PassengerDto> Passengers);
 
 public sealed record StaffBookingFilter(string? ItemStatus, string? ServiceType);
@@ -18,13 +17,13 @@ public sealed class BookingRepository(MySqlConnectionFactory connections)
     // Each order has exactly one item in this version; the subquery keeps the join one row per order.
     private const string SummarySelect = """
         SELECT b.id, b.booking_code, b.status, b.subtotal, b.discount_total, b.total, b.created_at,
-            b.customer_id, b.selling_branch_id, br.region_id AS branch_region_id,
+            b.customer_id, b.selling_branch_id, b.hold_expires_at,
+            (SELECT MAX(p.paid_at) FROM payments p WHERE p.booking_id = b.id AND p.status = 'succeeded') AS paid_at,
             i.id AS item_id, i.service_type, i.status AS item_status, i.supplier_confirmation_code, i.price_snapshot,
             u.full_name, u.email, u.phone
         FROM bookings b
         JOIN booking_items i ON i.id = (SELECT MIN(x.id) FROM booking_items x WHERE x.booking_id = b.id)
         JOIN users u ON u.id = b.customer_id
-        LEFT JOIN branches br ON br.id = b.selling_branch_id
         """;
 
     public async Task<BookingWriteSession> BeginWriteAsync(CancellationToken ct)
@@ -52,13 +51,13 @@ public sealed class BookingRepository(MySqlConnectionFactory connections)
         return await command.ReadAllAsync(reader => ReadSummary(reader, includeCustomer: false), ct);
     }
 
-    public async Task<IReadOnlyList<BookingSummaryDto>> ListForStaffAsync(StaffScope scope, StaffBookingFilter filter,
+    /// <summary>Staff and admins see every order (global scope), newest first.</summary>
+    public async Task<IReadOnlyList<BookingSummaryDto>> ListForStaffAsync(StaffBookingFilter filter,
         CancellationToken ct)
     {
         await using var connection = await connections.OpenAsync(ct);
         await using var command = new MySqlCommand { Connection = connection };
         var sql = new StringBuilder(SummarySelect).Append(" WHERE 1 = 1");
-        scope.AppendFilter(sql, command, "b.selling_branch_id");
         if (filter.ItemStatus is not null)
         {
             sql.Append(" AND i.status = @itemStatus");
@@ -84,6 +83,21 @@ public sealed class BookingRepository(MySqlConnectionFactory connections)
         return row with { Passengers = await ListPassengersAsync(connection, bookingId, ct) };
     }
 
+    /// <summary>Unpaid seat holds (tours and flight deals) whose deadline has passed, oldest first.</summary>
+    public async Task<IReadOnlyList<ulong>> ListExpiredHoldsAsync(DateTime nowUtc, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand("""
+            SELECT b.id FROM bookings b JOIN booking_items i ON i.booking_id = b.id
+            WHERE b.hold_expires_at <= @now AND i.status = @pending
+            ORDER BY b.hold_expires_at, b.id LIMIT @limit
+            """, connection);
+        command.Parameters.AddWithValue("@now", nowUtc);
+        command.Parameters.AddWithValue("@pending", BookingItemStatus.Pending);
+        command.Parameters.AddWithValue("@limit", BookingLimits.ExpiredHoldBatchSize);
+        return await command.ReadAllAsync(reader => reader.GetUInt64("id"), ct);
+    }
+
     private static async Task<IReadOnlyList<PassengerDto>> ListPassengersAsync(MySqlConnection connection,
         ulong bookingId, CancellationToken ct)
     {
@@ -107,7 +121,8 @@ public sealed class BookingRepository(MySqlConnectionFactory connections)
         return new BookingSummaryDto(reader.GetId("id"), reader.GetString("booking_code"),
             reader.GetString("service_type"), reader.GetString("status"), reader.GetString("item_status"),
             snapshot?.Title ?? reader.GetString("booking_code"), snapshot?.Subtitle, snapshot?.StartDate,
-            reader.GetDecimal("total"), reader.GetUtcDateTime("created_at"), customer);
+            reader.GetDecimal("total"), reader.GetUtcDateTime("created_at"),
+            reader.GetNullableUtcDateTime("hold_expires_at"), customer);
     }
 
     private static BookingDetailRow ReadDetail(MySqlDataReader reader) => new(
@@ -116,8 +131,8 @@ public sealed class BookingRepository(MySqlConnectionFactory connections)
         reader.GetDecimal("discount_total"),
         reader.GetUInt64("customer_id"),
         reader.IsDBNull(reader.GetOrdinal("selling_branch_id")) ? null : reader.GetUInt64("selling_branch_id"),
-        reader.IsDBNull(reader.GetOrdinal("branch_region_id")) ? null : reader.GetUInt64("branch_region_id"),
         reader.GetNullableString("supplier_confirmation_code"),
+        reader.GetNullableUtcDateTime("paid_at"),
         BookingSnapshotReader.Read(reader.GetNullableString("price_snapshot")),
         []);
 }
