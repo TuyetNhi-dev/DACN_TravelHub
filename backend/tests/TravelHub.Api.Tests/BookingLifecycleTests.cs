@@ -89,7 +89,8 @@ public sealed class BookingLifecycleTests
     {
         var deal = Item(BookingItemStatus.Pending, Today.AddDays(5), null) with
         {
-            ServiceType = ServiceType.Flight, DepartureId = null, FlightOfferId = 42, HoldExpiresAt = Now.AddMinutes(10),
+            ServiceType = ServiceType.Flight, DepartureId = null, FlightOfferId = 42,
+            HoldExpiresAt = Now.AddMinutes(10),
         };
         var ordinary = deal with { HoldExpiresAt = null, Status = BookingItemStatus.AwaitingSupplier };
         Assert.True(deal.HoldsSeats);
@@ -104,7 +105,8 @@ public sealed class BookingLifecycleTests
         Assert.Equal(TimeSpan.FromMinutes(15), new BookingOptions { TourHoldMinutes = 15 }.TourHold);
         Assert.Equal(TimeSpan.FromMinutes(10), new BookingOptions().DealHold);
         Assert.Equal(TimeSpan.FromMinutes(10), new BookingOptions { DealHoldMinutes = -1 }.DealHold);
-        Assert.Equal(TimeSpan.FromMinutes(5), new BookingOptions { DealHoldMinutes = 5, TourHoldMinutes = 20 }.DealHold);
+        var options = new BookingOptions { DealHoldMinutes = 5, TourHoldMinutes = 20 };
+        Assert.Equal(TimeSpan.FromMinutes(5), options.DealHold);
         Assert.Equal(TimeSpan.FromSeconds(30), new BookingOptions { HoldSweepSeconds = -5 }.HoldSweep);
     }
 

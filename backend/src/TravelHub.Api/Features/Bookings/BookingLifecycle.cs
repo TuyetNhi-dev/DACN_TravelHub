@@ -22,7 +22,7 @@ public static class BookingLifecycle
     public static bool CustomerCanCancel(string itemStatus, DateOnly? startDate, DateOnly today) =>
         BookingItemStatus.Open.Contains(itemStatus) && (startDate is null || startDate > today);
 
-    /// <summary>Seat-held items are confirmed by the customer's payment, so staff confirm partner quotes only.</summary>
+    /// <summary>Seat holds are confirmed by the customer's payment; staff confirm partner quotes only.</summary>
     public static bool StaffCanConfirm(bool holdsSeats, string itemStatus) =>
         !holdsSeats && itemStatus == BookingItemStatus.AwaitingSupplier;
 
@@ -47,7 +47,7 @@ public static class BookingLifecycle
     public static bool CanComplete(LockedItem item, DateOnly today) =>
         item.Status == BookingItemStatus.Confirmed && (item.EndDate ?? item.StartDate) is { } last && last < today;
 
-    /// <summary>Moves the item to a closed status and gives held seats back to the departure or the allotment.</summary>
+    /// <summary>Closes the item and gives held seats back to the tour departure or the flight allotment.</summary>
     public static async Task CloseAsync(BookingWriteSession session, LockedItem item, string closedStatus,
         CancellationToken ct)
     {
