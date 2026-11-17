@@ -1,15 +1,28 @@
 import { notFound } from "next/navigation";
+import { FlightBookingPage } from "@/components/flights/FlightBookingPage";
 import { FlightPage } from "@/components/flights/FlightPage";
+import { parseFlightSearch } from "@/lib/flight-search";
+import { firstParam, isResourceId } from "@/lib/route-params";
 import "@/styles/flights.css";
 
-export const metadata = { title: "Vé máy bay nội địa | SàiHành", description: "Tìm và so sánh chuyến bay nội địa, trải nghiệm đặt vé demo cùng SàiHành." };
-export default async function Page({ params, searchParams }: {
-  params: Promise<{ step?: string[] }>;
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const { step = [] } = await params;
-  if (step.length > 1 || (step[0] && !["results", "detail", "booking"].includes(step[0]))) notFound();
-  const query = await searchParams;
-  const values = Object.fromEntries(Object.entries(query).map(([k, v]) => [k, typeof v === "string" ? v : ""]));
-  return <FlightPage key={JSON.stringify([step, values])} step={step[0] || "search"} query={values} />;
+export const metadata = {
+  title: "Vé máy bay nội địa | SàiHành",
+  description: "So sánh giá vé tham khảo các chặng bay nội địa và gửi yêu cầu đặt vé cùng SàiHành.",
+};
+
+const BOOKING_STEP = "booking";
+
+type Params = Promise<{ step?: string[] }>;
+type SearchParams = Promise<Record<string, string | string[] | undefined>>;
+
+/** Serves /flights (search and results) and /flights/booking?offer=… (passenger details). */
+export default async function FlightsPage({ params, searchParams }: { params: Params; searchParams: SearchParams }) {
+  const [{ step = [] }, query] = await Promise.all([params, searchParams]);
+  const values = Object.fromEntries(Object.entries(query).map(([key, value]) => [key, firstParam(value)]));
+  const search = parseFlightSearch(values);
+  if (step.length === 0) return <FlightPage key={JSON.stringify(search)} search={search} />;
+  if (step.length === 1 && step[0] === BOOKING_STEP && isResourceId(values.offer ?? "")) {
+    return <FlightBookingPage key={values.offer} search={search} offerId={values.offer} />;
+  }
+  notFound();
 }

@@ -1,45 +1,51 @@
-/* eslint-disable @typescript-eslint/no-require-imports -- CommonJS harness evaluates the TypeScript adapter with an isolated API stub. */
+/* eslint-disable @typescript-eslint/no-require-imports -- CommonJS harness for TypeScript modules. */
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { readFileSync } = require('node:fs');
 const vm = require('node:vm');
 const ts = require('typescript');
 
-function catalog(apiGet) {
+function catalog({ hotels = async () => [], flights = async () => [] } = {}) {
   const exports = {};
   const source = ts.transpileModule(readFileSync('src/services/home-catalog.ts', 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
-  vm.runInNewContext(source, { exports, require: () => ({ apiGet, ApiError: Error }) });
+  const dependencies = {
+    '@/services/hotels': { getHotels: hotels },
+    '@/services/flights': { getUpcomingFlights: flights },
+  };
+  vm.runInNewContext(source, { exports, require: name => {
+    if (!(name in dependencies)) throw Error('Unexpected dependency: ' + name);
+    return dependencies[name];
+  } });
   return exports;
 }
-test('hotel endpoint preserves unknown prices without inventing availability', async () => {
-  let path;
-  const { getHomeCatalog } = catalog(async p => {
-    path = p;
-    return { data: [{ hotelId: 'H1', tenKhachSan: 'Hotel', thanhPho: 'Huế', giaTuVndDem: null, ghiChu: 'Demo' }] };
-  });
-  const items = await getHomeCatalog('hotel');
-  assert.equal(path, '/api/hotels');
-  assert.equal(items[0].price, null);
-  assert.equal(items[0].note, 'Demo');
-  assert.equal('availability' in items[0], false);
+
+const hotel = (id, price) => ({ id, name: 'KS ' + id, city: 'Huế', address: null, starRating: 4, description: null,
+  referencePricePerNight: price });
+const flight = (offerId, from, to, price) => ({
+  offerId, originCode: from, destinationCode: to, referencePrice: price,
 });
-test('flight endpoint preserves exact API date and price', async () => {
-  const { getHomeCatalog } = catalog(async path => {
-    assert.equal(path, '/api/flights');
-    return { data: [{ flightId: 'F1', hangBayThamKhao: 'Demo', noiDi: 'Hà Nội', noiDen: 'Huế', ngayBay: '2026-12-01', giaVnd: 0, ghiChu: null }] };
-  });
-  const [flight] = await getHomeCatalog('flight');
-  assert.equal(flight.date, '2026-12-01');
-  assert.equal(flight.price, 0);
+
+test('home hotels keep only priced partner quotes, at most four', async () => {
+  const { getHomeHotels } = catalog({ hotels: async () => [hotel('1', null), ...['2', '3', '4', '5', '6']
+    .map(id => hotel(id, 900000))] });
+  const items = await getHomeHotels();
+  assert.deepEqual(items.map(item => item.id), ['2', '3', '4', '5']);
+  assert.equal(items.some(item => 'availability' in item), false);
 });
-test('empty API stays empty; network failures propagate', async () => {
-  assert.equal((await catalog(async () => ({ data: [] })).getHomeCatalog('hotel')).length, 0);
-  await assert.rejects(catalog(async () => { throw Error('offline'); }).getHomeCatalog('hotel'), /offline/);
+
+test('home flights show the cheapest fare per route', async () => {
+  const { getHomeFlights } = catalog({ flights: async () => [
+    flight('a', 'SGN', 'HAN', 2000000), flight('b', 'SGN', 'HAN', 1500000), flight('c', 'HAN', 'SGN', 1800000),
+  ] });
+  const items = await getHomeFlights();
+  // Array.from copies into this realm; arrays built inside vm have a different prototype.
+  assert.deepEqual(Array.from(items, item => item.offerId), ['b', 'c']);
 });
-test('rejects malformed records and invalid prices', async () => {
-  for (const response of [null, { data: {} }, { data: [null] }, { data: [{ hotelId: 'H1', tenKhachSan: null, thanhPho: null, giaTuVndDem: -1, ghiChu: null }] }]) {
-    await assert.rejects(catalog(async () => response).getHomeCatalog('hotel'));
-  }
+
+test('empty catalogues stay empty and failures propagate', async () => {
+  assert.equal((await catalog().getHomeHotels()).length, 0);
+  assert.equal((await catalog().getHomeFlights()).length, 0);
+  await assert.rejects(catalog({ hotels: async () => { throw Error('offline'); } }).getHomeHotels(), /offline/);
 });

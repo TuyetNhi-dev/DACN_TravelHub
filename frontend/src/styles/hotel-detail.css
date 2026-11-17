@@ -1,0 +1,76 @@
+/* Hotel detail sections: in-page nav, highlights, grouped facilities, house rules and nearby tours. */
+.hotel-section-nav {
+  position: sticky; top: 76px; z-index: 5; display: flex; gap: var(--space-1); overflow-x: auto;
+  padding: 6px; border: 1px solid var(--line); border-radius: var(--radius-pill); background: var(--panel);
+  box-shadow: var(--shadow-sm); scrollbar-width: none;
+}
+.hotel-section-nav a {
+  flex: none; padding: 8px 16px; border-radius: var(--radius-pill); color: var(--muted); font-weight: 600;
+  text-decoration: none;
+}
+.hotel-section-nav a:hover, .hotel-section-nav a:focus-visible { background: var(--surface); color: var(--brand); }
+#hotel-overview, #hotel-rooms, #hotel-facilities, #hotel-rules, #hotel-tours { scroll-margin-top: 150px; }
+
+.hotel-section-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+.hotel-section-head h2 { margin: 0; }
+.hotel-section-head span { color: var(--muted); font-size: .92rem; }
+.hotel-section-head a { color: var(--brand); font-weight: 600; }
+.hotel-subtitle { margin: var(--space-6) 0 var(--space-3); font-size: 1.05rem; }
+
+.hotel-highlights {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: var(--space-3);
+  margin: 0; padding: 0; list-style: none;
+}
+.hotel-highlights li {
+  display: flex; align-items: center; gap: 10px; padding: 12px; border: 1px solid var(--line);
+  border-radius: var(--radius-md); background: var(--surface); color: var(--ink); font-weight: 600; font-size: .95rem;
+}
+.hotel-highlights li > span {
+  display: grid; flex: none; place-items: center; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--panel); color: var(--brand);
+}
+.hotel-times { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: var(--space-6) 0 0; }
+.hotel-times div { padding: 10px 16px; border-left: 3px solid var(--brand); background: var(--surface); }
+.hotel-times dt { color: var(--muted); font-size: .85rem; }
+.hotel-times dd { margin: 2px 0 0; color: var(--ink); font-weight: 700; }
+
+.hotel-facility-groups {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: var(--space-6);
+  margin-top: var(--space-6);
+}
+.hotel-facility-group h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 var(--space-3); font-size: 1rem; }
+.hotel-facility-group h3 svg { color: var(--brand); }
+.hotel-facility-group ul { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.hotel-facility-group li { display: flex; align-items: flex-start; gap: 8px; color: var(--ink); font-size: .95rem; }
+.hotel-facility-group li svg { flex: none; margin-top: 3px; color: var(--green); }
+.hotel-paid {
+  flex: none; margin-left: auto; padding: 1px 8px; border-radius: var(--radius-pill); background: var(--surface);
+  color: var(--muted); font-size: .78rem; white-space: nowrap;
+}
+.hotel-more {
+  display: inline-flex; align-items: center; gap: 6px; margin-top: var(--space-6); padding: 10px 18px;
+  border: 1px solid var(--brand); border-radius: var(--radius-pill); background: none; color: var(--brand);
+  font: inherit; font-weight: 700; cursor: pointer;
+}
+.hotel-more:hover { background: var(--brand); color: var(--on-brand); }
+.hotel-more span { display: inline-flex; transform: rotate(90deg); }
+.hotel-more span.hotel-more-up { transform: rotate(-90deg); }
+
+.hotel-rules { display: grid; gap: 0; margin: var(--space-4) 0; }
+.hotel-rules > div {
+  display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: var(--space-4); padding: 14px 0;
+  border-bottom: 1px solid var(--line);
+}
+.hotel-rules > div:last-child { border-bottom: 0; }
+.hotel-rules dt { display: flex; align-items: center; gap: 8px; color: var(--ink); font-weight: 700; }
+.hotel-rules dt svg { color: var(--brand); }
+.hotel-rules dd { margin: 0; color: var(--muted); line-height: 1.6; }
+
+.hotel-tours { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: var(--space-4); }
+
+@media (max-width: 640px) {
+  .hotel-section-nav { top: 66px; }
+  .hotel-rules > div { grid-template-columns: 1fr; gap: 4px; }
+  .hotel-highlights { grid-template-columns: 1fr 1fr; }
+  .hotel-highlights li { padding: 10px; font-size: .88rem; }
+}

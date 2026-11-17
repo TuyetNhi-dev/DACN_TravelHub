@@ -1,0 +1,183 @@
+/* Full-bleed animated home hero. Existing tokens only; all motion stops under prefers-reduced-motion. */
+
+body .hero.hero--immersive { padding: 0; background: var(--canvas); }
+body .hero.hero--immersive::before { display: none; }
+
+.hero-immersive {
+  --mx: 0;
+  --my: 0;
+  --slide-duration: 7000ms;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --glass-bg: rgba(255, 255, 255, .12);
+  --glass-line: rgba(255, 255, 255, .26);
+  position: relative;
+  isolation: isolate;
+  min-height: clamp(600px, calc(100svh - 150px), 800px);
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  color: var(--on-brand);
+  border-radius: 0 0 44px 44px;
+}
+
+/* ---------- Backdrop: cross-fade, Ken Burns, parallax ---------- */
+.hero-backdrop { position: absolute; inset: -30px; z-index: -3;
+  transform: translate(calc(var(--mx) * -18px), calc(var(--my) * -12px)); transition: transform .8s var(--ease-out); }
+.hero-backdrop img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+  opacity: 0; transform: scale(1.16);
+  transition: opacity 1.6s ease, transform calc(var(--slide-duration) + 2s) linear;
+}
+.hero-backdrop img.is-active { opacity: 1; transform: scale(1.02); }
+.hero-shade { position: absolute; inset: 0;
+  background:
+    linear-gradient(90deg, rgba(5, 16, 38, .86) 0%, rgba(5, 16, 38, .55) 38%, rgba(5, 16, 38, .08) 70%),
+    linear-gradient(0deg, rgba(5, 16, 38, .6) 0%, transparent 35%),
+    linear-gradient(180deg, rgba(5, 16, 38, .35) 0%, transparent 22%); }
+
+/* Faint outlined destination name, sitting behind the card deck */
+.hero-ghost {
+  position: absolute; right: 2vw; bottom: 70px; z-index: -2;
+  font-size: clamp(110px, 15vw, 240px); font-weight: 800; line-height: .8; letter-spacing: -.04em;
+  white-space: nowrap; color: transparent; -webkit-text-stroke: 1px rgba(255, 255, 255, .14);
+  transform: translateX(calc(var(--mx) * 30px)); pointer-events: none;
+  animation: hero-ghost-in 1.6s var(--ease-out) both;
+}
+
+/* Flight route kept to the top band so it never crosses the headline */
+.hero-route { position: absolute; left: 0; right: 0; top: 18px; height: 22%; z-index: -1; width: 100%;
+  overflow: visible; pointer-events: none; }
+.hero-route > path { fill: none; stroke: rgba(255, 255, 255, .32); stroke-width: 1.2; stroke-dasharray: 2 9;
+  stroke-linecap: round; vector-effect: non-scaling-stroke; animation: hero-dash 2.4s linear infinite; }
+.hero-route-plane { fill: var(--on-brand); offset-path: path("M-20 170 C 300 20, 760 10, 1220 90");
+  offset-rotate: auto; animation: hero-fly 12s ease-in-out infinite; }
+
+/* ---------- Layout ---------- */
+.hero-stage { width: min(1180px, calc(100% - 48px)); padding-block: 72px 150px;
+  display: grid; grid-template-columns: minmax(0, 1fr) 430px; align-items: center; gap: 48px; }
+.hero-copy-col { display: grid; gap: 44px; }
+.hero-copy-panel { max-width: 620px; }
+
+.hero-eyebrow { display: inline-flex; align-items: center; gap: 14px; font-size: 12px; font-weight: 700;
+  letter-spacing: .28em; text-transform: uppercase; color: var(--text-on-image);
+  animation: hero-rise .8s var(--ease-out) both; }
+.hero-eyebrow-line { width: 48px; height: 2px; background: var(--accent-warm); transform-origin: left;
+  animation: hero-grow 1s .15s var(--ease-out) both; }
+
+.hero-immersive h1 { margin: 22px 0 0; color: var(--on-brand); text-shadow: 0 8px 40px rgba(0, 0, 0, .3); }
+.hero-lead { display: block; font-size: clamp(24px, 2.6vw, 36px); font-weight: 400; letter-spacing: -.01em;
+  color: var(--text-on-image); animation: hero-rise .8s .05s var(--ease-out) both; }
+.hero-title { display: block; font-size: clamp(58px, 8.4vw, 120px); font-weight: 800; line-height: 1;
+  letter-spacing: -.045em; padding-block: .18em .1em; margin-top: -.1em; overflow: hidden; }
+.hero-title span { display: inline-block;
+  animation: hero-letter 1s calc(.12s + var(--i) * 40ms) var(--ease-out) both; }
+.hero-desc { max-width: 500px; margin: 14px 0 32px; font-size: 17px; line-height: 1.75;
+  color: var(--text-on-image); animation: hero-rise .8s .35s var(--ease-out) both; }
+
+.hero-actions { display: flex; flex-wrap: wrap; gap: 14px; animation: hero-rise .8s .5s var(--ease-out) both; }
+.hero-actions .btn-primary { box-shadow: 0 14px 34px var(--brand-shadow); }
+.hero-ghost-btn { color: var(--on-brand); border-color: var(--glass-line); background: var(--glass-bg);
+  backdrop-filter: blur(12px); }
+.hero-ghost-btn:hover { background: rgba(255, 255, 255, .22); transform: translateY(-1px); }
+.hero-shine { position: relative; overflow: hidden; }
+.hero-shine::after { content: ""; position: absolute; inset: 0 auto 0 -60%; width: 40%;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, .5), transparent);
+  transform: skewX(-20deg); animation: hero-shine 4s ease-in-out infinite; }
+
+/* ---------- Pager: counter, progress line, controls ---------- */
+.hero-pager { display: flex; align-items: center; gap: 14px; color: var(--text-on-image); }
+.hero-pager-count { min-width: 92px; font-size: 15px; font-variant-numeric: tabular-nums; }
+.hero-pager-count b { display: inline-block; font-size: 38px; font-weight: 800; color: var(--on-brand);
+  animation: hero-rise .6s var(--ease-out) both; }
+.hero-pager-track { position: relative; width: 150px; height: 2px; overflow: hidden; border-radius: 2px;
+  background: rgba(255, 255, 255, .28); margin-right: 8px; }
+.hero-pager-fill { position: absolute; inset: 0; background: var(--on-brand); transform-origin: left;
+  animation: hero-progress var(--slide-duration) linear forwards; }
+.hero-immersive.is-paused .hero-pager-fill { animation-play-state: paused; }
+.hero-round { width: 46px; height: 46px; display: grid; place-items: center; border-radius: 50%;
+  color: var(--on-brand); border: 1px solid var(--glass-line); background: var(--glass-bg);
+  backdrop-filter: blur(12px); transition: background .25s, transform .25s var(--ease-out); }
+.hero-round:hover { background: rgba(255, 255, 255, .26); transform: scale(1.06); }
+.hero-flip { display: grid; transform: rotate(180deg); }
+.hero-pause-glyph { font-size: 11px; }
+
+/* ---------- Right side: glass badge + fanned card deck ---------- */
+.hero-side { position: relative; height: 400px; }
+.hero-glass { position: absolute; top: 0; left: 0; z-index: 20; display: flex; align-items: center; gap: 12px;
+  max-width: 300px; padding: 14px 18px; border-radius: 18px; color: var(--on-brand);
+  background: var(--glass-bg); border: 1px solid var(--glass-line); backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, .2); translate: calc(var(--mx) * 18px) calc(var(--my) * 14px);
+  animation: hero-bob 6s ease-in-out infinite; }
+.hero-glass > span:last-child { display: flex; flex-direction: column; }
+.hero-glass b { font-size: 14px; }
+.hero-glass small { font-size: 12px; color: var(--text-on-image); }
+.hero-glass .deal-icon { background: rgba(255, 255, 255, .92); }
+
+.hero-deck { position: absolute; left: 30px; right: 0; bottom: 0; height: 300px;
+  translate: calc(var(--mx) * -14px) calc(var(--my) * -10px); }
+.hero-card {
+  position: absolute; left: 0; bottom: 0; width: 200px; height: 280px; padding: 0; overflow: hidden;
+  border-radius: 24px; border: 1px solid rgba(255, 255, 255, .35); background: var(--image-overlay);
+  color: var(--on-brand); text-align: left; z-index: calc(10 - var(--pos));
+  box-shadow: 0 24px 50px rgba(0, 0, 0, .35);
+  opacity: calc(1 - var(--pos) * .22);
+  transform: translateX(calc(var(--pos) * 96px)) translateY(calc(var(--pos) * -12px))
+    scale(calc(1 - var(--pos) * .09)) rotate(calc(var(--pos) * 4deg));
+  transform-origin: bottom left;
+  transition: transform 1s var(--ease-out), opacity .8s ease, translate .35s var(--ease-out);
+}
+.hero-card:hover { translate: 0 -10px; }
+.hero-card.is-hidden { opacity: 0; pointer-events: none; transform: translateX(-80px) scale(.85) rotate(-6deg); }
+.hero-card img { position: absolute; inset: 0; height: 100%; object-fit: cover; transition: transform .8s var(--ease-out); }
+.hero-card:hover img { transform: scale(1.08); }
+.hero-card::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(0deg, rgba(5, 16, 38, .85), rgba(5, 16, 38, .05) 55%); }
+.hero-card-body { position: absolute; left: 18px; right: 18px; bottom: 18px; z-index: 1; display: grid; gap: 2px; }
+.hero-card-body small { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; opacity: .85; }
+.hero-card-body b { font-size: 22px; font-weight: 800; letter-spacing: -.02em; }
+.hero-card-go { position: absolute; top: 14px; right: 14px; z-index: 1; width: 34px; height: 34px;
+  display: grid; place-items: center; border-radius: 50%; background: var(--glass-bg);
+  border: 1px solid var(--glass-line); backdrop-filter: blur(10px); transition: transform .3s var(--ease-out); }
+.hero-card:hover .hero-card-go { transform: rotate(-45deg); }
+
+.hero-round:focus-visible, .hero-card:focus-visible { outline: 3px solid var(--accent-sky); outline-offset: 3px; }
+
+/* The search box overlaps the banner bottom */
+.hero--immersive .search-wrap { margin-top: -72px; transform: none; }
+
+/* ---------- Motion ---------- */
+@keyframes hero-letter { from { opacity: 0; transform: translateY(100%) rotate(5deg); }
+  to { opacity: 1; transform: none; } }
+@keyframes hero-rise { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: none; } }
+@keyframes hero-grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes hero-ghost-in { from { opacity: 0; letter-spacing: .05em; } to { opacity: 1; } }
+@keyframes hero-shine { 0%, 65% { left: -60%; } 100% { left: 130%; } }
+@keyframes hero-dash { to { stroke-dashoffset: -22; } }
+@keyframes hero-fly { from { offset-distance: 0%; opacity: 0; } 8%, 92% { opacity: .9; }
+  to { offset-distance: 100%; opacity: 0; } }
+@keyframes hero-bob { 50% { transform: translateY(-10px); } }
+@keyframes hero-progress { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .hero-stage { grid-template-columns: 1fr; gap: 32px; padding-block: 56px 140px; }
+  .hero-side { height: 300px; max-width: 460px; }
+  .hero-glass, .hero-ghost { display: none; }
+  .hero-deck { left: 0; }
+}
+@media (max-width: 640px) {
+  .hero-immersive { min-height: 620px; border-radius: 0 0 26px 26px; }
+  .hero-stage { width: calc(100% - 32px); }
+  .hero-side, .hero-route { display: none; }
+  .hero-desc { font-size: 15px; }
+  .hero-pager-track { width: 80px; }
+  .hero-round { width: 40px; height: 40px; }
+}
+
+/* No autoplay or decorative motion for users who ask for less: the progress animation never ends,
+   so slides change only through the controls. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-immersive *, .hero-immersive *::after { animation: none !important; transition: none !important; }
+  .hero-backdrop, .hero-ghost, .hero-glass, .hero-deck { transform: none; translate: none; }
+  .hero-route-plane { display: none; }
+}

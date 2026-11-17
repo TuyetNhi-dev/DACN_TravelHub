@@ -2,7 +2,8 @@ import type { ReactNode } from "react";
 export type IconName =
   | "search" | "map" | "calendar" | "users" | "plane" | "hotel" | "ticket"
   | "arrow" | "star" | "clock" | "shield" | "headphones" | "wallet" | "check"
-  | "menu" | "close" | "minus" | "plus" | "chevron" | "heart" | "bus" | "eye" | "eyeOff";
+  | "menu" | "close" | "minus" | "plus" | "chevron" | "heart" | "bus" | "eye" | "eyeOff"
+  | "wifi" | "bed" | "bath" | "utensils" | "bell" | "waves" | "car" | "briefcase" | "accessibility" | "leaf";
 
 export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   const paths: Record<IconName, ReactNode> = {
@@ -28,6 +29,17 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
     plus: <path d="M12 5v14M5 12h14" />,
     chevron: <path d="m9 18 6-6-6-6" />,
     heart: <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z" />,
+    wifi: <><path d="M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0M2 9a15 15 0 0 1 20 0" /><circle cx="12" cy="19.5" r="1" /></>,
+    bed: <><path d="M2 19V5M2 13h20v6M2 17h20" /><path d="M22 13v-1a3 3 0 0 0-3-3h-8v4" /><circle cx="6.5" cy="10.5" r="1.8" /></>,
+    bath: <><path d="M3 12h18v3a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5v-3Z" /><path d="M6 12V5a2 2 0 0 1 4 0M7 20l-1 2M17 20l1 2" /></>,
+    utensils: <><path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18" /><path d="M17 21V3c-2 1-3 4-3 7s1 4 3 4" /></>,
+    bell: <><path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4Z" /><path d="M10 21h4" /></>,
+    waves: <><path d="M2 8c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" />
+      <path d="M2 14c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2M2 20c2.5 0 2.5-2 5-2s2.5 2 5 2 2.5-2 5-2 2.5 2 5 2" /></>,
+    car: <><path d="M5 17H3v-5l2-5h14l2 5v5h-2M3 12h18M9.5 17h5" /><circle cx="7.5" cy="17" r="2" /><circle cx="16.5" cy="17" r="2" /></>,
+    briefcase: <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18" /></>,
+    accessibility: <><circle cx="12" cy="4.5" r="1.8" /><path d="m5 8.5 7 1.5 7-1.5M12 10v5l-3 6M12 15l3 6" /></>,
+    leaf: <path d="M5 21c0-9 5-15 15-16-1 10-7 15-15 16Zm0 0 8-8" />,
     bus: <><rect x="4" y="3" width="16" height="16" rx="2" /><path d="M4 11h16M8 19v2M16 19v2M8 7h8" /></>,
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;

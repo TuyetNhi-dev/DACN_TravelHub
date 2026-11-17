@@ -1,35 +1,55 @@
-/** Exact camelCase JSON contract of the TravelHub API. SQL NULL remains null. */
-export interface Tour {
-  tourId: string;
-  tenTour: string | null;
-  diemKhoiHanh: string | null;
-  diemDen: string | null;
-  soNgay: number | null;
-  soDem: number | null;
-  phuongTien: string | null;
-  giaNguoiLonVnd: number | null;
-  giaTreEmVnd: number | null;
-  diemThamQuan: string | null;
-  lichTrinhTomTat: string | null;
-  loaiDuLieu: string | null;
-  nguonThamKhao: string | null;
+/** Mirrors TravelHub.Api.Features.Tours DTOs. Dates are Vietnamese calendar days "yyyy-mm-dd". */
+export interface TourSummary {
+  id: string;
+  code: string;
+  title: string;
+  destination: string;
+  departureFrom: string | null;
+  durationDays: number;
+  durationNights: number;
+  transport: string | null;
+  basePrice: number;
+  description: string | null;
+  upcomingDepartureDates: string[];
+}
+
+export interface ItineraryDay {
+  dayNumber: number;
+  title: string;
+  description: string | null;
 }
 
 export interface TourDeparture {
-  departureId: string;
-  tourId: string;
-  ngayKhoiHanh: string | null;
-  soChoCon: number | null;
-  giaNguoiLonVnd: number | null;
-  trangThai: string | null;
+  id: string;
+  departureFrom: string;
+  departureDate: string;
+  returnDate: string;
+  capacity: number;
+  availableSeats: number;
+  adultPrice: number;
+  childPrice: number | null;
+  status: string;
+  isBookable: boolean;
 }
 
 export interface TourDetail {
-  tour: Tour;
+  tour: TourSummary;
+  itinerary: ItineraryDay[];
   departures: TourDeparture[];
 }
 
-export interface TourListResponse {
-  data: Tour[];
-  count: number;
+/** Mirrors TourCollectionDto: a seasonal or themed group of tours. */
+export interface TourCollection {
+  slug: string;
+  name: string;
+  tagline: string | null;
+  seasonLabel: string | null;
+  /** Place whose photos represent the collection. */
+  coverPlace: string | null;
+  tourCount: number;
+}
+
+export interface TourCollectionDetail {
+  collection: TourCollection;
+  tours: TourSummary[];
 }

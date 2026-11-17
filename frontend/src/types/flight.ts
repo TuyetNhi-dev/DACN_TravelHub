@@ -1,22 +1,30 @@
-export interface Flight {
+/** Mirrors TravelHub.Api.Features.Flights.FlightOfferDto. departAt/arriveAt are UTC ISO instants. */
+export interface FlightOffer {
   flightId: string;
-  soHieuDemo: string | null;
-  hangBayThamKhao: string | null;
-  maSanBayDi: string | null;
-  noiDi: string | null;
-  maSanBayDen: string | null;
-  noiDen: string | null;
-  ngayBay: string | null;
-  gioDi: string | null;
-  gioDen: string | null;
-  thoiGianPhut: number | null;
-  hangVe: string | null;
-  giaVnd: number | null;
-  soGheCon: number | null;
-  ghiChu: string | null;
-  nguonThamKhao: string | null;
+  offerId: string;
+  flightNumber: string;
+  airline: string;
+  airlineCode: string | null;
+  originCode: string;
+  originCity: string;
+  destinationCode: string;
+  destinationCity: string;
+  departAt: string;
+  arriveAt: string;
+  durationMinutes: number;
+  cabinClass: CabinClass;
+  referencePrice: number;
+  baggageTerms: string | null;
+  changeCancelTerms: string | null;
+  quoteExpiresAt: string | null;
 }
+
+export type CabinClass = "economy" | "premium_economy" | "business" | "first";
+
 export interface FlightSearch {
-  from: string; to: string; departure: string; returning: string;
-  roundTrip: boolean; passengers: number; cabin: string;
+  from: string;
+  to: string;
+  date: string;
+  passengers: number;
+  cabin: CabinClass;
 }

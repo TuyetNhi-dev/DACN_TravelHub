@@ -1,0 +1,188 @@
+/* Shared coastal treatment; all colors follow the light and dark theme tokens. */
+.header .contact-bar {
+  background: var(--footer-bg);
+}
+
+.header .header-search {
+  border-radius: 24px;
+}
+
+.header .nav-links > a.active::after {
+  background: var(--accent-sky);
+}
+
+body .btn {
+  border-radius: 24px;
+  min-height: 44px;
+}
+
+body .btn-primary:hover,
+body .search-submit:hover {
+  background: var(--blue-dark);
+}
+
+body .hero {
+  padding-top: 76px;
+  background: linear-gradient(155deg, var(--hero-start), var(--canvas) 74%);
+}
+
+body .hero-grid {
+  gap: 52px;
+}
+
+body .hero h1 {
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -2px;
+}
+
+body .hero h1 em {
+  font-weight: 600;
+  color: var(--blue);
+}
+
+body .hero-copy > p {
+  font-size: 16px;
+  line-height: 1.9;
+}
+
+body .kicker {
+  font-weight: 600;
+  letter-spacing: 2px;
+  line-height: 1.8;
+}
+
+body .hero-image-wrap {
+  border-radius: 48% 48% 16px 16px;
+  box-shadow: 0 24px 60px var(--image-shadow);
+}
+
+body .floating-card {
+  border-radius: 16px;
+  padding: 16px 18px;
+}
+
+body .search-box {
+  border-radius: 22px;
+  box-shadow: 0 18px 54px var(--search-shadow);
+}
+
+body .search-submit {
+  background: var(--brand);
+  border-radius: 28px;
+  min-height: 48px;
+}
+
+body .search-tabs button.selected {
+  color: var(--blue);
+}
+
+body .search-tabs button.selected::after {
+  background: var(--accent-sky);
+}
+
+body .section-head h2,
+body .why h2,
+body .promo h2 {
+  font-weight: 500;
+  letter-spacing: -0.8px;
+  line-height: 1.4;
+}
+
+body .destination {
+  border-radius: 80px 80px 16px 16px;
+  height: 320px;
+}
+
+body .tour-card,
+body .hotel-card,
+body .flight-card,
+body .tour-list-card {
+  box-shadow: 0 6px 24px var(--search-shadow);
+}
+
+body .benefit {
+  border: 0;
+  border-bottom: 1px solid var(--line);
+  border-radius: 0;
+  padding: 22px 0;
+}
+
+body .benefit > span {
+  border-radius: 50%;
+}
+
+body .promo {
+  border-radius: 24px;
+  padding-block: 56px;
+}
+
+body .promo-circle {
+  background: transparent;
+  border: 1px solid var(--text-on-promo);
+  color: var(--on-brand);
+  box-shadow: none;
+  transform: none;
+}
+
+body .auth-page {
+  background: linear-gradient(160deg, var(--hero-start), var(--canvas) 80%);
+}
+
+body .auth-card {
+  border-radius: 24px;
+  box-shadow: 0 16px 48px var(--search-shadow);
+}
+
+body footer {
+  padding-top: 72px;
+}
+
+:is(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 4px;
+}
+
+@media (max-width: 900px) {
+  body .hero-grid {
+    gap: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  body .hero {
+    padding-top: 36px;
+  }
+
+  body .hero h1 {
+    font-size: clamp(32px, 8.5vw, 42px);
+    letter-spacing: -1.2px;
+  }
+
+  body .hero-copy > p {
+    font-size: 14px;
+  }
+
+  body .kicker {
+    letter-spacing: 1.3px;
+    font-size: 10px;
+  }
+
+  body .floating-card {
+    padding: 10px 12px;
+  }
+
+  body .search-box {
+    border-radius: 20px;
+    margin-inline: 16px;
+  }
+
+  body .destination {
+    height: 240px;
+    border-radius: 60px 60px 12px 12px;
+  }
+
+  body .promo {
+    padding: 34px 28px;
+  }
+}

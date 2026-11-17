@@ -1,52 +1,39 @@
-/* eslint-disable @next/next/no-img-element -- Prototype illustration, explicitly labelled. */
-import { Icon } from "@/components/ui/Icon";
 import Link from "next/link";
-import { tourHref } from "@/lib/tour-display";
-import { photos } from "@/data/home";
-import type { Tour, TourDeparture } from "@/types/tour";
-import { formatCurrency } from "@/lib/format";
+import { Badge } from "@/components/ui/Badge";
+import { Card, MediaFrame } from "@/components/ui/Card";
+import { Icon } from "@/components/ui/Icon";
+import { PriceTag } from "@/components/ui/PriceTag";
+import { formatDate } from "@/lib/format";
+import { getTourImages } from "@/lib/media";
+import { tourDuration, tourHref } from "@/lib/tour-display";
+import type { TourSummary } from "@/types/tour";
 
-export interface TourCardProps {
-  tour: Tour;
-  departures: TourDeparture[] | null;
-}
+const CARD_SIZES = "(max-width: 640px) 85vw, (max-width: 1080px) 45vw, 380px";
 
-export function TourCard({ tour, departures }: TourCardProps) {
-  // The API has no image column. This is a generic illustration, not a tour photo.
-  const date = departures?.map(item => item.ngayKhoiHanh)
-    .filter((value): value is string => value !== null).sort()[0];
-  const duration = [
-    tour.soNgay !== null ? `${tour.soNgay} ngày` : null,
-    tour.soDem !== null ? `${tour.soDem} đêm` : null,
-  ].filter(Boolean).join(" ") || "Chưa có thời lượng";
+/** The whole card is one link (stretched title link) so it is a single tab stop. */
+export function TourCard({ tour }: { tour: TourSummary }) {
+  const nextDate = tour.upcomingDepartureDates[0];
   return (
-    <article className="tour-card">
-      <div className="tour-image">
-        <img src={photos.hero} alt="Ảnh du lịch minh họa, không phải ảnh riêng của tour" loading="lazy" />
-        {tour.loaiDuLieu && <span className="tag">{tour.loaiDuLieu}</span>}
-        <span className="tour-illustration-label">Ảnh minh họa</span>
-        <button className="heart" aria-label="Yêu thích sắp ra mắt" disabled><Icon name="heart" size={19} /></button>
-      </div>
-      <div className="tour-body">
-        <div className="eyebrow"><Icon name="map" size={15} />{tour.diemDen || "Chưa có điểm đến"}</div>
-        <h3>{tour.tenTour || "Tour chưa có tên"}</h3>
-        <div className="meta">
-          <span><Icon name="clock" size={16} />{duration}</span>
-          <span><Icon name="bus" size={16} />{tour.phuongTien || "Chưa có phương tiện"}</span>
-        </div>
-        <div className="rating"><Icon name="calendar" size={15} /><b>
-          {departures === null ? "Chưa tải được lịch khởi hành" :
-            date ? `Lịch đầu tiên: ${date.split("-").reverse().join("/")}` : "Chưa có lịch khởi hành"}
-        </b></div>
-        <div className="card-footer">
-          <div><small>Giá người lớn tham khảo</small><strong>
-            {formatCurrency(tour.giaNguoiLonVnd)}
-          </strong></div>
-          <Link className="btn btn-outline" href={tourHref(tour.tourId)}>Xem chi tiết</Link>
+    <Card className="tour-tile">
+      <MediaFrame image={getTourImages(tour)[0]} sizes={CARD_SIZES}>
+        <Badge tone="image">{tour.code}</Badge>
+        <Badge tone="image"><Icon name="clock" size={13} />{tourDuration(tour)}</Badge>
+      </MediaFrame>
+      <div className="tour-tile-body">
+        <span className="tour-tile-place"><Icon name="map" size={15} />{tour.destination}</span>
+        <h3><Link className="ui-stretched" href={tourHref(tour.id)}>{tour.title}</Link></h3>
+        <ul className="tour-tile-facts">
+          <li><Icon name="bus" size={15} />{tour.transport ?? "Phương tiện đang cập nhật"}</li>
+          <li>
+            <Icon name="calendar" size={15} />
+            {nextDate ? `Khởi hành ${formatDate(nextDate)}` : "Chưa có lịch mở bán"}
+          </li>
+        </ul>
+        <div className="tour-tile-foot">
+          <PriceTag prefix="Giá từ" amount={tour.basePrice} unit="/ khách" />
+          <span className="tour-tile-go" aria-hidden="true"><Icon name="arrow" size={18} /></span>
         </div>
       </div>
-    </article>
+    </Card>
   );
 }
-
-

@@ -1,24 +1,55 @@
-/** Existing ASP.NET public JSON contracts. Null means unknown, never zero stock. */
-export interface Hotel {
-  hotelId: string;
-  tenKhachSan: string | null;
-  thanhPho: string | null;
-  diaChi: string | null;
-  hangSaoDemo: number | null;
-  giaTuVndDem: number | null;
-  tienNghi: string | null;
-  ghiChu: string | null;
-  nguonThamKhao: string | null;
+/** Mirrors TravelHub.Api.Features.Hotels DTOs. Prices are partner references, never availability. */
+export interface HotelSummary {
+  id: string;
+  name: string;
+  city: string;
+  address: string | null;
+  starRating: number | null;
+  description: string | null;
+  referencePricePerNight: number | null;
 }
-export interface HotelRoom {
-  roomId: string;
-  hotelId: string;
-  loaiPhong: string | null;
-  sucChua: number | null;
-  giaVndDem: number | null;
-  soPhongCon: number | null;
-  loaiDuLieu: string | null;
+
+export interface RoomType {
+  id: string;
+  name: string;
+  maxGuests: number;
+  description: string | null;
+  referencePricePerNight: number | null;
+  offerTerms: string | null;
 }
-export interface HotelDetail { hotel: Hotel; rooms: HotelRoom[] }
-export type HotelSource = "api" | "demo";
-export interface Stay { checkIn: string; checkOut: string; guests: number; rooms: number }
+
+export interface HotelAmenity {
+  code: string;
+  name: string;
+  /** Stable group code, e.g. "wellness"; labels live in lib/hotel-amenities. */
+  category: string;
+  isHighlight: boolean;
+  /** Charged on top of the room price. */
+  isPaid: boolean;
+}
+
+export interface HotelPolicy {
+  type: string;
+  content: string;
+}
+
+export interface HouseRules {
+  /** "HH:mm" Vietnam time, null when the partner has not said. */
+  checkInFrom: string | null;
+  checkOutUntil: string | null;
+  policies: HotelPolicy[];
+}
+
+export interface HotelDetail {
+  hotel: HotelSummary;
+  roomTypes: RoomType[];
+  amenities: HotelAmenity[];
+  houseRules: HouseRules;
+}
+
+export interface Stay {
+  checkIn: string;
+  checkOut: string;
+  guests: number;
+  rooms: number;
+}

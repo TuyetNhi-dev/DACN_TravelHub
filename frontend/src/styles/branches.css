@@ -1,0 +1,81 @@
+/* Office directory (/branches): map on the left, scrolling list on the right. */
+.branch-page { padding: var(--space-12) 0 var(--space-16); background: var(--surface); }
+.branch-head { margin-bottom: var(--space-6); }
+.branch-head h1 { margin: 0 0 var(--space-2); color: var(--ink); font-size: clamp(1.9rem, 3vw + 1rem, 2.75rem); }
+.branch-head p { margin: 0; color: var(--muted); }
+
+.branch-filter { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-6); }
+.branch-filter button {
+  padding: 8px 16px; border: 1px solid var(--line); border-radius: var(--radius-pill);
+  background: var(--panel); color: var(--ink); font: inherit; font-weight: 600; cursor: pointer;
+  transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+}
+.branch-filter button:hover { border-color: var(--brand); }
+.branch-filter button[aria-pressed="true"] {
+  border-color: var(--brand); background: var(--brand); color: var(--on-brand);
+}
+
+.branch-layout {
+  --branch-height: 600px;
+  display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(320px, 1fr); gap: var(--space-6);
+  align-items: start;
+}
+.branch-map {
+  height: var(--branch-height); border: 1px solid var(--card-border); border-radius: var(--radius-lg);
+  overflow: hidden; box-shadow: var(--shadow-sm); z-index: 0; background: var(--panel);
+}
+
+.branch-list {
+  display: grid; gap: var(--space-4); max-height: var(--branch-height); margin: 0; padding: 0 var(--space-2) 0 0;
+  list-style: none; overflow-y: auto; overscroll-behavior: contain;
+}
+.branch-card {
+  display: flex; gap: var(--space-4); padding: var(--space-6); border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg); background: var(--panel); box-shadow: var(--shadow-sm);
+  transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+}
+.branch-card:hover { box-shadow: var(--shadow-md); }
+.branch-card.is-selected { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand-shadow), var(--shadow-md); }
+.branch-card-icon {
+  display: grid; flex: none; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: var(--surface); color: var(--muted);
+}
+.branch-card.is-selected .branch-card-icon { background: var(--brand); color: var(--on-brand); }
+.branch-card-body { min-width: 0; }
+.branch-card-region {
+  color: var(--brand); font-size: var(--text-caption); font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+}
+.branch-card h2 { margin: 2px 0 var(--space-1); color: var(--ink); font-size: 1.15rem; line-height: 1.35; }
+.branch-card h2 button {
+  padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
+}
+.branch-card h2 button:hover { color: var(--brand); }
+.branch-card-address { margin: 0 0 var(--space-3); color: var(--muted); }
+.branch-card-meta { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-4); font-size: .95rem; }
+.branch-card-meta > * { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); }
+.branch-card-meta a { color: var(--brand); font-weight: 600; text-decoration: none; }
+.branch-card-meta a:hover { text-decoration: underline; }
+
+/* Leaflet divIcon pin in brand colour; the active pin grows and sits on top. */
+.branch-pin { background: none; border: 0; }
+.branch-pin span {
+  position: absolute; inset: 0 0 auto; width: 30px; height: 30px; border: 3px solid #fff;
+  border-radius: 50% 50% 50% 0; background: var(--brand); box-shadow: 0 4px 10px rgb(0 0 0 / .3);
+  transform: rotate(-45deg); transform-origin: center;
+}
+.branch-pin span::after {
+  content: ""; position: absolute; inset: 7px; border-radius: 50%; background: #fff;
+}
+.branch-pin.is-active { z-index: 1000 !important; }
+.branch-pin.is-active span { background: var(--ink); transform: rotate(-45deg) scale(1.2); }
+.branch-popup { display: grid; gap: 4px; font-family: inherit; }
+.branch-popup strong { color: #142f3d; }
+.branch-popup span { color: #586f7a; }
+
+@media (max-width: 900px) {
+  .branch-page { padding-top: var(--space-8); }
+  .branch-layout { --branch-height: 360px; grid-template-columns: 1fr; }
+  .branch-list { max-height: none; padding: 0; overflow: visible; }
+  .branch-card { padding: var(--space-4); }
+}

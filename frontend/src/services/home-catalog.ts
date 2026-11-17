@@ -1,32 +1,25 @@
-import { apiGet, ApiError } from "@/lib/api-client";
+import { getUpcomingFlights } from "@/services/flights";
+import { getHotels } from "@/services/hotels";
+import type { FlightOffer } from "@/types/flight";
+import type { HotelSummary } from "@/types/hotel";
 
-export type CatalogKind = "hotel" | "flight";
-export interface CatalogItem {
-  id: string; title: string; location: string; price: number | null;
-  note: string | null; date: string | null; origin: string | null;
+const HOME_HOTELS = 4;
+const HOME_FLIGHTS = 6;
+
+/** Home teaser: hotels that have a partner reference price. Never implies a room is available. */
+export async function getHomeHotels(signal?: AbortSignal): Promise<HotelSummary[]> {
+  const hotels = await getHotels(signal);
+  return hotels.filter(hotel => hotel.referencePricePerNight !== null).slice(0, HOME_HOTELS);
 }
 
-/** Read existing public endpoints. Never replace a failed request with invented stock/prices. */
-export async function getHomeCatalog(kind: CatalogKind, signal?: AbortSignal): Promise<CatalogItem[]> {
-  const value = await apiGet(kind === "hotel" ? "/api/hotels" : "/api/flights", signal);
-  if (!value || typeof value !== "object" || !("data" in value) || !Array.isArray(value.data))
-    throw new ApiError("Dữ liệu dịch vụ chưa đúng định dạng.");
-  return value.data.map((row: unknown) => {
-    if (!row || typeof row !== "object") throw new ApiError("Dữ liệu dịch vụ chưa đúng định dạng.");
-    const r = row as Record<string, unknown>;
-    const str = (key: string) => {
-      if (r[key] === null) return null;
-      if (typeof r[key] !== "string") throw new ApiError("Dữ liệu dịch vụ chưa đúng định dạng.");
-      return r[key] as string;
-    };
-    const id = str(kind === "hotel" ? "hotelId" : "flightId");
-    const price = r[kind === "hotel" ? "giaTuVndDem" : "giaVnd"];
-    if (!id || (price !== null && (typeof price !== "number" || !Number.isSafeInteger(price) || price < 0)))
-      throw new ApiError("Dữ liệu dịch vụ chưa đúng định dạng.");
-    return { id, title: str(kind === "hotel" ? "tenKhachSan" : "hangBayThamKhao") || "Chưa có tên",
-      location: str(kind === "hotel" ? "thanhPho" : "noiDen") || "Chưa có điểm đến",
-      origin: kind === "flight" ? str("noiDi") : null,
-      date: kind === "flight" ? str("ngayBay") : null,
-      price: price as number | null, note: str("ghiChu") };
-  });
+/** Home teaser: one reference fare per route (the cheapest), so the strip shows different routes. */
+export async function getHomeFlights(signal?: AbortSignal): Promise<FlightOffer[]> {
+  const flights = await getUpcomingFlights(signal);
+  const cheapest = new Map<string, FlightOffer>();
+  for (const flight of flights) {
+    const route = `${flight.originCode}-${flight.destinationCode}`;
+    const current = cheapest.get(route);
+    if (!current || flight.referencePrice < current.referencePrice) cheapest.set(route, flight);
+  }
+  return [...cheapest.values()].slice(0, HOME_FLIGHTS);
 }
