@@ -2,6 +2,7 @@ using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Options;
+using TravelHub.Api.Common.Errors;
 using TravelHub.Api.Configuration;
 using TravelHub.Api.Features.Bookings;
 
@@ -18,11 +19,18 @@ public sealed class VnPayPaymentGateway(IOptions<VnPayOptions> options) : IPayme
     private static readonly TimeZoneInfo VietnamTz =
         TimeZoneInfo.FindSystemTimeZoneById("Asia/Ho_Chi_Minh");
 
+    /// <summary>Problem "code" returned when VNPAY is called without TmnCode/HashSecret configured.</summary>
+    public const string NotConfiguredCode = "vnpay_not_configured";
+    private const string NotConfiguredMessage = "Thanh toán VNPAY chưa được cấu hình. Vui lòng dùng thanh toán mô phỏng.";
+
     public string ProviderKey => PaymentProvider.VnPay;
 
     public GatewayInitResult CreatePaymentUrl(CreatePaymentUrlRequest request)
     {
         var opts = options.Value;
+        // Checked per call, not at startup: without secrets only simulated payment works.
+        if (!opts.IsConfigured)
+            throw new ApiException(StatusCodes.Status503ServiceUnavailable, NotConfiguredMessage, NotConfiguredCode);
         var txnRef = TxnRef(request.BookingCode, request.AttemptNumber);
         var createDate = ToVnDateTime(request.NowUtc);
         var expireDate = ToVnDateTime(request.HoldExpiresAtUtc);
@@ -53,6 +61,10 @@ public sealed class VnPayPaymentGateway(IOptions<VnPayOptions> options) : IPayme
 
     public GatewayVerifyResult VerifyCallback(IReadOnlyDictionary<string, string> callbackParams)
     {
+        // Never verify with an empty key: anyone could compute that signature.
+        if (!options.Value.IsConfigured)
+            return Fail(GetParam(callbackParams, "vnp_TransactionNo"), GetParam(callbackParams, "vnp_TxnRef"),
+                ParseAmount(callbackParams), "VNPAY chưa được cấu hình.");
         if (!callbackParams.TryGetValue("vnp_SecureHash", out var receivedHash))
             return Fail("", "", 0, "vnp_SecureHash vắng mặt.");
 

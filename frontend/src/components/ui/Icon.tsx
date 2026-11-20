@@ -3,7 +3,8 @@ export type IconName =
   | "search" | "map" | "calendar" | "users" | "plane" | "hotel" | "ticket"
   | "arrow" | "star" | "clock" | "shield" | "headphones" | "wallet" | "check"
   | "menu" | "close" | "minus" | "plus" | "chevron" | "heart" | "bus" | "eye" | "eyeOff"
-  | "wifi" | "bed" | "bath" | "utensils" | "bell" | "waves" | "car" | "briefcase" | "accessibility" | "leaf";
+  | "wifi" | "bed" | "bath" | "utensils" | "bell" | "waves" | "car" | "briefcase" | "accessibility" | "leaf"
+  | "passport";
 
 export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   const paths: Record<IconName, ReactNode> = {
@@ -41,7 +42,7 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
     accessibility: <><circle cx="12" cy="4.5" r="1.8" /><path d="m5 8.5 7 1.5 7-1.5M12 10v5l-3 6M12 15l3 6" /></>,
     leaf: <path d="M5 21c0-9 5-15 15-16-1 10-7 15-15 16Zm0 0 8-8" />,
     bus: <><rect x="4" y="3" width="16" height="16" rx="2" /><path d="M4 11h16M8 19v2M16 19v2M8 7h8" /></>,
-  };
+    passport: <><rect x="5" y="2" width="14" height="20" rx="2" /><circle cx="12" cy="10" r="3.5" /><path d="M8.5 10h7M12 6.5c-1.2 1-1.2 6 0 7M12 6.5c1.2 1 1.2 6 0 7M9 17h6" /></>,  };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 

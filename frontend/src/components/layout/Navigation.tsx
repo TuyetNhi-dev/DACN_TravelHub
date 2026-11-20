@@ -6,6 +6,7 @@ import { Icon } from "@/components/ui/Icon";
 import { navigation } from "@/data/home";
 import { ThemeToggle } from "./ThemeToggle";
 import { HeaderSearch } from "./HeaderSearch";
+import { ServicesMenu } from "./ServicesMenu";
 import { AuthActions } from "@/components/auth/AuthActions";
 
 /** The longest matching link wins, so /flights/deals marks "Săn vé rẻ" and not also "Vé máy bay". */
@@ -19,7 +20,8 @@ function activeHref(pathname: string): string | undefined {
 
 export function Navigation() {
   const [open, setOpen] = useState(false);
-  const current = activeHref(usePathname());
+  const pathname = usePathname();
+  const current = activeHref(pathname);
   return <>
     <nav id="main-navigation" aria-label="Điều hướng chính" className={open ? "nav-links open" : "nav-links"}>
       {navigation.map(item => (
@@ -28,6 +30,7 @@ export function Navigation() {
           {item.label}
         </Link>
       ))}
+      <ServicesMenu pathname={pathname} onNavigate={() => setOpen(false)} />
       <div className="mobile-auth"><AuthActions onNavigate={() => setOpen(false)} /></div>
     </nav>
     <HeaderSearch />

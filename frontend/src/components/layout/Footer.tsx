@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
+import { EXTRA_SERVICES, serviceHref } from "@/data/extra-services";
 import { Logo } from "./Logo";
 
 const HOTLINE = "1900 6886";
@@ -13,7 +14,11 @@ const COLUMNS = [
     { label: "Vé máy bay", href: "/flights" },
     { label: "Săn vé rẻ", href: "/flights/deals" },
     { label: "Hệ thống văn phòng", href: "/branches" },
+    { label: "Lịch âm dương", href: "/lich" },
   ] },
+  { title: "Dịch vụ cộng thêm", links: EXTRA_SERVICES.map(service => ({
+    label: service.name, href: serviceHref(service.slug),
+  })) },
   { title: "Tài khoản", links: [
     { label: "Đăng nhập", href: "/login" },
     { label: "Đăng ký", href: "/register" },

@@ -1,0 +1,158 @@
+/* Shared month calendar (lunar dates + holidays): /lich, tour departures, hotel stays. Theme tokens from tokens.css. */
+:root { --cal-official: #c62828; --cal-traditional: #b45309; --cal-official-bg: #fdecea; --cal-traditional-bg: #fff4e5; }
+:root[data-theme="dark"] {
+  --cal-official: #ff8a80; --cal-traditional: #fbbf24;
+  --cal-official-bg: rgba(255,138,128,.14); --cal-traditional-bg: rgba(251,191,36,.12);
+}
+
+.mc { display: grid; gap: 12px; }
+.mc-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.mc-nav p { margin: 0; font-weight: 600; font-size: 15px; text-align: center; }
+.mc-nav button { min-width: 40px; height: 40px; border: 1px solid var(--line); background: var(--panel); color: var(--blue);
+  border-radius: var(--radius-sm); font-size: 20px; cursor: pointer; }
+.mc-nav button:disabled { opacity: .4; cursor: not-allowed; }
+.mc-months { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.mc-month { width: 100%; min-width: 0 !important; border-collapse: separate !important; border-spacing: 3px;
+  table-layout: fixed; }
+.mc-month caption { font-weight: 600; font-size: 14px; color: var(--blue); padding-bottom: 6px; }
+.mc-month th { padding: 4px 0 !important; border: 0 !important; text-align: center; font-size: 11px; color: var(--muted);
+  background: none !important; }
+.mc-month th.is-sunday { color: var(--cal-official); }
+.mc-month td { padding: 0 !important; border: 0 !important; position: relative; }
+
+/* Fixed cell height per variant: rows line up across side-by-side months whatever a cell contains. */
+.mc { --mc-cell-h: 56px; }
+.mc--compact { --mc-cell-h: 44px; }
+.mc--details { --mc-cell-h: 76px; }
+.mc-day { position: relative; width: 100%; height: var(--mc-cell-h); display: flex; flex-direction: column;
+  align-items: center; justify-content: flex-start; gap: 1px; padding: 6px 2px; border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent;
+  color: var(--ink); font: inherit; cursor: pointer; }
+.mc-day:hover { border-color: var(--line-strong); background: var(--surface); }
+.mc-day:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; z-index: 2; }
+.mc-solar { font-size: 17px; font-weight: 600; line-height: 1.2; }
+.mc-lunar { font-size: 10px; color: var(--muted); line-height: 1.2; }
+.mc-lunar.is-first { color: var(--blue); font-weight: 600; }
+.mc-day.is-sunday .mc-solar { color: var(--cal-official); }
+/* Holiday marker: a corner dot, so it never changes the cell layout. */
+.mc-dot { position: absolute; top: 5px; right: 5px; width: 7px; height: 7px; border-radius: 50%; }
+.mc-dot.is-official { background: var(--cal-official); }
+.mc-dot.is-traditional { background: var(--cal-traditional); }
+.mc-day.is-selected .mc-dot { box-shadow: 0 0 0 1.5px var(--panel); }
+.mc-day.has-official .mc-solar { color: var(--cal-official); }
+.mc-day.is-today { border-color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+.mc-day.is-today .mc-solar { color: var(--brand); }
+.mc-day.is-in-range { background: var(--blue-soft); border-radius: 0; }
+.mc-day.is-selected { background: var(--blue); border-color: var(--blue); color: var(--on-brand); }
+.mc-day.is-selected .mc-solar, .mc-day.is-selected .mc-lunar, .mc-day.is-selected .mc-extra { color: var(--on-brand); }
+:root[data-theme="dark"] .mc-day.is-selected { color: var(--canvas); }
+:root[data-theme="dark"] .mc-day.is-selected :is(.mc-solar, .mc-lunar, .mc-extra) { color: var(--canvas); }
+.mc-day.is-highlighted:not(.is-selected) { border-color: var(--outline-border); background: var(--blue-soft); }
+.mc-day.is-muted { opacity: .45; }
+.mc-day.is-disabled { cursor: not-allowed; }
+.mc-day.is-disabled:not(.is-muted) .mc-solar { opacity: .55; }
+.mc-day.is-disabled:hover { background: transparent; border-color: transparent; }
+.mc-extra { display: grid; font-size: 10px; line-height: 1.25; color: var(--blue); font-weight: 600; }
+.mc-extra small { font-size: 9px; font-weight: 500; color: var(--muted); }
+
+/* Holiday name on hover, keyboard focus or tap (a tap focuses the button). */
+.mc-tip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); z-index: 5;
+  display: none; flex-direction: column; gap: 2px; width: max-content; max-width: 200px; padding: 6px 10px;
+  border-radius: 8px; background: var(--panel); border: 1px solid var(--line-strong); box-shadow: var(--shadow-md);
+  font-size: 12px; line-height: 1.4; text-align: left; white-space: normal; pointer-events: none; }
+.mc-tip .is-official { color: var(--cal-official); font-weight: 600; }
+.mc-tip .is-traditional { color: var(--cal-traditional); font-weight: 600; }
+.mc-day:hover .mc-tip, .mc-day:focus .mc-tip { display: flex; }
+.mc-day[data-col="0"] .mc-tip { left: 0; transform: none; }
+.mc-day[data-col="6"] .mc-tip { left: auto; right: 0; transform: none; }
+
+.mc-nights { margin: 0; font-size: 13px; font-weight: 600; color: var(--blue); }
+.mc-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: 12px;
+  color: var(--muted); }
+.mc-legend li { display: flex; align-items: center; gap: 6px; }
+.mc-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.mc-legend i.is-official, .mc-legend i.is-traditional { border-radius: 50%; width: 8px; height: 8px; }
+.mc-legend i.is-official { background: var(--cal-official); }
+.mc-legend i.is-traditional { background: var(--cal-traditional); }
+.mc-legend i.is-today { border: 2px solid var(--brand); }
+.mc-legend i.is-departure { background: var(--blue-soft); border: 1px solid var(--outline-border); }
+.mc-legend i.is-soldout { background: var(--line); opacity: .6; }
+
+.mc--compact .mc-day { padding: 4px 1px; gap: 0; }
+.mc--compact .mc-solar { font-size: 14px; }
+.mc--compact .mc-lunar { font-size: 9px; }
+.mc--compact .mc-dot { top: 3px; right: 3px; width: 6px; height: 6px; }
+.mc--compact .mc-month caption { display: none; }
+
+@media (max-width: 560px) {
+  .mc { --mc-cell-h: 50px; }
+  .mc--compact { --mc-cell-h: 42px; }
+  .mc--details { --mc-cell-h: 70px; }
+  .mc-day { padding: 4px 0; }
+  .mc-solar { font-size: 15px; }
+  .mc-dot { top: 3px; right: 3px; width: 6px; height: 6px; }
+  .mc-extra { font-size: 9px; }
+}
+
+/* ---------- Home: "Lên lịch cho chuyến đi" ---------- */
+.home-planner { padding-block: 40px 8px; }
+.home-planner-card { display: grid; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); gap: 32px; align-items: start;
+  background: var(--panel); border: 1px solid var(--card-border); border-radius: var(--radius-lg); padding: 28px;
+  box-shadow: var(--shadow-sm); }
+.home-planner-calendar { display: grid; gap: 12px; }
+.home-planner-calendar .btn { justify-self: start; }
+.home-planner-side { display: grid; gap: 16px; min-width: 0; }
+.home-planner-side h2 { font-size: var(--text-h3); margin: 4px 0 0; }
+.home-planner-side > p { margin: 0; color: var(--muted); font-size: var(--text-small); }
+.home-holidays { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.home-holiday { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: 16px; align-items: center;
+  padding: 14px 16px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); }
+.home-holiday-date { display: grid; justify-items: center; padding: 8px 4px; border-radius: var(--radius-sm);
+  background: var(--panel); border: 1px solid var(--line); line-height: 1.1; }
+.home-holiday-date b { font-size: 22px; }
+.home-holiday-date small { font-size: 11px; color: var(--muted); }
+.home-holiday.is-official .home-holiday-date b { color: var(--cal-official); }
+.home-holiday.is-traditional .home-holiday-date b { color: var(--cal-traditional); }
+.home-holiday-info { display: grid; gap: 3px; min-width: 0; }
+.home-holiday-info h3 { margin: 0; font-size: 15px; font-weight: 600; }
+.home-holiday-info p { margin: 0; font-size: 12px; color: var(--muted); }
+.home-holiday-kind { justify-self: start; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-pill); }
+.home-holiday.is-official .home-holiday-kind { color: var(--cal-official); background: var(--cal-official-bg); }
+.home-holiday.is-traditional .home-holiday-kind { color: var(--cal-traditional); background: var(--cal-traditional-bg); }
+.home-holiday-actions { display: grid; justify-items: end; gap: 6px; }
+.home-holiday-left { font-size: 13px; font-weight: 700; color: var(--blue); white-space: nowrap; }
+@media (max-width: 900px) {
+  .home-planner-card { grid-template-columns: minmax(0, 1fr); padding: 20px; gap: 24px; }
+}
+@media (max-width: 560px) {
+  .home-planner { padding-top: 28px; }
+  .home-holiday { grid-template-columns: 56px minmax(0, 1fr); gap: 12px; padding: 12px; }
+  .home-holiday-actions { grid-column: 1 / -1; grid-auto-flow: column; justify-content: space-between;
+    align-items: center; }
+}
+
+/* ---------- /lich page ---------- */
+.lich-page { padding: 32px 0 72px; background: var(--surface); }
+.lich-head h1 { font-size: var(--text-h1); line-height: 1.25; margin: 6px 0 8px; }
+.lich-head p { margin: 0; color: var(--muted); }
+.lich-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 24px; align-items: start; margin-top: 24px; }
+.lich-card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius-md); padding: 20px; }
+.lich-side { display: grid; gap: 16px; }
+.lich-side h2 { font-size: 17px; margin: 0 0 12px; }
+.lich-day-big { display: flex; align-items: baseline; gap: 12px; }
+.lich-day-big strong { font-size: 44px; line-height: 1; color: var(--blue); }
+.lich-day-big span { color: var(--muted); }
+.lich-facts { display: grid; gap: 6px; margin: 12px 0 0; font-size: 14px; }
+.lich-facts dt { color: var(--muted); font-size: 12px; }
+.lich-facts dd { margin: 0 0 6px; font-weight: 600; }
+.lich-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.lich-list li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; font-size: 13px; }
+.lich-list time { font-weight: 600; }
+.lich-list small { display: block; color: var(--muted); font-size: 11px; }
+.lich-list .is-official b { color: var(--cal-official); }
+.lich-list .is-traditional b { color: var(--cal-traditional); }
+.lich-note { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
+@media (max-width: 900px) { .lich-layout { grid-template-columns: minmax(0, 1fr); } }
+
+/* ---------- Tour departure calendar ---------- */
+.tour-calendar { margin-bottom: 18px; }
+.tour-calendar-hint { font-size: 12px; color: var(--muted); margin: 8px 0 0; }

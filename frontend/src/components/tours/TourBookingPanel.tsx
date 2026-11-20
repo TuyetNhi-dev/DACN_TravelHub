@@ -15,7 +15,14 @@ import { seatLabel, tourEstimate } from "@/lib/tour-display";
 import { createTourBooking } from "@/services/bookings";
 import type { TourDeparture } from "@/types/tour";
 
-export function TourBookingPanel({ departures }: { departures: TourDeparture[] }) {
+interface TourBookingPanelProps {
+  departures: TourDeparture[];
+  /** Chosen departure, shared with the departure calendar on the page. */
+  departureId: string | null;
+  onDepartureChange: (departureId: string) => void;
+}
+
+export function TourBookingPanel({ departures, departureId, onDepartureChange }: TourBookingPanelProps) {
   const bookable = departures.filter(departure => departure.isBookable);
   const { session, loading } = useAuth();
   if (bookable.length === 0) {
@@ -28,11 +35,10 @@ export function TourBookingPanel({ departures }: { departures: TourDeparture[] }
   }
   if (loading) return <p role="status">Đang kiểm tra phiên đăng nhập…</p>;
   if (!session) return <LoginPrompt action="giữ chỗ tour" />;
-  return <TourBookingForm departures={bookable} />;
+  return <TourBookingForm departures={bookable} departureId={departureId} onDepartureChange={onDepartureChange} />;
 }
 
-function TourBookingForm({ departures }: { departures: TourDeparture[] }) {
-  const [departureId, setDepartureId] = useState(departures[0].id);
+function TourBookingForm({ departures, departureId, onDepartureChange }: TourBookingPanelProps) {
   const [adults, setAdults] = useState(1);
   const [children, setChildren] = useState(0);
   const [passengers, setPassengers] = useState(() => emptyPassengers(1, 0));
@@ -62,7 +68,7 @@ function TourBookingForm({ departures }: { departures: TourDeparture[] }) {
     <form className="sh-form" onSubmit={handleSubmit} aria-describedby="tour-booking-note">
       <label className="sh-field">
         Ngày khởi hành
-        <select value={departure.id} onChange={event => setDepartureId(event.target.value)}>
+        <select value={departure.id} onChange={event => onDepartureChange(event.target.value)}>
           {departures.map(item => (
             <option key={item.id} value={item.id}>
               {formatDate(item.departureDate)} · {item.departureFrom} · {seatLabel(item)}

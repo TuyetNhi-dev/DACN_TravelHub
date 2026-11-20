@@ -1,10 +1,13 @@
+using System.Net;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using TravelHub.Api.Common.Errors;
 using TravelHub.Api.Features.Auth;
 using TravelHub.Api.Features.Bookings;
+using TravelHub.Api.Features.ServiceRequests;
 
 namespace TravelHub.Api.Configuration;
 
@@ -12,9 +15,12 @@ public static class SecurityRegistration
 {
     private const int AuthRequestsPerMinute = 20;
     private const int BookingsPerMinute = 10;
+    private const int ServiceRequestsPerWindow = 5;
+    private static readonly TimeSpan ServiceRequestWindow = TimeSpan.FromMinutes(10);
 
     public static IServiceCollection AddTravelHubSecurity(this IServiceCollection services, IHostEnvironment env)
     {
+        ConfigureForwardedHeaders(services);
         // Plain HTTP is allowed only for local development; everywhere else cookies require HTTPS.
         var securePolicy = env.IsDevelopment() ? CookieSecurePolicy.SameAsRequest : CookieSecurePolicy.Always;
         services.AddSingleton<IPasswordHasher<string>, PasswordHasher<string>>();
@@ -63,13 +69,32 @@ public static class SecurityRegistration
         options.AddPolicy(AuthOptions.RateLimitPolicy, context => FixedWindow(ClientIp(context), AuthRequestsPerMinute));
         options.AddPolicy(BookingEndpoints.CreateRateLimitPolicy, context => FixedWindow(
             context.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? ClientIp(context), BookingsPerMinute));
+        options.AddPolicy(ServiceRequestEndpoints.CreateRateLimitPolicy, context => FixedWindow(
+            ClientIp(context), ServiceRequestsPerWindow, ServiceRequestWindow));
     }
 
-    private static RateLimitPartition<string> FixedWindow(string key, int permits) =>
+    /// <summary>
+    /// Browsers reach the API through the Next.js proxy, so without this every client shares the proxy's IP and
+    /// per-IP rate limits become one global limit. X-Forwarded-For is trusted ONLY from loopback (the Next.js
+    /// server on the same machine); anyone else sending the header cannot change their apparent IP.
+    /// Deploying with the proxy on another host requires adding its address to KnownProxies (ROADMAP, week 10).
+    /// </summary>
+    private static void ConfigureForwardedHeaders(IServiceCollection services) =>
+        services.Configure<ForwardedHeadersOptions>(options =>
+        {
+            options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
+            options.ForwardLimit = 1;
+            options.KnownIPNetworks.Clear();
+            options.KnownProxies.Clear();
+            options.KnownProxies.Add(IPAddress.Loopback);
+            options.KnownProxies.Add(IPAddress.IPv6Loopback);
+        });
+
+    private static RateLimitPartition<string> FixedWindow(string key, int permits, TimeSpan? window = null) =>
         RateLimitPartition.GetFixedWindowLimiter(key, _ => new FixedWindowRateLimiterOptions
         {
             PermitLimit = permits,
-            Window = TimeSpan.FromMinutes(1),
+            Window = window ?? TimeSpan.FromMinutes(1),
             QueueLimit = 0,
         });
 

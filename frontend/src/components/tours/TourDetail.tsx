@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { Gallery } from "@/components/ui/Gallery";
 import { Icon } from "@/components/ui/Icon";
@@ -12,6 +13,7 @@ import { getTour } from "@/services/tours";
 import type { TourDetail as Detail } from "@/types/tour";
 import { DepartureTable } from "./DepartureTable";
 import { TourBookingPanel } from "./TourBookingPanel";
+import { TourDepartureCalendar } from "./TourDepartureCalendar";
 
 export function TourDetail({ id }: { id: string }) {
   const { state, retry } = useResource(`tour:${id}`, signal => getTour(id, signal));
@@ -29,6 +31,9 @@ export function TourDetail({ id }: { id: string }) {
 }
 
 function TourDetailContent({ detail: { tour, itinerary, departures } }: { detail: Detail }) {
+  // Shared by the departure calendar and the booking panel's dropdown so both always agree.
+  const [departureId, setDepartureId] = useState<string | null>(
+    () => departures.find(departure => departure.isBookable)?.id ?? null);
   return (
     <>
       <div className="container detail-breadcrumb">
@@ -71,6 +76,9 @@ function TourDetailContent({ detail: { tour, itinerary, departures } }: { detail
           </section>
           <section>
             <h2>Lịch khởi hành</h2>
+            {departures.length > 0 && (
+              <TourDepartureCalendar departures={departures} selectedId={departureId} onSelect={setDepartureId} />
+            )}
             <DepartureTable departures={departures} />
           </section>
           <section>
@@ -85,7 +93,7 @@ function TourDetailContent({ detail: { tour, itinerary, departures } }: { detail
         <aside className="detail-booking" aria-label="Đặt tour">
           <span className="kicker">ĐẶT TOUR</span>
           <h2>Chọn lịch &amp; số khách</h2>
-          <TourBookingPanel departures={departures} />
+          <TourBookingPanel departures={departures} departureId={departureId} onDepartureChange={setDepartureId} />
         </aside>
       </div>
     </>

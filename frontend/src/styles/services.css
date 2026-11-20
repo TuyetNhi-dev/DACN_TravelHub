@@ -1,0 +1,112 @@
+/* "Dịch vụ cộng thêm": service pages, consultation form, icon tiles (shared with the header menu). */
+
+/* Icon tile tones: a pale background with a darker icon, readable in both themes. */
+.svc-tone--sky { --tone-bg: #e3f3fb; --tone-fg: #0b6f9c; }
+.svc-tone--green { --tone-bg: #e2f6ee; --tone-fg: #127a52; }
+.svc-tone--amber { --tone-bg: #fdf1dc; --tone-fg: #9a5a00; }
+.svc-tone--violet { --tone-bg: #eeeafd; --tone-fg: #5b45b5; }
+.svc-tone--rose { --tone-bg: #fce8f2; --tone-fg: #a8226e; }
+:root[data-theme="dark"] .svc-tone--sky { --tone-bg: rgba(112,205,243,.16); --tone-fg: #8fd8f5; }
+:root[data-theme="dark"] .svc-tone--green { --tone-bg: rgba(76,216,160,.16); --tone-fg: #6fe0b3; }
+:root[data-theme="dark"] .svc-tone--amber { --tone-bg: rgba(251,191,36,.16); --tone-fg: #fbcb5c; }
+:root[data-theme="dark"] .svc-tone--violet { --tone-bg: rgba(167,150,255,.18); --tone-fg: #c4b8ff; }
+:root[data-theme="dark"] .svc-tone--rose { --tone-bg: rgba(239,144,197,.16); --tone-fg: #f3a8d2; }
+.svc-tile { display: inline-grid; place-items: center; flex-shrink: 0; width: 56px; height: 56px;
+  border-radius: var(--radius-md); background: var(--tone-bg); color: var(--tone-fg); }
+
+/* ---------- Page ---------- */
+.svc-page { background: var(--surface); padding-bottom: 72px; }
+.svc-hero { background: linear-gradient(135deg, var(--hero-start), var(--surface)); border-bottom: 1px solid var(--line);
+  padding: 28px 0 32px; }
+.svc-hero-title { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
+.svc-hero-title .ui-eyebrow { margin-bottom: 4px; }
+.svc-hero h1 { margin: 0; font-size: var(--text-h1); line-height: 1.2; }
+.svc-lead { max-width: 720px; margin: 14px 0 0; color: var(--text-secondary); font-size: 16px; line-height: 1.7; }
+
+.svc-layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 28px; align-items: start; padding-top: 28px; }
+.svc-content { display: grid; gap: 18px; min-width: 0; }
+.svc-content > section { background: var(--panel); border: 1px solid var(--card-border); border-radius: var(--radius-md);
+  padding: 24px; }
+.svc-content h2 { font-size: 20px; margin: 0 0 14px; }
+.svc-content section > p { margin: 0 0 12px; color: var(--text-secondary); line-height: 1.8; }
+.svc-content section > p:last-child { margin-bottom: 0; }
+.svc-highlights { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px; }
+.svc-highlights li { display: flex; gap: 12px; align-items: flex-start; padding: 14px; border-radius: var(--radius-sm);
+  background: var(--surface); }
+.svc-highlights h3 { margin: 0 0 4px; font-size: 15px; }
+.svc-highlights p { margin: 0; font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+.svc-check { display: grid; place-items: center; flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--tone-bg); color: var(--tone-fg); }
+.svc-faq { display: grid; gap: 10px; }
+.svc-faq details { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--panel); }
+.svc-faq summary { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px;
+  cursor: pointer; font-weight: 600; list-style: none; }
+.svc-faq summary::-webkit-details-marker { display: none; }
+.svc-faq summary svg { flex-shrink: 0; color: var(--blue); transition: transform var(--duration-fast) ease; }
+.svc-faq details[open] summary svg { transform: rotate(90deg); }
+.svc-faq summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: var(--radius-sm); }
+.svc-faq details p { margin: 0; padding: 0 16px 16px; color: var(--text-secondary); line-height: 1.7; }
+
+/* Form sticks while the content scrolls on desktop; it follows the content on small screens. */
+.svc-aside { position: sticky; top: 110px; max-height: calc(100dvh - 130px); overflow: hidden auto;
+  background: var(--panel); border: 1px solid var(--card-border); border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm); padding: 22px; }
+
+/* ---------- Form ---------- */
+.svc-form { display: grid; gap: 18px; }
+.svc-form-head h2 { margin: 0 0 4px; font-size: 20px; }
+.svc-form-head p { margin: 0; font-size: 13px; color: var(--muted); }
+.svc-form fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 12px; min-width: 0; }
+.svc-form legend { padding: 0; margin-bottom: 10px; font-size: 13px; font-weight: 700; color: var(--blue);
+  text-transform: uppercase; letter-spacing: .04em; }
+.svc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.svc-grid-wide { grid-column: 1 / -1; }
+.svc-field { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.svc-field label { font-size: 13px; font-weight: 600; color: var(--text-control); }
+.svc-field label small { font-weight: 400; color: var(--muted); }
+.svc-required { color: var(--blue-dark); }
+.svc-field :is(input, select, textarea) { width: 100%; min-width: 0; border: 1px solid var(--line-strong); border-radius: 10px;
+  padding: 10px 12px; background: var(--panel); color: var(--ink); font: inherit; font-size: 14px; }
+.svc-field textarea { resize: vertical; }
+.svc-field :is(input, select, textarea):focus-visible { outline: 3px solid var(--blue-soft); border-color: var(--blue); }
+.svc-field.has-error :is(input, select, textarea) { border-color: var(--blue-dark); }
+.svc-hint { font-size: 12px; color: var(--muted); }
+.svc-field-error { margin: 0; font-size: 12px; font-weight: 600; color: var(--blue-dark); }
+.svc-privacy { display: flex; align-items: center; gap: 8px; margin: 0; padding: 8px 12px; border-radius: 10px;
+  background: var(--warning-bg); color: var(--ink); font-size: 13px; font-weight: 600; }
+.svc-privacy svg { color: var(--accent-warm); flex-shrink: 0; }
+.svc-consent { display: grid; gap: 6px; }
+.svc-consent.has-error .sh-check input { outline: 2px solid var(--blue-dark); outline-offset: 2px; }
+.svc-submit { width: 100%; justify-content: center; }
+.svc-submit:disabled { opacity: .7; cursor: progress; }
+
+/* Clipped, not display:none: invisible to people, still in the DOM for bots to fill in (aria-hidden + tabIndex -1
+   keep it away from screen readers and keyboard users). No negative offset, so the scrolling form box gets no
+   horizontal scrollbar. */
+.svc-honeypot { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; opacity: 0; pointer-events: none; }
+
+.svc-success { display: grid; justify-items: center; gap: 10px; text-align: center; padding: 12px 4px; }
+.svc-success h2 { margin: 6px 0 0; font-size: 20px; }
+.svc-success h2:focus { outline: none; }
+.svc-success p { margin: 0; color: var(--text-secondary); }
+.svc-success-icon { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%;
+  background: var(--success-bg); color: var(--green); }
+.svc-code { font-size: 24px; letter-spacing: .08em; color: var(--blue); font-variant-numeric: tabular-nums;
+  padding: 8px 16px; border: 1px dashed var(--outline-border); border-radius: 10px; background: var(--blue-soft); }
+.svc-success .sh-state-actions { justify-content: center; margin-top: 6px; }
+
+@media (max-width: 1000px) {
+  .svc-layout { grid-template-columns: minmax(0, 1fr) 360px; gap: 20px; }
+  .svc-highlights { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 860px) {
+  .svc-layout { grid-template-columns: minmax(0, 1fr); }
+  .svc-aside { position: static; max-height: none; overflow: visible; }
+}
+@media (max-width: 480px) {
+  .svc-grid { grid-template-columns: minmax(0, 1fr); }
+  .svc-content > section, .svc-aside { padding: 18px; }
+  .svc-tile { width: 48px; height: 48px; }
+}

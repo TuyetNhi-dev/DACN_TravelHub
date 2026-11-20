@@ -36,6 +36,7 @@
 | 6.5 | VNPAY Part D — nút VNPAY trong PaymentPanel, trang `/payment/result` | `PaymentPanel.tsx`, `payment/result/page.tsx` | ⬜ |
 | 6.6 | Email xác nhận sau khi tạo đơn tour (hold) | `BookingService.cs`, `BookingConfirmationEmail.cs` | ⬜ |
 | 6.7 | Email xác nhận sau khi thanh toán (confirmed) | `BookingPaymentService.cs`, `BookingReceiptEmail.cs` | ⬜ |
+| 6.8 | Dịch vụ cộng thêm (vé tham quan, thuê xe, visa, tour đoàn): menu, trang `/dich-vu/<slug>`, form yêu cầu tư vấn không cần đăng nhập, quản trị `/admin/service-requests`. Migration 012 (viết file, chưa chạy) | `Features/ServiceRequests/`, `012_service_requests.sql`, `components/services/` | 🔄 A (backend) xong; B–D đang làm |
 
 ---
 
@@ -89,6 +90,7 @@
 | 10.2 | AI tóm tắt đánh giá tour (nếu có rating) | Claude API, 1 prompt, cache |
 | 10.3 | docker-compose: MySQL 8 local thay cho Aiven | `docker-compose.yml`, `.env.example` |
 | 10.4 | **Chuyển DB khỏi Aiven free tier trước 21/12** | Export → import MySQL local/cloud khác |
+| 10.5 | **Deploy: cấu hình lại `KnownProxies`** — backend chỉ tin `X-Forwarded-For` từ loopback (Next.js cùng máy). Nếu proxy/Next.js/load balancer nằm ở máy khác, thêm IP của nó vào `ForwardedHeadersOptions.KnownProxies`; nếu không, rate limit theo IP sẽ gộp mọi khách thành một IP | `SecurityRegistration.cs` (`ConfigureForwardedHeaders`) |
 
 ---
 

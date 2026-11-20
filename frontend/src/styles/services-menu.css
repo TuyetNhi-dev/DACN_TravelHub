@@ -1,0 +1,53 @@
+/* "Dịch vụ cộng thêm" header menu. Desktop (>= 1220px): dropdown panel. Hamburger panel (<= 1219px): an
+   expandable group in the link column. Icon tile colours (.svc-tone--*) come from services.css. */
+.svc-menu { position: relative; height: 100%; display: flex; align-items: center; }
+.svc-menu-trigger { position: relative; height: 100%; display: flex; align-items: center; gap: 4px; padding: 0;
+  border: 0; background: none; color: var(--text-secondary); font: inherit; font-size: 14px; font-weight: 500;
+  white-space: nowrap; cursor: pointer; }
+.svc-menu-trigger:hover, .svc-menu.is-open .svc-menu-trigger, .svc-menu-trigger.active { color: var(--blue); }
+.svc-menu-trigger.active::after { position: absolute; content: ""; height: 2px; left: 0; right: 0; bottom: 0;
+  background: var(--brand); }
+.svc-menu-trigger:focus-visible { outline: 2px solid var(--blue); outline-offset: 4px; border-radius: 4px; }
+.svc-menu-trigger svg { transform: rotate(90deg); transition: transform var(--duration-fast) ease; }
+.svc-menu.is-open .svc-menu-trigger svg { transform: rotate(-90deg); }
+.svc-menu-label-short { display: none; }
+
+/* Overlaps the trigger by a few pixels so the pointer never leaves the menu on its way down. */
+.svc-menu-panel { position: absolute; top: calc(100% - 10px); left: 50%; transform: translateX(-50%); z-index: 60;
+  width: 380px; padding: 8px; border: 1px solid var(--line); border-radius: var(--radius-md);
+  background: var(--panel); box-shadow: var(--shadow-lg); }
+.svc-menu-panel[hidden] { display: none; }
+.svc-menu-panel ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.svc-menu-link { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: var(--radius-sm);
+  color: var(--ink); text-decoration: none; }
+.svc-menu-link:hover { background: var(--surface); }
+.svc-menu-link:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; background: var(--surface); }
+.svc-menu-link.is-current { background: var(--blue-soft); }
+.svc-menu-link.is-current b { color: var(--blue); }
+.svc-menu-tile { width: 40px; height: 40px; border-radius: 12px; }
+.svc-menu-text { display: grid; gap: 2px; min-width: 0; }
+.svc-menu-text b { font-size: 14px; font-weight: 600; }
+.svc-menu-text small { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* The desktop header starts at 1220px, the narrowest width where the sign-in buttons fit on one line
+   (measured with Edge headless); the search box shrinks instead of the buttons wrapping. */
+.header .nav-actions { flex-shrink: 0; }
+.header .nav-actions :is(a, button) { white-space: nowrap; }
+
+/* Narrow desktop header: short label (the full name stays the accessible name via aria-label). */
+@media (min-width: 1220px) and (max-width: 1280px) {
+  .svc-menu-label-full { display: none; }
+  .svc-menu-label-short { display: inline; }
+}
+
+@media (max-width: 1219px) {
+  .svc-menu { height: auto; display: block; }
+  .svc-menu-trigger { width: 100%; height: auto; justify-content: space-between; padding: 14px 2px; font-size: 14px; }
+  .svc-menu-trigger.active::after { display: none; }
+  .svc-menu-panel { position: static; transform: none; width: auto; padding: 0 0 8px; border: 0; box-shadow: none;
+    background: transparent; }
+  .svc-menu-link { padding: 8px 6px; }
+  .svc-menu-tile { width: 36px; height: 36px; }
+}
+
+@media (prefers-reduced-motion: reduce) { .svc-menu-trigger svg { transition: none; } }
