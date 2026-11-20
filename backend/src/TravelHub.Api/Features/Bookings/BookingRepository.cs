@@ -83,6 +83,30 @@ public sealed class BookingRepository(MySqlConnectionFactory connections)
         return row with { Passengers = await ListPassengersAsync(connection, bookingId, ct) };
     }
 
+    /// <summary>Looks up the internal booking ID from the human-readable booking_code.</summary>
+    public async Task<ulong?> FindIdByCodeAsync(string code, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand(
+            "SELECT id FROM bookings WHERE booking_code = @code", connection);
+        command.Parameters.AddWithValue("@code", code);
+        var result = await command.ExecuteScalarAsync(ct);
+        return result is null or DBNull ? null : Convert.ToUInt64(result);
+    }
+
+    /// <summary>
+    /// Counts all payment rows (any status) for a booking.
+    /// Used to generate monotonically increasing vnp_TxnRef attempt numbers.
+    /// </summary>
+    public async Task<int> CountPaymentAttemptsAsync(ulong bookingId, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand(
+            "SELECT COUNT(*) FROM payments WHERE booking_id = @id", connection);
+        command.Parameters.AddWithValue("@id", bookingId);
+        return Convert.ToInt32(await command.ExecuteScalarAsync(ct));
+    }
+
     /// <summary>Unpaid seat holds (tours and flight deals) whose deadline has passed, oldest first.</summary>
     public async Task<IReadOnlyList<ulong>> ListExpiredHoldsAsync(DateTime nowUtc, CancellationToken ct)
     {

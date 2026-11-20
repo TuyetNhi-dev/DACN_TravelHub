@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using MySqlConnector;
 using TravelHub.Api.Data;
 
@@ -303,7 +304,7 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
             """);
         command.Parameters.AddWithValue("@booking", bookingId);
         command.Parameters.AddWithValue("@provider", PaymentProvider.Simulated);
-        var transactionId = PaymentProvider.TransactionPrefix + Guid.NewGuid().ToString("N");
+        var transactionId = PaymentProvider.SimulatedTransactionPrefix + Guid.NewGuid().ToString("N");
         command.Parameters.AddWithValue("@transaction", transactionId);
         command.Parameters.AddWithValue("@key", idempotencyKey);
         command.Parameters.AddWithValue("@amount", amount);
@@ -322,8 +323,7 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
 
     public async Task<bool> HasPaymentAsync(ulong bookingId, string idempotencyKey, CancellationToken ct)
     {
-        await using var command = Command(
-            """
+        await using var command = Command("""
             SELECT COUNT(*) FROM payments
             WHERE booking_id = @booking AND idempotency_key = @key AND status = @status
             """);
@@ -332,6 +332,56 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
         command.Parameters.AddWithValue("@status", PaymentStatus.Succeeded);
         return Convert.ToInt64(await command.ExecuteScalarAsync(ct)) > 0;
     }
+
+    /// <summary>
+    /// Returns true when ANY payment row (any status) exists for this idempotency key.
+    /// Used for VNPAY idempotency: a failed or refund_needed row also stops re-processing.
+    /// </summary>
+    public async Task<bool> HasPaymentByKeyAsync(string idempotencyKey, CancellationToken ct)
+    {
+        await using var command = Command(
+            "SELECT COUNT(*) FROM payments WHERE idempotency_key = @key");
+        command.Parameters.AddWithValue("@key", idempotencyKey);
+        return Convert.ToInt64(await command.ExecuteScalarAsync(ct)) > 0;
+    }
+
+    /// <summary>
+    /// Records a VNPAY payment result (succeeded, failed, or refund_needed).
+    /// Returns false when idempotency_key already exists (concurrent or duplicate IPN).
+    /// Requires migration 011 (gateway_meta column) to have been applied.
+    /// </summary>
+    public async Task<bool> TryInsertGatewayPaymentAsync(ulong bookingId, decimal amount,
+        string idempotencyKey, string providerTransactionId, string status,
+        IDictionary<string, string>? gatewayMeta, DateTime nowUtc, CancellationToken ct)
+    {
+        await using var command = Command("""
+            INSERT INTO payments (booking_id, provider, provider_transaction_id, idempotency_key,
+                amount, currency, gateway_meta, status, paid_at)
+            VALUES (@booking, @provider, @txnNo, @key, @amount, 'VND', @meta, @status, @paidAt)
+            """);
+        command.Parameters.AddWithValue("@booking", bookingId);
+        command.Parameters.AddWithValue("@provider", PaymentProvider.VnPay);
+        command.Parameters.AddWithValue("@txnNo", providerTransactionId);
+        command.Parameters.AddWithValue("@key", idempotencyKey);
+        command.Parameters.AddWithValue("@amount", amount);
+        command.Parameters.AddWithValue("@meta",
+            gatewayMeta is null ? null : JsonSerializer.Serialize(gatewayMeta, GatewayMetaJson));
+        command.Parameters.AddWithValue("@status", status);
+        command.Parameters.AddWithValue("@paidAt",
+            status == PaymentStatus.Succeeded ? nowUtc : (DateTime?)null);
+        try
+        {
+            await command.ExecuteNonQueryAsync(ct);
+            return true;
+        }
+        catch (MySqlException ex) when (ex.Number == DuplicateKeyError)
+        {
+            return false;
+        }
+    }
+
+    private static readonly JsonSerializerOptions GatewayMetaJson =
+        new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
 
     public Task CommitAsync(CancellationToken ct) => transaction.CommitAsync(ct);
 
