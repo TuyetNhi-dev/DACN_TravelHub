@@ -51,16 +51,22 @@ public static class BookingItemStatus
     public static string InitialFor(bool holdsSeats) => holdsSeats ? Pending : AwaitingSupplier;
 }
 
-/// <summary>Simulated payment until the VNPAY sandbox is integrated.</summary>
 public static class PaymentProvider
 {
     public const string Simulated = "simulated";
-    public const string TransactionPrefix = "SIM-";
+    public const string VnPay = "vnpay";
+    public const string SimulatedTransactionPrefix = "SIM-";
 }
 
 public static class PaymentStatus
 {
     public const string Succeeded = "succeeded";
+    public const string Failed = "failed";
+    /// <summary>
+    /// VNPAY collected money but the hold had already expired and seats were released.
+    /// Requires manual refund via the VNPAY merchant dashboard.
+    /// </summary>
+    public const string RefundNeeded = "refund_needed";
 }
 
 public static class PassengerType

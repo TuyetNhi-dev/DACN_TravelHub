@@ -54,8 +54,24 @@ public sealed record BookingDetailDto(
     bool CanCancel,
     bool CanPay);
 
-/// <summary>IdempotencyKey lets a retried pay request return the same result instead of paying twice.</summary>
-public sealed record PayBookingRequest(string? IdempotencyKey);
+/// <summary>
+/// IdempotencyKey lets a retried simulated-pay request return the same result instead of paying twice.
+/// Gateway selects the payment method: "vnpay" redirects to VNPAY; anything else uses the simulated flow.
+/// </summary>
+public sealed record PayBookingRequest(string? IdempotencyKey, string? Gateway);
+
+/// <summary>
+/// Discriminated response from POST /api/bookings/{id}/pay.
+/// Type "confirmed": simulated payment succeeded inline; Booking is non-null.
+/// Type "redirect": VNPAY gateway requires a browser redirect; RedirectUrl is non-null.
+/// </summary>
+public sealed record PayBookingResponse(string Type, BookingDetailDto? Booking, string? RedirectUrl)
+{
+    public static PayBookingResponse Confirmed(BookingDetailDto booking) =>
+        new("confirmed", booking, null);
+    public static PayBookingResponse Redirect(string url) =>
+        new("redirect", null, url);
+}
 
 /// <summary>
 /// Frozen at order time in booking_items.price_snapshot so later catalogue edits never change an order.

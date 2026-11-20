@@ -2,15 +2,21 @@ using System.Text.RegularExpressions;
 using TravelHub.Api.Common.Errors;
 using TravelHub.Api.Common.Http;
 using TravelHub.Api.Common.Time;
+using TravelHub.Api.Features.Payments;
 
 namespace TravelHub.Api.Features.Bookings;
 
 /// <summary>
-/// Simulated payment and tour hold expiry. Every check runs on the order row locked FOR UPDATE, so a payment
-/// and the expiry job can never both win, and seats are released at most once.
+/// Payment flows (simulated and VNPAY) and tour hold expiry.
+/// Every state change runs on the order row locked FOR UPDATE so the expiry job and a payment
+/// can never both win, and seats are released exactly once.
 /// </summary>
-public sealed partial class BookingPaymentService(BookingRepository repository, BookingService bookings,
-    VietnamClock clock, ILogger<BookingPaymentService> logger)
+public sealed partial class BookingPaymentService(
+    BookingRepository repository,
+    BookingService bookings,
+    VietnamClock clock,
+    ILogger<BookingPaymentService> logger,
+    VnPayPaymentGateway vnPayGateway)
 {
     public const string HoldExpiredCode = "hold_expired";
 
@@ -63,6 +69,113 @@ public sealed partial class BookingPaymentService(BookingRepository repository, 
         }
         return cancelled;
     }
+
+    // -------------------------------------------------------------------------
+    // VNPAY flows
+    // -------------------------------------------------------------------------
+
+    /// <summary>
+    /// Phase 1 — generates a VNPAY payment URL and returns a redirect response.
+    /// No state is changed; the booking transitions to confirmed only after the IPN or verify-return.
+    /// </summary>
+    public async Task<PayBookingResponse> InitiateVnPayAsync(ulong customerId, string rawId,
+        string clientIpAddress, CancellationToken ct)
+    {
+        var now = clock.UtcNow;
+        var detail = await bookings.GetForCustomerAsync(customerId, rawId, ct);
+        if (!detail.CanPay)
+            throw ApiException.Conflict(detail.HoldExpiresAt <= now
+                ? "Đã hết thời gian giữ chỗ. Vui lòng đặt lại."
+                : "Đơn không ở trạng thái chờ thanh toán.");
+
+        var bookingId = ResourceId.Parse(rawId, "id");
+        var attempt = await repository.CountPaymentAttemptsAsync(bookingId, ct) + 1;
+        var orderInfo = $"Thanh toan tour {detail.Code}";
+        var urlRequest = new CreatePaymentUrlRequest(
+            detail.Code, attempt, (long)detail.Total, orderInfo,
+            now, detail.HoldExpiresAt!.Value, clientIpAddress);
+
+        var result = vnPayGateway.CreatePaymentUrl(urlRequest);
+        logger.LogInformation("VNPAY payment URL created for booking {BookingId}, attempt {Attempt}",
+            bookingId, attempt);
+        return PayBookingResponse.Redirect(result.RedirectUrl!);
+    }
+
+    /// <summary>
+    /// Phase 2 — called from the IPN handler or verify-return endpoint after VNPAY confirms payment.
+    /// Idempotent: calling twice with the same TxnRef returns the same outcome.
+    /// </summary>
+    public async Task<VnPayConfirmResult> ConfirmVnPayAsync(
+        string txnRef, string transactionNo, long amountVnd,
+        string responseCode, IDictionary<string, string> rawCallback, CancellationToken ct)
+    {
+        var bookingCode = VnPayPaymentGateway.BookingCodeFromTxnRef(txnRef);
+        var bookingId = await repository.FindIdByCodeAsync(bookingCode, ct);
+        if (bookingId is null)
+        {
+            logger.LogWarning("VNPAY IPN for unknown booking code {Code}", bookingCode);
+            return new VnPayConfirmResult(VnPayConfirmOutcome.BookingNotPayable, null);
+        }
+
+        await using var session = await repository.BeginWriteAsync(ct);
+        var item = await session.LockItemAsync(bookingId.Value, ct);
+        if (item is null)
+            return new VnPayConfirmResult(VnPayConfirmOutcome.BookingNotPayable, null);
+
+        var alreadyProcessed = await session.HasPaymentByKeyAsync(txnRef, ct);
+        var outcome = VnPayConfirmDecision.Evaluate(item, amountVnd, alreadyProcessed);
+
+        switch (outcome)
+        {
+            case VnPayConfirmOutcome.AlreadyProcessed:
+                await session.CommitAsync(ct);
+                return new VnPayConfirmResult(outcome, await LoadBookingDetailAsync(bookingId.Value, ct));
+
+            case VnPayConfirmOutcome.Confirm:
+                await session.TryInsertGatewayPaymentAsync(bookingId.Value, item.Total, txnRef,
+                    transactionNo, PaymentStatus.Succeeded, rawCallback, clock.UtcNow, ct);
+                await BookingLifecycle.TransitionAsync(session, item, BookingItemStatus.Confirmed, null, ct);
+                await session.CommitAsync(ct);
+                logger.LogInformation("VNPAY booking {BookingId} confirmed, TxnRef {TxnRef}", bookingId, txnRef);
+                return new VnPayConfirmResult(outcome, await LoadBookingDetailAsync(bookingId.Value, ct));
+
+            case VnPayConfirmOutcome.RefundNeeded:
+                // Job cancelled the booking; VNPAY still charged the customer. Record for manual refund.
+                await session.TryInsertGatewayPaymentAsync(bookingId.Value, item.Total, txnRef,
+                    transactionNo, PaymentStatus.RefundNeeded, rawCallback, clock.UtcNow, ct);
+                await session.CommitAsync(ct);
+                logger.LogWarning(
+                    "VNPAY collected money for already-cancelled booking {BookingId}, TxnRef {TxnRef}. Manual refund required.",
+                    bookingId, txnRef);
+                return new VnPayConfirmResult(outcome, null);
+
+            case VnPayConfirmOutcome.AmountMismatch:
+                await session.TryInsertGatewayPaymentAsync(bookingId.Value, amountVnd, txnRef,
+                    transactionNo, PaymentStatus.Failed, rawCallback, clock.UtcNow, ct);
+                await session.CommitAsync(ct);
+                logger.LogError(
+                    "VNPAY amount mismatch for booking {BookingId}: expected {Expected} VND, received {Actual} VND, TxnRef {TxnRef}",
+                    bookingId, item.Total, amountVnd, txnRef);
+                return new VnPayConfirmResult(outcome, null);
+
+            default:
+                logger.LogWarning("VNPAY callback for booking {BookingId} in unexpected status {Status}",
+                    bookingId, item.Status);
+                return new VnPayConfirmResult(outcome, null);
+        }
+    }
+
+    private async Task<BookingDetailDto?> LoadBookingDetailAsync(ulong bookingId, CancellationToken ct)
+    {
+        var row = await repository.FindDetailAsync(bookingId, ct);
+        if (row is null) return null;
+        var summary = row.Summary;
+        var holdsSeats = BookingLifecycle.HoldsSeats(summary.ServiceType, summary.HoldExpiresAt);
+        var canPay = BookingLifecycle.CanPay(holdsSeats, summary.ItemStatus, summary.HoldExpiresAt, clock.UtcNow);
+        return BookingMapper.ToDetail(row, canCancel: false, canPay, includeCustomer: false);
+    }
+
+    // -------------------------------------------------------------------------
 
     private async Task ReleaseExpiredAsync(BookingWriteSession session, LockedItem item, CancellationToken ct)
     {
