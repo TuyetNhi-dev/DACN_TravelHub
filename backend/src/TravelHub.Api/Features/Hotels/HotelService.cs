@@ -9,6 +9,14 @@ public sealed class HotelService(HotelRepository repository, VietnamClock clock)
     public Task<IReadOnlyList<HotelSummaryDto>> ListAsync(CancellationToken ct) =>
         repository.ListActiveAsync(clock.Today, ct);
 
+    public async Task<(IReadOnlyList<HotelSummaryDto> Rows, int Total)> ListPagedAsync(
+        int page, int pageSize, CancellationToken ct)
+    {
+        var total = await repository.CountActiveAsync(ct);
+        var rows = await repository.ListActivePagedAsync(clock.Today, (page - 1) * pageSize, pageSize, ct);
+        return (rows, total);
+    }
+
     public async Task<HotelDetailDto> GetAsync(string rawId, CancellationToken ct)
     {
         var id = ResourceId.Parse(rawId, "id");

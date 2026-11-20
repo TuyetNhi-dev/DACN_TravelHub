@@ -8,8 +8,8 @@ const HOME_FLIGHTS = 6;
 
 /** Home teaser: hotels that have a partner reference price. Never implies a room is available. */
 export async function getHomeHotels(signal?: AbortSignal): Promise<HotelSummary[]> {
-  const hotels = await getHotels(signal);
-  return hotels.filter(hotel => hotel.referencePricePerNight !== null).slice(0, HOME_HOTELS);
+  const { items } = await getHotels({}, signal);
+  return items.filter(hotel => hotel.referencePricePerNight !== null).slice(0, HOME_HOTELS);
 }
 
 /** Home teaser: one reference fare per route (the cheapest), so the strip shows different routes. */

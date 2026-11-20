@@ -9,6 +9,14 @@ public sealed class TourService(TourRepository repository, VietnamClock clock)
     public Task<IReadOnlyList<TourSummaryDto>> ListAsync(CancellationToken ct) =>
         repository.ListPublishedAsync(clock.Today, ct);
 
+    public async Task<(IReadOnlyList<TourSummaryDto> Rows, int Total)> ListPagedAsync(
+        int page, int pageSize, CancellationToken ct)
+    {
+        var total = await repository.CountPublishedAsync(ct);
+        var rows = await repository.ListPublishedPagedAsync(clock.Today, (page - 1) * pageSize, pageSize, ct);
+        return (rows, total);
+    }
+
     public async Task<TourDetailDto> GetAsync(string rawId, CancellationToken ct)
     {
         var id = ResourceId.Parse(rawId, "id");

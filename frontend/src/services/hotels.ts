@@ -1,6 +1,6 @@
 import { apiGet } from "@/lib/api-client";
 import {
-  bool, invalid, isRecord, itemEnvelope, list, listEnvelope, num, optNum, optStr, str, type Row,
+  bool, invalid, isRecord, itemEnvelope, list, num, optNum, optStr, pagedListEnvelope, str, type Row,
 } from "@/lib/decode";
 import type { HotelAmenity, HotelDetail, HotelPolicy, HotelSummary, HouseRules, RoomType } from "@/types/hotel";
 
@@ -60,8 +60,15 @@ export function decodeHotelDetail(row: Row): HotelDetail {
   };
 }
 
-export async function getHotels(signal?: AbortSignal): Promise<HotelSummary[]> {
-  return listEnvelope(await apiGet("/api/hotels", signal), decodeHotel, RESOURCE);
+export async function getHotels(
+  params?: { page?: number; pageSize?: number },
+  signal?: AbortSignal,
+): Promise<{ items: HotelSummary[]; total: number }> {
+  const query = new URLSearchParams();
+  if (params?.page) query.set("page", String(params.page));
+  if (params?.pageSize) query.set("pageSize", String(params.pageSize));
+  const qs = query.size ? "?" + query : "";
+  return pagedListEnvelope(await apiGet("/api/hotels" + qs, signal), decodeHotel, RESOURCE);
 }
 
 export async function getHotel(id: string, signal?: AbortSignal): Promise<HotelDetail> {

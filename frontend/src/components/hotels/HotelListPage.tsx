@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useCallback, useState, type FormEvent } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { QuoteNotice } from "@/components/ui/QuoteNotice";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateMessage";
@@ -12,15 +12,17 @@ import type { HotelSummary, Stay } from "@/types/hotel";
 import { HotelCard } from "./HotelCard";
 import { StayFields } from "./StayFields";
 
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 12;
 const STAR_OPTIONS = [5, 4, 3, 2];
 
 export function HotelListPage({ initialStay, initialQuery }: { initialStay: Stay; initialQuery: string }) {
-  const { state, retry } = useResource("hotels", getHotels);
+  const loader = useCallback((signal: AbortSignal) => getHotels({ page: 1, pageSize: PAGE_SIZE }, signal), []);
+  const { state, retry, replace } = useResource("hotels", loader);
   const [stay, setStay] = useState(initialStay);
   const [query, setQuery] = useState(initialQuery);
   const [applied, setApplied] = useState({ stay: initialStay, query: initialQuery });
   const [error, setError] = useState<string | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   function search(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -31,6 +33,16 @@ export function HotelListPage({ initialStay, initialQuery }: { initialStay: Stay
     const params = stayParams(stay);
     if (query.trim()) params.set("q", query.trim());
     window.history.replaceState(null, "", "/hotels?" + params);
+  }
+
+  async function loadMore(currentItems: HotelSummary[], nextPage: number) {
+    setLoadingMore(true);
+    try {
+      const { items, total } = await getHotels({ page: nextPage, pageSize: PAGE_SIZE });
+      replace({ items: [...currentItems, ...items], total });
+    } finally {
+      setLoadingMore(false);
+    }
   }
 
   return (
@@ -54,21 +66,34 @@ export function HotelListPage({ initialStay, initialQuery }: { initialStay: Stay
         {state.status === "loading" && <LoadingState label="Đang tải danh sách khách sạn…" />}
         {state.status === "error" && <ErrorState error={state.error} onRetry={retry} />}
         {state.status === "ready" && (
-          <HotelResults key={applied.query} hotels={state.data} stay={applied.stay} query={applied.query} />
+          <HotelResults key={applied.query} hotels={state.data.items} total={state.data.total}
+            stay={applied.stay} query={applied.query} loadingMore={loadingMore}
+            onLoadMore={() => {
+              const nextPage = Math.ceil(state.data.items.length / PAGE_SIZE) + 1;
+              void loadMore(state.data.items, nextPage);
+            }} />
         )}
       </div>
     </main>
   );
 }
 
-function HotelResults({ hotels, stay, query }: { hotels: HotelSummary[]; stay: Stay; query: string }) {
+interface HotelResultsProps {
+  hotels: HotelSummary[];
+  total: number;
+  stay: Stay;
+  query: string;
+  loadingMore: boolean;
+  onLoadMore: () => void;
+}
+
+function HotelResults({ hotels, total, stay, query, loadingMore, onLoadMore }: HotelResultsProps) {
   const [filters, setFilters] = useState<HotelFilters>({ ...EMPTY_HOTEL_FILTERS, query });
-  const [limit, setLimit] = useState(PAGE_SIZE);
   const rows = filterHotels(hotels, filters);
+  const hasMore = hotels.length < total;
 
   function change<K extends keyof HotelFilters>(key: K, value: HotelFilters[K]) {
     setFilters(current => ({ ...current, [key]: value }));
-    setLimit(PAGE_SIZE);
   }
 
   return (
@@ -93,7 +118,10 @@ function HotelResults({ hotels, stay, query }: { hotels: HotelSummary[]; stay: S
       </aside>
       <section aria-label="Kết quả khách sạn" className="sh-hotel-results">
         <div className="sh-hotel-results-head">
-          <div><h2>Chọn nơi bạn muốn đến</h2><p role="status">{rows.length} khách sạn phù hợp</p></div>
+          <div>
+            <h2>Chọn nơi bạn muốn đến</h2>
+            <p role="status">{rows.length} khách sạn phù hợp{hasMore && ` (đang hiển thị ${hotels.length}/${total})`}</p>
+          </div>
           <label>
             Sắp xếp
             <select value={filters.sort} onChange={event => change("sort", event.target.value as HotelSort)}>
@@ -111,11 +139,11 @@ function HotelResults({ hotels, stay, query }: { hotels: HotelSummary[]; stay: S
         ) : (
           <>
             <div className="sh-hotel-cards">
-              {rows.slice(0, limit).map(hotel => <HotelCard key={hotel.id} hotel={hotel} stay={stay} />)}
+              {rows.map(hotel => <HotelCard key={hotel.id} hotel={hotel} stay={stay} />)}
             </div>
-            {limit < rows.length && (
-              <button className="btn btn-outline sh-hotel-more" onClick={() => setLimit(value => value + PAGE_SIZE)}>
-                Xem thêm khách sạn
+            {hasMore && (
+              <button className="btn btn-outline sh-hotel-more" onClick={onLoadMore} disabled={loadingMore}>
+                {loadingMore ? "Đang tải…" : "Xem thêm khách sạn"}
               </button>
             )}
           </>

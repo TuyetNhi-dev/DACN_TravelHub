@@ -18,18 +18,27 @@ export function stayNights(stay: Pick<Stay, "checkIn" | "checkOut">): number {
   return start === null || end === null || end <= start ? 0 : (end - start) / DAY_MS;
 }
 
+function datesValid(stay: Pick<Stay, "checkIn" | "checkOut">): boolean {
+  return dayValue(stay.checkIn) !== null && dayValue(stay.checkOut) !== null;
+}
+
+function roomCountValid(rooms: number): boolean {
+  return Number.isInteger(rooms) && rooms >= 1 && rooms <= MAX_ROOMS;
+}
+
+function guestCountValid(guests: number, rooms: number): boolean {
+  return Number.isInteger(guests) && guests >= rooms && guests <= MAX_GUESTS;
+}
+
 /** Mirrors BookingRequestValidator.Hotel on the server so users see problems before submitting. */
 export function validateStay(stay: Stay, today = vietnamToday()): string | null {
-  if (dayValue(stay.checkIn) === null || dayValue(stay.checkOut) === null)
-    return "Vui lòng chọn ngày nhận và trả phòng.";
+  if (!datesValid(stay)) return "Vui lòng chọn ngày nhận và trả phòng.";
   if (stay.checkIn < today) return "Ngày nhận phòng không được ở trong quá khứ.";
   const nights = stayNights(stay);
   if (!nights) return "Ngày trả phòng phải sau ngày nhận phòng.";
   if (nights > MAX_NIGHTS) return `Mỗi lần đặt tối đa ${MAX_NIGHTS} đêm.`;
-  if (!Number.isInteger(stay.rooms) || stay.rooms < 1 || stay.rooms > MAX_ROOMS)
-    return `Số phòng từ 1 đến ${MAX_ROOMS}.`;
-  if (!Number.isInteger(stay.guests) || stay.guests < stay.rooms || stay.guests > MAX_GUESTS)
-    return "Mỗi phòng cần ít nhất một khách.";
+  if (!roomCountValid(stay.rooms)) return `Số phòng từ 1 đến ${MAX_ROOMS}.`;
+  if (!guestCountValid(stay.guests, stay.rooms)) return "Mỗi phòng cần ít nhất một khách.";
   return null;
 }
 

@@ -23,6 +23,24 @@ public sealed class HotelRepository(MySqlConnectionFactory connections)
         return await command.ReadAllAsync(ReadSummary, ct);
     }
 
+    public async Task<int> CountActiveAsync(CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand("SELECT COUNT(*) FROM hotels WHERE status = 'active'", connection);
+        return Convert.ToInt32(await command.ExecuteScalarAsync(ct));
+    }
+
+    public async Task<IReadOnlyList<HotelSummaryDto>> ListActivePagedAsync(
+        DateOnly today, int offset, int limit, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand(SummarySelect + " ORDER BY h.id LIMIT @limit OFFSET @offset", connection);
+        command.Parameters.AddWithValue("@today", today);
+        command.Parameters.AddWithValue("@limit", limit);
+        command.Parameters.AddWithValue("@offset", offset);
+        return await command.ReadAllAsync(ReadSummary, ct);
+    }
+
     public async Task<HotelSummaryDto?> FindActiveAsync(ulong id, DateOnly today, CancellationToken ct)
     {
         await using var connection = await connections.OpenAsync(ct);
