@@ -32,6 +32,24 @@ public sealed class TourRepository(MySqlConnectionFactory connections)
         return await command.ReadAllAsync(ReadSummary, ct);
     }
 
+    public async Task<int> CountPublishedAsync(CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand("SELECT COUNT(*) FROM tours WHERE status = 'published'", connection);
+        return Convert.ToInt32(await command.ExecuteScalarAsync(ct));
+    }
+
+    public async Task<IReadOnlyList<TourSummaryDto>> ListPublishedPagedAsync(
+        DateOnly today, int offset, int limit, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand(SummarySelect + " ORDER BY t.id LIMIT @limit OFFSET @offset", connection);
+        command.Parameters.AddWithValue("@today", today);
+        command.Parameters.AddWithValue("@limit", limit);
+        command.Parameters.AddWithValue("@offset", offset);
+        return await command.ReadAllAsync(ReadSummary, ct);
+    }
+
     /// <summary>Published tours of one collection, in the collection's own order.</summary>
     public async Task<IReadOnlyList<TourSummaryDto>> ListByCollectionAsync(ulong collectionId, DateOnly today,
         CancellationToken ct)

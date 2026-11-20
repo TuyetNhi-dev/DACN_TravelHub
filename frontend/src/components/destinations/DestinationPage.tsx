@@ -28,11 +28,11 @@ export interface PlaceServices {
 /** Everything SàiHành sells in one city: tours, hotels, flights there, seasonal ideas and offices. */
 export function DestinationPage({ slug }: { slug: string }) {
   const tours = useResource("tours", getTours);
-  const hotels = useResource("hotels", getHotels);
+  const hotels = useResource("hotels", signal => getHotels({}, signal));
   const flights = useResource("flights:upcoming", getUpcomingFlights);
   const lists = {
     tours: tours.state.status === "ready" ? tours.state.data : [],
-    hotels: hotels.state.status === "ready" ? hotels.state.data : [],
+    hotels: hotels.state.status === "ready" ? hotels.state.data.items : [],
     flights: flights.state.status === "ready" ? flights.state.data : [],
   };
   const settled = [tours.state, hotels.state, flights.state].every(state => state.status !== "loading");

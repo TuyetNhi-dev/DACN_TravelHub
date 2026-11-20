@@ -7,8 +7,15 @@ public static class TourEndpoints
     public static void MapTourEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/tours").WithTags("Tours");
-        group.MapGet("/", async (TourService service, CancellationToken ct) =>
-            Results.Ok(ListResponse<TourSummaryDto>.From(await service.ListAsync(ct))));
+        group.MapGet("/", async (int? page, int? pageSize, TourService service, CancellationToken ct) =>
+        {
+            if (page is null && pageSize is null)
+                return Results.Ok(ListResponse<TourSummaryDto>.From(await service.ListAsync(ct)));
+            var p = Math.Max(1, page ?? 1);
+            var size = Math.Clamp(pageSize ?? 20, 1, 200);
+            var (rows, total) = await service.ListPagedAsync(p, size, ct);
+            return Results.Ok(ListResponse<TourSummaryDto>.Paged(rows, total));
+        });
         group.MapGet("/{id}", async (string id, TourService service, CancellationToken ct) =>
             Results.Ok(new ItemResponse<TourDetailDto>(await service.GetAsync(id, ct))));
 

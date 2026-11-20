@@ -65,6 +65,18 @@ export function listEnvelope<T>(value: unknown, item: (row: Row) => T, resource:
   return list(value.data, item, resource);
 }
 
+/** Unwraps a paginated { data, count, total } envelope, returning items and the full total. */
+export function pagedListEnvelope<T>(
+  value: unknown, item: (row: Row) => T, resource: string,
+): { items: T[]; total: number } {
+  if (!isRecord(value) || value.count !== (Array.isArray(value.data) ? value.data.length : -1))
+    return invalid(resource);
+  const total = typeof value.total === "number" && Number.isFinite(value.total)
+    ? value.total
+    : (value.data as unknown[]).length;
+  return { items: list(value.data, item, resource), total };
+}
+
 /** Unwraps the backend's { data } item envelope. */
 export function itemEnvelope<T>(value: unknown, item: (row: Row) => T, resource: string): T {
   return isRecord(value) && isRecord(value.data) ? item(value.data) : invalid(resource);
