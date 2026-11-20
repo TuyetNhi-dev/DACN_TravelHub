@@ -107,7 +107,7 @@
 .cta-band-actions { display: flex; flex-wrap: wrap; gap: 12px; }
 
 /* ---------- Footer ---------- */
-.site-footer-grid { display: grid; grid-template-columns: 1.6fr repeat(3, 1fr); gap: 48px; padding-bottom: 40px; }
+.site-footer-grid { display: grid; grid-template-columns: 1.5fr repeat(4, 1fr); gap: 36px; padding-bottom: 40px; }
 .site-footer-grid > * { display: flex; flex-direction: column; gap: 12px; }
 .site-footer-grid b { color: var(--on-brand); font-size: 14px; margin-bottom: 4px; }
 .site-footer-grid a, .site-footer-grid span, .site-footer-brand p { color: var(--footer-muted); font-size: 14px;

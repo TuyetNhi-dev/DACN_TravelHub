@@ -7,6 +7,7 @@ import { HomeCollections } from "@/components/home/HomeCollections";
 import { HomePromises } from "@/components/home/HomePromises";
 import { HomeSearch } from "@/components/home/HomeSearch";
 import { HomeToursProvider } from "@/components/home/HomeToursProvider";
+import { HomeTripPlanner } from "@/components/home/HomeTripPlanner";
 import { HotelHighlights } from "@/components/home/HotelHighlights";
 import { TourNeeds } from "@/components/home/TourNeeds";
 import { QUOTE_LABEL } from "@/components/ui/PriceTag";
@@ -20,6 +21,7 @@ export default function Home() {
         <HeroBanner />
         <div className="container search-wrap" id="home-search"><HomeSearch /></div>
       </section>
+      <HomeTripPlanner />
       <HomeCollections />
 
       <HomeToursProvider>

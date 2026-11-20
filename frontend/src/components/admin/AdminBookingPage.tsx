@@ -6,6 +6,7 @@ import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useResource } from "@/hooks/useResource";
 import { getAdminBooking } from "@/services/admin";
 import { AdminBookingActions } from "./AdminBookingActions";
+import { AdminNav } from "./AdminNav";
 import { OperatorGate } from "./OperatorGate";
 
 export function AdminBookingPage({ bookingId }: { bookingId: string }) {
@@ -15,7 +16,10 @@ export function AdminBookingPage({ bookingId }: { bookingId: string }) {
         <Breadcrumb items={[{ label: "Quản trị đơn", href: "/admin/bookings" }, { label: "Chi tiết đơn" }]} />
         <h1>Xử lý đơn đặt chỗ</h1>
       </div>
-      <OperatorGate><AdminBookingDetail bookingId={bookingId} /></OperatorGate>
+      <OperatorGate>
+        <AdminNav current="bookings" />
+        <AdminBookingDetail bookingId={bookingId} />
+      </OperatorGate>
     </main>
   );
 }

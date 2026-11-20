@@ -28,6 +28,9 @@ export function AccountPanel() {
           <div className="sh-actions">
             <Link className="btn btn-primary" href="/bookings">Đơn của tôi</Link>
             {isOperator(session.user) && <Link className="btn btn-outline" href="/admin/bookings">Quản trị đơn</Link>}
+            {isOperator(session.user) && (
+              <Link className="btn btn-outline" href="/admin/service-requests">Yêu cầu tư vấn</Link>
+            )}
             <AuthActions />
           </div>
         </section>

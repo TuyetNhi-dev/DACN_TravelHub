@@ -9,6 +9,7 @@ import { ITEM_STATUS_OPTIONS, SERVICE_LABELS } from "@/lib/booking-rules";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
 import { getAdminBookings, type AdminBookingFilter } from "@/services/admin";
 import type { BookingItemStatus, BookingSummary, ServiceType } from "@/types/booking";
+import { AdminNav } from "./AdminNav";
 import { OperatorGate } from "./OperatorGate";
 
 const DEFAULT_FILTER: AdminBookingFilter = { status: "", serviceType: "" };
@@ -21,7 +22,10 @@ export function AdminBookingsPage() {
         <h1>Đơn đặt chỗ</h1>
         <p>Xác nhận giữ chỗ tour và phản hồi của đối tác khách sạn, vé máy bay trong phạm vi bạn phụ trách.</p>
       </div>
-      <OperatorGate><BookingQueue /></OperatorGate>
+      <OperatorGate>
+        <AdminNav current="bookings" />
+        <BookingQueue />
+      </OperatorGate>
     </main>
   );
 }

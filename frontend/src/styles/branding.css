@@ -12,7 +12,7 @@ html:root { scroll-padding-top:110px; }
  .header .nav-links { top:75px; }
 }
 /* Switch to the compact navigation before the wider wordmark crowds the links. */
-@media(max-width:1100px) {
+@media(max-width:1219px) {
  .header .nav-links { position:fixed; left:0; right:0; top:89px; height:auto; display:none; flex-direction:column; align-items:stretch; gap:0; padding:15px 24px 24px; background:var(--panel); border-bottom:1px solid var(--line); box-shadow:0 15px 30px var(--nav-shadow); }
  .header .nav-links.open { display:flex; }
  .header .nav-links > a { padding:14px 2px; height:auto; }

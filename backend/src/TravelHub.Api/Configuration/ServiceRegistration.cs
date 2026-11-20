@@ -11,6 +11,8 @@ using TravelHub.Api.Features.Branches;
 using TravelHub.Api.Features.Flights;
 using TravelHub.Api.Features.Health;
 using TravelHub.Api.Features.Hotels;
+using TravelHub.Api.Features.Payments;
+using TravelHub.Api.Features.ServiceRequests;
 using TravelHub.Api.Features.Tours;
 
 namespace TravelHub.Api.Configuration;
@@ -34,6 +36,11 @@ public static class ServiceRegistration
         services.AddScoped<BranchRepository>().AddScoped<BranchService>();
         services.Configure<EmailOptions>(config.GetSection("Email"));
         services.Configure<BookingOptions>(config.GetSection(BookingOptions.SectionName));
+        // Payments: gateways are stateless. Missing Vnpay secrets are allowed at startup; VnPayPaymentGateway
+        // reports "chưa cấu hình" when called, and simulated payment keeps working.
+        services.Configure<VnPayOptions>(config.GetSection(VnPayOptions.SectionName));
+        services.AddSingleton<VnPayPaymentGateway>();
+        services.AddSingleton<SimulatedPaymentGateway>();
         services.AddScoped<BookingPaymentService>();
         services.AddHostedService<TourHoldExpiryJob>();
         services.AddSingleton<IEmailSender, SmtpEmailSender>();
@@ -42,6 +49,8 @@ public static class ServiceRegistration
         services.Configure<GoogleOptions>(config.GetSection("Google"));
         services.AddScoped<GoogleSignInService>();
         services.AddScoped<BookingRepository>().AddScoped<BookingService>().AddScoped<AdminBookingService>();
+        services.AddScoped<ServiceRequestRepository>().AddScoped<ServiceRequestService>()
+            .AddScoped<AdminServiceRequestService>();
 
         // Browsers reach authenticated APIs through the Next.js same-origin proxy; direct CORS stays read-only.
         var origins = config.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? ["http://localhost:3000"];
@@ -60,5 +69,6 @@ public static class ServiceRegistration
         app.MapAuthEndpoints();
         app.MapBookingEndpoints();
         app.MapAdminEndpoints();
+        app.MapServiceRequestEndpoints();
     }
 }

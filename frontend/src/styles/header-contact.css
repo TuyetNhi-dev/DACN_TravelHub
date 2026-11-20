@@ -15,8 +15,8 @@
 .header-search button { border:0; background:transparent; color:var(--blue); width:40px; min-height:42px; flex-shrink:0; display:grid; place-items:center; }
 html:root { scroll-padding-top:144px; }
 .filters,.detail-booking { top:144px; }
-@media(min-width:1101px) and (max-width:1280px) { .header .nav { gap:10px; } .header .nav-links { gap:12px; } .header-search { max-width:160px; } }
-@media(max-width:1100px) { .header .nav-links { top:125px; gap:0; } .header .nav-links.open { max-height:calc(100dvh - 125px); overflow-y:auto; } .header-search { margin-left:auto; max-width:320px; } }
+@media(min-width:1220px) and (max-width:1280px) { .header .nav { gap:10px; } .header .nav-links { gap:12px; } .header-search { max-width:160px; } }
+@media(max-width:1219px) { .header .nav-links { top:125px; gap:0; } .header .nav-links.open { max-height:calc(100dvh - 125px); overflow-y:auto; } .header-search { margin-left:auto; max-width:320px; } }
 @media(max-width:600px) {
  .header .nav { height:auto; display:grid; grid-template-columns:minmax(0,1fr) 44px 28px; gap:8px 12px; padding-block:10px; }
  .header .brand-logo { grid-column:1; grid-row:1; }
