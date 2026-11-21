@@ -20,6 +20,8 @@ export interface AuthUser {
 export interface Session {
   user: AuthUser;
   expiresAt: string | null;
+  /** False until the user ticks the data protection policy and terms of use ("Hoàn tất đăng ký"). */
+  termsAccepted: boolean;
 }
 
 export interface LoginInput {
@@ -35,6 +37,8 @@ export interface RegisterResult {
 
 export const EMAIL_NOT_VERIFIED = "email_not_verified";
 export const PHONE_REQUIRED = "phone_required";
+/** API answer for any signed-in feature while the account has not agreed to the terms yet. */
+export const TERMS_REQUIRED = "terms_required";
 
 /** Same rule as the backend PhoneNumber: 9–15 digits, optional leading +. */
 export const PHONE_PATTERN = "\\+?[0-9]{9,15}";
@@ -44,4 +48,13 @@ export interface RegisterInput extends LoginInput {
   fullName: string;
   confirmPassword: string;
   acceptTerms: boolean;
+  /** Optional Vietnamese number; the server stores it as the booking contact. */
+  phone: string | null;
+}
+
+export interface PasswordResetInput {
+  email: string;
+  code: string;
+  newPassword: string;
+  confirmPassword: string;
 }

@@ -1,32 +1,29 @@
 "use client";
 
-import { useId, useState } from "react";
-import { Icon } from "@/components/ui/Icon";
+import { FilterSheet } from "@/components/listing/FilterSheet";
 import { formatCurrency, vietnamToday } from "@/lib/format";
 import { DURATION_OPTIONS, type TourFilters } from "@/lib/tour-display";
 
 const PRICE_STEP = 100_000;
+/** Same width as the .listing-layout breakpoint in listing.css. */
+const SIDEBAR_MIN_WIDTH = 980;
 
 interface TourFiltersPanelProps {
   filters: TourFilters;
   activeCount: number;
+  resultCount: number;
   destinations: string[];
   priceCeiling: number;
   onChange: <K extends keyof TourFilters>(key: K, value: TourFilters[K]) => void;
   onReset: () => void;
 }
 
-/** Sticky sidebar on wide screens; a collapsible panel behind a "Bộ lọc" button on phones. */
+/** Sticky sidebar on wide screens; a bottom sheet behind a "Bộ lọc" button on phones and tablets. */
 export function TourFiltersPanel(props: TourFiltersPanelProps) {
-  const [open, setOpen] = useState(false);
-  const panelId = useId();
   return (
-    <aside className={open ? "listing-filters is-open" : "listing-filters"} aria-label="Bộ lọc tour">
-      <button type="button" className="listing-filters-toggle" aria-expanded={open} aria-controls={panelId}
-        onClick={() => setOpen(value => !value)}>
-        <Icon name="menu" size={18} />Bộ lọc{props.activeCount > 0 && <span>{props.activeCount}</span>}
-      </button>
-      <div id={panelId} className="listing-filters-body">
+    <FilterSheet label="Bộ lọc tour" activeCount={props.activeCount} resultCount={props.resultCount}
+      sheetBelow={SIDEBAR_MIN_WIDTH} className="listing-filters">
+      <div className="listing-filters-body">
         <div className="listing-filters-title">
           <b>Bộ lọc tìm kiếm</b>
           {props.activeCount > 0 && <button type="button" onClick={props.onReset}>Xóa bộ lọc</button>}
@@ -36,7 +33,7 @@ export function TourFiltersPanel(props: TourFiltersPanelProps) {
           Giá từ là giá cơ bản cho một người lớn. Giá chính xác theo từng lịch khởi hành.
         </p>
       </div>
-    </aside>
+    </FilterSheet>
   );
 }
 

@@ -4,28 +4,29 @@ using System.Text;
 using Microsoft.AspNetCore.Identity;
 using MySqlConnector;
 using TravelHub.Api.Common.Errors;
+using TravelHub.Api.Common.Time;
 using TravelHub.Api.Features.Auth.EmailVerification;
 
 namespace TravelHub.Api.Features.Auth;
 
 public sealed class AuthService(AuthRepository repository, IPasswordHasher<string> hasher,
-    DummyPasswordHash dummyHash, EmailVerificationService verification)
+    DummyPasswordHash dummyHash, EmailVerificationService verification, VietnamClock clock)
 {
     private const int DuplicateKeyError = 1062;
     private const int MaxEmailLength = 254;
-    private const int MinPasswordLength = 12;
-    private const int MaxPasswordLength = 128;
+    private const int MaxPasswordLength = PasswordRules.MaxLength;
 
     public async Task<RegisterResponse> RegisterAsync(RegisterRequest request, CancellationToken ct)
     {
-        ValidateRegistration(request);
+        var phone = ValidateRegistration(request);
         var email = NormalizeEmail(request.Email!);
         var fullName = request.FullName!.Trim();
         ulong userId;
         try
         {
-            userId = await repository.CreateCustomerAsync(new NewCustomer(fullName, email, null,
-                hasher.HashPassword(email, request.Password!), null, AccountStatus.Pending), ct);
+            // The box was ticked (validated above), so the agreement time is stored with the account.
+            userId = await repository.CreateCustomerAsync(new NewCustomer(fullName, email, phone,
+                hasher.HashPassword(email, request.Password!), null, AccountStatus.Pending, clock.UtcNow), ct);
         }
         catch (MySqlException ex) when (ex.Number == DuplicateKeyError)
         {
@@ -91,18 +92,32 @@ public sealed class AuthService(AuthRepository repository, IPasswordHasher<strin
     public static bool IsValidEmail(string? value) => !string.IsNullOrWhiteSpace(value)
         && value.Trim().Length <= MaxEmailLength && new EmailAddressAttribute().IsValid(value.Trim());
 
-    private static void ValidateRegistration(RegisterRequest request)
+    /// <summary>Validates the form and returns the phone normalised to "0…" digits (null when left empty).</summary>
+    public static string? ValidateRegistration(RegisterRequest request)
     {
         var errors = new ValidationErrors();
         errors.AddIf(string.IsNullOrWhiteSpace(request.FullName) || request.FullName.Trim().Length is < 2 or > 160,
             "fullName", "Họ tên cần từ 2 đến 160 ký tự.");
         errors.AddIf(!IsValidEmail(request.Email), "email", "Email không hợp lệ.");
-        errors.AddIf(request.Password is null || request.Password.Length is < MinPasswordLength or > MaxPasswordLength,
-            "password", "Mật khẩu cần từ 12 đến 128 ký tự.");
-        errors.AddIf(request.Password != request.ConfirmPassword, "confirmPassword", "Mật khẩu xác nhận không khớp.");
-        errors.AddIf(!request.AcceptTerms, "acceptTerms",
-            "Bạn cần đồng ý với Điều khoản sử dụng và Chính sách bảo mật.");
+        PasswordRules.AddErrors(errors, request.Password, request.ConfirmPassword);
+        var phone = PhoneNumber.NormalizeVietnamese(request.Phone);
+        errors.AddIf(!string.IsNullOrWhiteSpace(request.Phone) && phone is null, "phone",
+            PhoneNumber.InvalidVietnameseMessage);
+        errors.AddIf(!request.AcceptTerms, "acceptTerms", TermsRequiredMessage);
         errors.ThrowIfAny();
+        return phone;
+    }
+
+    public const string TermsRequiredMessage =
+        "Bạn cần đồng ý với Chính sách bảo vệ dữ liệu cá nhân và Thỏa thuận sử dụng.";
+
+    /// <summary>"Hoàn tất đăng ký": stores the agreement time; refusing is not an option the API records.</summary>
+    public async Task<Account> AcceptTermsAsync(ulong userId, AcceptTermsRequest request, CancellationToken ct)
+    {
+        if (!request.Accept)
+            throw new ApiValidationException(new Dictionary<string, string[]> { ["accept"] = [TermsRequiredMessage] });
+        await repository.AcceptTermsAsync(userId, clock.UtcNow, ct);
+        return (await repository.FindByIdAsync(userId, ct))!;
     }
 }
 

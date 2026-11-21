@@ -10,10 +10,10 @@ import { stayParams, validateStay } from "@/lib/hotel-stay";
 import { getHotels } from "@/services/hotels";
 import type { HotelSummary, Stay } from "@/types/hotel";
 import { HotelCard } from "./HotelCard";
+import { HotelFiltersPanel } from "./HotelFiltersPanel";
 import { StayFields } from "./StayFields";
 
 const PAGE_SIZE = 12;
-const STAR_OPTIONS = [5, 4, 3, 2];
 
 export function HotelListPage({ initialStay, initialQuery }: { initialStay: Stay; initialQuery: string }) {
   const loader = useCallback((signal: AbortSignal) => getHotels({ page: 1, pageSize: PAGE_SIZE }, signal), []);
@@ -98,24 +98,8 @@ function HotelResults({ hotels, total, stay, query, loadingMore, onLoadMore }: H
 
   return (
     <div className="sh-hotel-list-layout">
-      <aside className="sh-hotel-panel sh-hotel-filters" aria-label="Bộ lọc khách sạn">
-        <div className="sh-hotel-filter-head">
-          <h2>Lọc lựa chọn</h2>
-          <button type="button" onClick={() => setFilters({ ...EMPTY_HOTEL_FILTERS, query })}>Xóa bộ lọc</button>
-        </div>
-        <label>
-          Giá tối đa / phòng / đêm
-          <input type="number" min={0} step={50_000} value={filters.maxPrice} placeholder="Không giới hạn"
-            onChange={event => change("maxPrice", event.target.value)} />
-        </label>
-        <label>
-          Hạng sao
-          <select value={filters.stars} onChange={event => change("stars", event.target.value)}>
-            <option value="">Tất cả</option>
-            {STAR_OPTIONS.map(value => <option value={value} key={value}>{value} sao</option>)}
-          </select>
-        </label>
-      </aside>
+      <HotelFiltersPanel filters={filters} resultCount={rows.length} onChange={change}
+        onReset={() => setFilters({ ...EMPTY_HOTEL_FILTERS, query })} />
       <section aria-label="Kết quả khách sạn" className="sh-hotel-results">
         <div className="sh-hotel-results-head">
           <div>

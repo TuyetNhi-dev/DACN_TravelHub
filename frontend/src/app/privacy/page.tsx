@@ -1,8 +1,8 @@
-import { LegalPage } from "@/components/legal/LegalPage";
-import { privacyPolicy } from "@/data/legal";
+import { ContentPage } from "@/components/content/ContentPage";
+import { privacyPolicy } from "@/data/policies";
 
-export const metadata = { title: "Chính sách bảo mật | SàiHành" };
+export const metadata = { title: "Chính sách riêng tư | SàiHành" };
 
 export default function PrivacyPage() {
-  return <LegalPage document={privacyPolicy} />;
+  return <ContentPage document={privacyPolicy} />;
 }

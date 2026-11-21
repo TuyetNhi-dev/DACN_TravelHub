@@ -12,7 +12,7 @@
 /* ---------- Buttons (extends .btn in globals.css) ---------- */
 .btn { border-radius: var(--radius-sm); transition: background var(--duration-fast), border-color var(--duration-fast),
   transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast); }
-.btn-small { min-height: 36px; padding-inline: 14px; font-size: 13px; }
+.btn-small { min-height: 36px; padding-inline: 14px; font-size: max(13px, var(--text-min)); }
 .btn-glass { color: var(--on-brand); border-color: rgba(255, 255, 255, .32); background: rgba(255, 255, 255, .14);
   backdrop-filter: blur(12px); }
 .btn-glass:hover { background: rgba(255, 255, 255, .26); transform: translateY(-1px); }
@@ -20,7 +20,7 @@
   border-right-color: transparent; animation: ui-spin .8s linear infinite; }
 
 /* ---------- Badges ---------- */
-.sh-badge { font-size: 12px; font-weight: 600; line-height: 1.4; }
+.sh-badge { font-size: max(12px, var(--text-min)); font-weight: 600; line-height: 1.4; }
 .sh-badge--brand { color: var(--brand); background: color-mix(in srgb, var(--brand) 10%, transparent); }
 .sh-badge--image { color: #fff; background: rgba(5, 16, 38, .62); backdrop-filter: blur(8px); }
 
@@ -38,7 +38,7 @@
 .ui-card:hover .ui-media img { transform: scale(1.05); }
 .ui-media-badges { position: absolute; top: 12px; left: 12px; right: 12px; display: flex; flex-wrap: wrap; gap: 6px; }
 .ui-media-note { position: absolute; right: 10px; bottom: 10px; padding: 3px 8px; border-radius: var(--radius-pill);
-  font-size: 11px; font-weight: 600; color: #fff; background: rgba(5, 16, 38, .62); }
+  font-size: max(11px, var(--text-min)); font-weight: 600; color: #fff; background: rgba(5, 16, 38, .62); }
 /* Makes the card's main link cover the whole card: one tab stop, whole card clickable. */
 .ui-stretched { color: inherit; }
 .ui-stretched::after { content: ""; position: absolute; inset: 0; z-index: 1; }
@@ -47,13 +47,13 @@
 
 /* ---------- Price ---------- */
 .ui-price { display: grid; gap: 2px; }
-.ui-price-prefix { color: var(--muted); font-size: 12px; }
+.ui-price-prefix { color: var(--muted); font-size: max(12px, var(--text-min)); }
 .ui-price-line { display: flex; align-items: baseline; gap: 4px; flex-wrap: wrap; }
 .ui-price strong { color: var(--brand); font-size: 20px; font-weight: 800; letter-spacing: -.02em; }
 .ui-price--lg strong { font-size: 28px; }
-.ui-price-unit { color: var(--muted); font-size: 13px; }
+.ui-price-unit { color: var(--muted); font-size: max(13px, var(--text-min)); }
 .ui-price-quote { justify-self: start; margin-top: 4px; padding: 2px 8px; border-radius: var(--radius-pill);
-  font-size: 11px; font-weight: 600; color: var(--accent-warm); background: var(--warning-bg); }
+  font-size: max(11px, var(--text-min)); font-weight: 600; color: var(--accent-warm); background: var(--warning-bg); }
 
 /* ---------- Stars ---------- */
 /* Amber chosen for ≥3:1 contrast against the card in each theme (non-text graphic). */
@@ -178,10 +178,25 @@
 .ui-lightbox-thumbs button.is-current { border-color: #fff; opacity: 1; }
 .ui-lightbox-thumbs img { object-fit: cover; }
 .ui-lightbox :focus-visible { outline: 3px solid var(--accent-sky); outline-offset: 3px; }
+/* Phone strip (GallerySwipe.tsx): one photo per screen, native scroll-snap for the swipe. */
+.ui-swipe { display: none; position: relative; }
+.ui-swipe-track { display: flex; margin: 0; padding: 0; list-style: none; overflow-x: auto;
+  scroll-snap-type: x mandatory; overscroll-behavior-x: contain; scrollbar-width: none;
+  border-radius: var(--radius-lg); }
+.ui-swipe-track::-webkit-scrollbar { display: none; }
+/* Fixed ratio reserves the space before a lazy photo arrives, so nothing below it moves. */
+.ui-swipe-slide { position: relative; flex: 0 0 100%; aspect-ratio: 4 / 3; scroll-snap-align: start; }
+.ui-swipe-slide button { position: absolute; inset: 0; width: 100%; padding: 0; border: 0;
+  background: var(--surface); cursor: zoom-in; }
+.ui-swipe-slide img { object-fit: cover; }
+.ui-swipe-slide button:focus-visible { outline: 3px solid var(--blue); outline-offset: -3px; }
+.ui-swipe-count { position: absolute; right: 12px; bottom: 12px; padding: 4px 12px; border-radius: var(--radius-pill);
+  background: rgba(3, 10, 20, .7); color: #fff; font-size: 14px; font-weight: 700; pointer-events: none;
+  font-variant-numeric: tabular-nums; }
+.ui-swipe .ui-media-note { top: 12px; left: 12px; right: auto; bottom: auto; }
 @media (max-width: 640px) {
-  .ui-gallery { grid-template-columns: 1fr 1fr; grid-template-rows: 2fr 1fr; }
-  .ui-gallery-tile:first-child { grid-column: span 2; grid-row: auto; }
-  .ui-gallery-tile:nth-child(n + 4) { display: none; }
+  .ui-gallery { display: none; }
+  .ui-swipe { display: block; }
   .ui-lightbox-stage { inset: 56px 0 140px; }
   .ui-lightbox-thumbs button { width: 64px; height: 48px; }
   .ui-lightbox-caption { bottom: 84px; }

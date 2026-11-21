@@ -1,8 +1,19 @@
 namespace TravelHub.Api.Features.Auth;
 
-/// <summary>Sign-up asks for the email only; the contact phone is saved at the first booking.</summary>
+/// <summary>
+/// Sign-up. Phone is optional (Vietnamese format); when given it pre-fills the booking contact. AcceptTerms must be
+/// ticked actively: its time is stored as users.terms_accepted_at.
+/// </summary>
 public sealed record RegisterRequest(string? FullName, string? Email, string? Password, string? ConfirmPassword,
-    bool AcceptTerms = false);
+    bool AcceptTerms = false, string? Phone = null);
+
+/// <summary>"Hoàn tất đăng ký": a signed-in account without a stored agreement ticks the box.</summary>
+public sealed record AcceptTermsRequest(bool Accept);
+
+public sealed record PasswordResetRequest(string? Email);
+
+public sealed record PasswordResetConfirmRequest(string? Email, string? Code, string? NewPassword,
+    string? ConfirmPassword);
 
 /// <summary>Credential is the Google ID token (a JWT) returned by Google Identity Services in the browser.</summary>
 public sealed record GoogleSignInRequest(string? Credential);
@@ -23,19 +34,28 @@ public sealed record RoleAssignmentDto(string Code, string Scope, string? Region
 public sealed record AuthUserDto(string Id, string FullName, string Email, string? Phone,
     IReadOnlyList<RoleAssignmentDto> Roles);
 
-public sealed record SessionDto(AuthUserDto User, DateTimeOffset? ExpiresAt);
+/// <summary>
+/// TermsAccepted false means every signed-in feature answers 403 "terms_required" until the user agrees.
+/// </summary>
+public sealed record SessionDto(AuthUserDto User, DateTimeOffset? ExpiresAt, bool TermsAccepted);
 
 public sealed record CsrfTokenDto(string? Token);
 
 public sealed record GoogleConfigDto(string? ClientId);
 
-/// <summary>Row for a new customer. Exactly one of PasswordHash and GoogleSubject is set.</summary>
+/// <summary>
+/// Row for a new customer. Exactly one of PasswordHash and GoogleSubject is set. TermsAcceptedAt is null for
+/// Google sign-ups, which have not ticked the agreement yet.
+/// </summary>
 public sealed record NewCustomer(string FullName, string Email, string? Phone, string? PasswordHash,
-    string? GoogleSubject, string Status);
+    string? GoogleSubject, string Status, DateTime? TermsAcceptedAt = null);
 
 /// <summary>Account as loaded for authentication; the hash and Google id never leave the backend.</summary>
-public sealed record Account(AuthUserDto User, string? PasswordHash, string? GoogleSubject, string Status)
+public sealed record Account(AuthUserDto User, string? PasswordHash, string? GoogleSubject, string Status,
+    DateTime? TermsAcceptedAt = null)
 {
+    public bool HasAcceptedTerms => TermsAcceptedAt is not null;
+
     /// <summary>An active account needs at least one way to sign in: a password or a linked Google account.</summary>
     public bool IsActive => Status == AccountStatus.Active && (PasswordHash is not null || GoogleSubject is not null);
 
@@ -59,6 +79,17 @@ public static class AuthErrorCodes
     public const string EmailNotVerified = "email_not_verified";
     /// <summary>The account has no contact phone yet; bookings need one so staff can reach the customer.</summary>
     public const string PhoneRequired = "phone_required";
+    /// <summary>Signed in but has not agreed to the data protection policy and terms of use yet.</summary>
+    public const string TermsRequired = "terms_required";
+}
+
+/// <summary>
+/// The default authorization policy requires a session AND a stored agreement. Only the endpoints a user needs to
+/// give that agreement (or leave) use <see cref="SignedIn"/>, which requires a session alone.
+/// </summary>
+public static class AuthPolicies
+{
+    public const string SignedIn = "signed-in";
 }
 
 /// <summary>Three roles: customers act on their own orders (self); staff and admins see everything (global).</summary>

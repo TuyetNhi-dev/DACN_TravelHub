@@ -47,10 +47,11 @@
 | # | Việc | File chính |
 |---|---|---|
 | 7.1 | Giá em bé (infant): thêm `baby_price` vào `tour_departures`, DTO, pricing | migration, `TourDtos`, `BookingPricing`, `TourBookingPanel.tsx` |
+| 7.1b | **Nhớ khi làm 7.1:** giỏ hàng cũng phải có em bé. Migration mới thêm `infant_count` (và `infant_price_seen`) vào `cart_items` (bảng tạo ở migration 013); cập nhật CHECK tổng khách; `CartChoice`/`CartItemDto`/`GuestCartItem`, `CartRules.Status` (so giá em bé) và `Subtotal`; frontend `types/cart.ts`, `cart-rules.ts` (kiểm tra dòng localStorage, link "Đặt ngay" thêm `infants=`), `TourChoiceFields`, `CartItemCard`; dòng giỏ cũ trong localStorage không có trường này → coi là 0 | migration mới, `Features/Cart/*`, `components/cart/*`, `lib/cart-rules.ts` |
 | 7.2 | Chính sách hủy tính phí thật — sửa R1: logic `CloseAsync` tính refund theo ngày (thay hardcoded text) | `BookingLifecycle.cs`, `TourDetail.tsx` |
 | 7.3 | Thông tin liên hệ khi đặt hộ — form nhập tên/SĐT/email riêng thay vì đọc từ session | `TourBookingPanel.tsx`, `BookingDtos`, validator |
 | 7.4 | Lịch chọn ngày khởi hành: hiển thị ngày lễ VN (âm/dương) | `DepartureCalendar.tsx`, file dữ liệu ngày lễ |
-| 7.5 | Quên mật khẩu — OTP email đặt lại mật khẩu | `AuthEndpoints.cs`, `PasswordResetService.cs`, frontend |
+| 7.5 | Quên mật khẩu — OTP email đặt lại mật khẩu. **Đã code (21/11/2026), chờ chạy migration 014:** `/quen-mat-khau`, mã OTP theo mục đích `reset_password` (10 phút, sai 5 lần hủy, 60 giây/lần, tối đa 5 mã/giờ), cùng một thông báo dù email có tồn tại hay không, đổi mật khẩu xong đăng xuất các phiên cũ; kèm lưu `terms_accepted_at` và màn hình "Hoàn tất đăng ký" | `AuthEndpoints.cs`, `PasswordResetService.cs`, `TermsAcceptedAuthorization.cs`, frontend |
 
 ---
 

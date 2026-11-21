@@ -27,7 +27,14 @@ export function Lightbox({ images, index, onIndexChange, onClose }: LightboxProp
   useEffect(() => {
     const element = dialog.current;
     element?.showModal();
-    return () => element?.close();
+    // A modal dialog does not stop the page behind it from scrolling (touch scroll leaks through on phones).
+    const root = document.documentElement;
+    const previousOverflow = root.style.overflow;
+    root.style.overflow = "hidden";
+    return () => {
+      root.style.overflow = previousOverflow;
+      element?.close();
+    };
   }, []);
 
   function onKeyDown(event: KeyboardEvent<HTMLDialogElement>) {
@@ -43,7 +50,10 @@ export function Lightbox({ images, index, onIndexChange, onClose }: LightboxProp
   }
 
   return (
-    <dialog ref={dialog} className="ui-lightbox" aria-label="Xem ảnh toàn màn hình" onClose={onClose}
+    // The close event is async: after a dev StrictMode remount it arrives while the dialog is open again,
+    // and must not shut the lightbox the user just opened.
+    <dialog ref={dialog} className="ui-lightbox" aria-label="Xem ảnh toàn màn hình"
+      onClose={() => { if (!dialog.current?.open) onClose(); }}
       onKeyDown={onKeyDown}>
       <div className="ui-lightbox-stage" onPointerDown={event => { swipeStart.current = event.clientX; }}
         onPointerUp={onPointerUp}>

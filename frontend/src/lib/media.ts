@@ -1,11 +1,12 @@
 import { photoLibrary, type LibraryPhoto, type PhotoSetKey } from "@/data/photo-library";
 import { normalizeSearch } from "@/lib/format";
-import type { TourSummary } from "@/types/tour";
+import type { TourImage, TourSummary } from "@/types/tour";
 import type { HotelSummary, RoomType } from "@/types/hotel";
 
 /**
- * The ONLY place components get images from. API DTOs carry no photos yet; when they gain an
- * `imageUrls` field those images win automatically (add their host to images.remotePatterns).
+ * The ONLY place components get images from. Tour detail photos come from the API (tour_images); other DTOs
+ * carry no photos yet, and when they gain an `imageUrls` field those images win automatically (add any new
+ * host to images.remotePatterns).
  */
 export interface MediaImage {
   src: string;
@@ -86,10 +87,13 @@ export function getDestinationImages(name: string | null): MediaImage[] {
 type TourForImages = Pick<TourSummary, "id" | "destination"> & { title?: string } & WithApiImages;
 
 /**
- * Up to DETAIL_GALLERY_SIZE photos: every stop named in the title (interleaved, so the first tiles
- * already show different places), then nearby stops. None shows this exact tour, so all are labelled.
+ * The tour's own photos from GET /api/tours/{id} when it has any. Otherwise up to DETAIL_GALLERY_SIZE library
+ * photos: every stop named in the title (interleaved, so the first tiles already show different places), then
+ * nearby stops. Those do not show this exact tour, so all of them are labelled as illustrations.
  */
-export function getTourImages(tour: TourForImages): MediaImage[] {
+export function getTourImages(tour: TourForImages, tourImages: readonly TourImage[] = []): MediaImage[] {
+  const stored = fromTourImages(tourImages, `Ảnh tour ${tour.destination}`);
+  if (stored.length > 0) return stored;
   const api = fromApi(tour.imageUrls, `Ảnh tour ${tour.destination}`);
   if (api.length > 0) return api;
   const named = tourPhotoSets(tour);
@@ -155,6 +159,28 @@ function fromApi(urls: readonly string[] | null | undefined, alt: string): Media
   return (urls ?? []).map((src, index) => ({
     src, alt: `${alt} ${index + 1}`, author: null, sourceUrl: null, illustrative: false,
   }));
+}
+
+/**
+ * Photos stored for the tour itself (cover first). Only hosts allowed by images.remotePatterns in next.config.ts
+ * can go through next/image, so any other URL is skipped rather than breaking the gallery.
+ */
+function fromTourImages(images: readonly TourImage[], fallbackAlt: string): MediaImage[] {
+  return images
+    .filter(image => image.url.startsWith(IMAGE_HOST))
+    .map((image, index) => {
+      // Seeded photos come from the credited library; keep the photographer credit when we know it.
+      const credit = libraryPhotoOf(image.url);
+      return {
+        src: image.url, alt: image.alt ?? `${fallbackAlt} ${index + 1}`, author: credit?.author ?? null,
+        sourceUrl: credit ? SOURCE_PAGE + credit.page : null, illustrative: false,
+      };
+    });
+}
+
+function libraryPhotoOf(url: string): LibraryPhoto | undefined {
+  const id = url.slice(IMAGE_HOST.length).split("?")[0];
+  return Object.values(photoLibrary).flat().find(photo => photo.id === id);
 }
 
 function placed(photo: LibraryPhoto, set: PhotoSetKey): MediaImage {

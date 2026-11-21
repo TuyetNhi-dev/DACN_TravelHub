@@ -20,12 +20,14 @@ export function StayFields({ stay, onChange }: { stay: Stay; onChange: (stay: St
       </label>
       <label>
         Số khách
-        <input name="guests" type="number" min={1} max={MAX_GUESTS} required value={stay.guests || ""}
+        <input name="guests" type="number" inputMode="numeric" min={1} max={MAX_GUESTS} required
+          value={stay.guests || ""}
           onChange={event => onChange({ ...stay, guests: Number(event.target.value) })} />
       </label>
       <label>
         Số phòng
-        <input name="rooms" type="number" min={1} max={MAX_ROOMS} required value={stay.rooms || ""}
+        <input name="rooms" type="number" inputMode="numeric" min={1} max={MAX_ROOMS} required
+          value={stay.rooms || ""}
           onChange={event => onChange({ ...stay, rooms: Number(event.target.value) })} />
       </label>
     </div>

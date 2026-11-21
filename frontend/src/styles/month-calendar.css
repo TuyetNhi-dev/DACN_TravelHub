@@ -15,7 +15,7 @@
 .mc-month { width: 100%; min-width: 0 !important; border-collapse: separate !important; border-spacing: 3px;
   table-layout: fixed; }
 .mc-month caption { font-weight: 600; font-size: 14px; color: var(--blue); padding-bottom: 6px; }
-.mc-month th { padding: 4px 0 !important; border: 0 !important; text-align: center; font-size: 11px; color: var(--muted);
+.mc-month th { padding: 4px 0 !important; border: 0 !important; text-align: center; font-size: max(11px, var(--text-min)); color: var(--muted);
   background: none !important; }
 .mc-month th.is-sunday { color: var(--cal-official); }
 .mc-month td { padding: 0 !important; border: 0 !important; position: relative; }
@@ -30,7 +30,7 @@
 .mc-day:hover { border-color: var(--line-strong); background: var(--surface); }
 .mc-day:focus-visible { outline: 2px solid var(--blue); outline-offset: 1px; z-index: 2; }
 .mc-solar { font-size: 17px; font-weight: 600; line-height: 1.2; }
-.mc-lunar { font-size: 10px; color: var(--muted); line-height: 1.2; }
+.mc-lunar { font-size: max(10px, var(--text-min)); color: var(--muted); line-height: 1.2; }
 .mc-lunar.is-first { color: var(--blue); font-weight: 600; }
 .mc-day.is-sunday .mc-solar { color: var(--cal-official); }
 /* Holiday marker: a corner dot, so it never changes the cell layout. */
@@ -51,22 +51,22 @@
 .mc-day.is-disabled { cursor: not-allowed; }
 .mc-day.is-disabled:not(.is-muted) .mc-solar { opacity: .55; }
 .mc-day.is-disabled:hover { background: transparent; border-color: transparent; }
-.mc-extra { display: grid; font-size: 10px; line-height: 1.25; color: var(--blue); font-weight: 600; }
-.mc-extra small { font-size: 9px; font-weight: 500; color: var(--muted); }
+.mc-extra { display: grid; font-size: max(10px, var(--text-min)); line-height: 1.25; color: var(--blue); font-weight: 600; }
+.mc-extra small { font-size: max(9px, var(--text-min)); font-weight: 500; color: var(--muted); }
 
 /* Holiday name on hover, keyboard focus or tap (a tap focuses the button). */
 .mc-tip { position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%); z-index: 5;
   display: none; flex-direction: column; gap: 2px; width: max-content; max-width: 200px; padding: 6px 10px;
   border-radius: 8px; background: var(--panel); border: 1px solid var(--line-strong); box-shadow: var(--shadow-md);
-  font-size: 12px; line-height: 1.4; text-align: left; white-space: normal; pointer-events: none; }
+  font-size: max(12px, var(--text-min)); line-height: 1.4; text-align: left; white-space: normal; pointer-events: none; }
 .mc-tip .is-official { color: var(--cal-official); font-weight: 600; }
 .mc-tip .is-traditional { color: var(--cal-traditional); font-weight: 600; }
 .mc-day:hover .mc-tip, .mc-day:focus .mc-tip { display: flex; }
 .mc-day[data-col="0"] .mc-tip { left: 0; transform: none; }
 .mc-day[data-col="6"] .mc-tip { left: auto; right: 0; transform: none; }
 
-.mc-nights { margin: 0; font-size: 13px; font-weight: 600; color: var(--blue); }
-.mc-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: 12px;
+.mc-nights { margin: 0; font-size: max(13px, var(--text-min)); font-weight: 600; color: var(--blue); }
+.mc-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: max(12px, var(--text-min));
   color: var(--muted); }
 .mc-legend li { display: flex; align-items: center; gap: 6px; }
 .mc-legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
@@ -79,7 +79,7 @@
 
 .mc--compact .mc-day { padding: 4px 1px; gap: 0; }
 .mc--compact .mc-solar { font-size: 14px; }
-.mc--compact .mc-lunar { font-size: 9px; }
+.mc--compact .mc-lunar { font-size: max(9px, var(--text-min)); }
 .mc--compact .mc-dot { top: 3px; right: 3px; width: 6px; height: 6px; }
 .mc--compact .mc-month caption { display: none; }
 
@@ -90,7 +90,14 @@
   .mc-day { padding: 4px 0; }
   .mc-solar { font-size: 15px; }
   .mc-dot { top: 3px; right: 3px; width: 6px; height: 6px; }
-  .mc-extra { font-size: 9px; }
+  .mc-extra { font-size: max(9px, var(--text-min)); }
+  /* Seven 44px touch cells need ~310px: thinner gaps, and the tour calendar bleeds into its card padding. */
+  .mc-month { border-spacing: 1px; }
+  .tour-calendar .mc { margin-inline: -12px; }
+  .home-planner-calendar .mc, .lich-card .mc { margin-inline: -16px; }
+  /* At a readable 14px the seat note no longer fits a 44px cell; seats stay in the cell's aria-label, the
+     departure cards below and the booking dropdown. Sold-out days keep their muted style and legend entry. */
+  .mc-extra small { display: none; }
 }
 
 /* ---------- Home: "Lên lịch cho chuyến đi" ---------- */
@@ -109,17 +116,17 @@
 .home-holiday-date { display: grid; justify-items: center; padding: 8px 4px; border-radius: var(--radius-sm);
   background: var(--panel); border: 1px solid var(--line); line-height: 1.1; }
 .home-holiday-date b { font-size: 22px; }
-.home-holiday-date small { font-size: 11px; color: var(--muted); }
+.home-holiday-date small { font-size: max(11px, var(--text-min)); color: var(--muted); }
 .home-holiday.is-official .home-holiday-date b { color: var(--cal-official); }
 .home-holiday.is-traditional .home-holiday-date b { color: var(--cal-traditional); }
 .home-holiday-info { display: grid; gap: 3px; min-width: 0; }
 .home-holiday-info h3 { margin: 0; font-size: 15px; font-weight: 600; }
-.home-holiday-info p { margin: 0; font-size: 12px; color: var(--muted); }
-.home-holiday-kind { justify-self: start; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: var(--radius-pill); }
+.home-holiday-info p { margin: 0; font-size: max(12px, var(--text-min)); color: var(--muted); }
+.home-holiday-kind { justify-self: start; font-size: max(11px, var(--text-min)); font-weight: 600; padding: 2px 8px; border-radius: var(--radius-pill); }
 .home-holiday.is-official .home-holiday-kind { color: var(--cal-official); background: var(--cal-official-bg); }
 .home-holiday.is-traditional .home-holiday-kind { color: var(--cal-traditional); background: var(--cal-traditional-bg); }
 .home-holiday-actions { display: grid; justify-items: end; gap: 6px; }
-.home-holiday-left { font-size: 13px; font-weight: 700; color: var(--blue); white-space: nowrap; }
+.home-holiday-left { font-size: max(13px, var(--text-min)); font-weight: 700; color: var(--blue); white-space: nowrap; }
 @media (max-width: 900px) {
   .home-planner-card { grid-template-columns: minmax(0, 1fr); padding: 20px; gap: 24px; }
 }
@@ -142,17 +149,17 @@
 .lich-day-big strong { font-size: 44px; line-height: 1; color: var(--blue); }
 .lich-day-big span { color: var(--muted); }
 .lich-facts { display: grid; gap: 6px; margin: 12px 0 0; font-size: 14px; }
-.lich-facts dt { color: var(--muted); font-size: 12px; }
+.lich-facts dt { color: var(--muted); font-size: max(12px, var(--text-min)); }
 .lich-facts dd { margin: 0 0 6px; font-weight: 600; }
 .lich-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
-.lich-list li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; font-size: 13px; }
+.lich-list li { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 10px; font-size: max(13px, var(--text-min)); }
 .lich-list time { font-weight: 600; }
-.lich-list small { display: block; color: var(--muted); font-size: 11px; }
+.lich-list small { display: block; color: var(--muted); font-size: max(11px, var(--text-min)); }
 .lich-list .is-official b { color: var(--cal-official); }
 .lich-list .is-traditional b { color: var(--cal-traditional); }
-.lich-note { font-size: 12px; color: var(--muted); margin: 12px 0 0; }
+.lich-note { font-size: max(12px, var(--text-min)); color: var(--muted); margin: 12px 0 0; }
 @media (max-width: 900px) { .lich-layout { grid-template-columns: minmax(0, 1fr); } }
 
 /* ---------- Tour departure calendar ---------- */
 .tour-calendar { margin-bottom: 18px; }
-.tour-calendar-hint { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+.tour-calendar-hint { font-size: max(12px, var(--text-min)); color: var(--muted); margin: 8px 0 0; }

@@ -44,6 +44,31 @@ test('CSRF and the POST share one deadline and the POST carries the CSRF header'
   assert.equal(requests[1].options.credentials, 'same-origin');
 });
 
+test('DELETE fetches a CSRF token first, sends it, and has no JSON body', async () => {
+  const requests = [];
+  const api = client(async (url, options) => {
+    requests.push({ url, options });
+    return json(url === '/api/auth/csrf' ? { token: 'test-csrf' } : { data: { items: [] } });
+  });
+  const value = await api.apiDelete('/api/cart/items/12');
+  assert.deepEqual(requests.map(request => request.url), ['/api/auth/csrf', '/api/cart/items/12']);
+  const { method, headers, body, credentials } = requests[1].options;
+  assert.equal(method, 'DELETE');
+  assert.equal(headers['X-CSRF-Token'], 'test-csrf');
+  assert.equal(headers['Content-Type'], undefined);
+  assert.equal(body, undefined);
+  assert.equal(credentials, 'same-origin');
+  assert.deepEqual(JSON.parse(JSON.stringify(value)), { data: { items: [] } });
+});
+
+test('a failed DELETE is reported like any other request', async () => {
+  const api = client(async url => (url === '/api/auth/csrf'
+    ? json({ token: 't' })
+    : json({ detail: 'Món này không còn trong giỏ hàng.' }, 404)));
+  await assert.rejects(api.apiDelete('/api/cart/items/9'),
+    { name: 'ApiError', status: 404, message: 'Món này không còn trong giỏ hàng.' });
+});
+
 test('a body cut off by the deadline is an error, not a successful empty response', async () => {
   const deadline = new AbortController();
   const api = client(async () => ({

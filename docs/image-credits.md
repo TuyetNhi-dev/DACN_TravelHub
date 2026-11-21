@@ -84,3 +84,12 @@ Mọi ảnh trên website lấy từ [Unsplash](https://unsplash.com) theo [Gi�
 | room | Giường trải ga trắng trong phòng | Point3D Commercial Imaging Ltd. | [unsplash.com/photos/oxeCZrodz78](https://unsplash.com/photos/oxeCZrodz78) |
 | room | Phòng ngủ hiện đại có nội thất gỗ và ánh sáng tự nhiên | Marcel Strauß | [unsplash.com/photos/CMHgRFDANH8](https://unsplash.com/photos/CMHgRFDANH8) |
 | room | Phòng ngủ giường lớn nhìn ra vườn | João Emanuel | [unsplash.com/photos/0ppqZpWTkXE](https://unsplash.com/photos/0ppqZpWTkXE) |
+
+## Logo đối tác thanh toán
+
+| File | Nội dung | Nguồn | Ngày tải |
+|---|---|---|---|
+| `frontend/public/payments/vnpay-logo.svg` | Logo VNPAY (bản chính, không chỉnh sửa) | Website chính thức của VNPAY: [vnpay.vn](https://vnpay.vn), file `https://1889324617.cloud.edgevnpay.vn/assets/images/logo-icon/logo-primary.svg` (logo trên thanh menu của trang) | 21/11/2026 |
+
+Logo VNPAY là nhãn hiệu của Công ty CP Giải pháp Thanh toán Việt Nam (VNPAY), chỉ dùng để chỉ cổng thanh toán mà
+website tích hợp; không chỉnh màu, tỷ lệ hay ghép với logo khác. Không dùng logo của phương thức hệ thống không hỗ trợ.

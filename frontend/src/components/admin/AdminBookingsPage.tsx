@@ -63,26 +63,33 @@ function BookingQueue() {
   );
 }
 
+// Header cells and the phone card labels (td[data-label]) share these names.
+const BOOKING_COLUMNS = ["Mã đơn", "Dịch vụ", "Khách hàng", "Ngày sử dụng", "Tổng", "Trạng thái"] as const;
+const [CODE, SERVICE, CUSTOMER, START_DATE, TOTAL, STATUS] = BOOKING_COLUMNS;
+
 function BookingTable({ bookings }: { bookings: BookingSummary[] }) {
   return (
     <div className="sh-table-wrap">
-      <table className="sh-table">
+      <table className="sh-table sh-table--cards">
         <caption className="sr-only">Danh sách đơn đặt chỗ</caption>
         <thead>
-          <tr><th>Mã đơn</th><th>Dịch vụ</th><th>Khách hàng</th><th>Ngày sử dụng</th><th>Tổng</th><th>Trạng thái</th></tr>
+          <tr>{BOOKING_COLUMNS.map(column => <th key={column}>{column}</th>)}</tr>
         </thead>
         <tbody>
           {bookings.map(booking => (
             <tr key={booking.id}>
-              <td>
+              <td data-label={CODE}>
                 <Link href={`/admin/bookings/${encodeURIComponent(booking.id)}`}>{booking.code}</Link>
                 <small>{formatDateTime(booking.createdAt)}</small>
               </td>
-              <td>{booking.title}<small>{SERVICE_LABELS[booking.serviceType]}</small></td>
-              <td>{booking.customer?.fullName ?? "—"}<small>{booking.customer?.phone ?? booking.customer?.email}</small></td>
-              <td>{formatDate(booking.startDate)}</td>
-              <td>{formatCurrency(booking.total)}</td>
-              <td><StatusBadge status={booking.itemStatus} /></td>
+              <td data-label={SERVICE}>{booking.title}<small>{SERVICE_LABELS[booking.serviceType]}</small></td>
+              <td data-label={CUSTOMER}>
+                {booking.customer?.fullName ?? "—"}
+                <small>{booking.customer?.phone ?? booking.customer?.email}</small>
+              </td>
+              <td data-label={START_DATE}>{formatDate(booking.startDate)}</td>
+              <td data-label={TOTAL}>{formatCurrency(booking.total)}</td>
+              <td data-label={STATUS}><StatusBadge status={booking.itemStatus} /></td>
             </tr>
           ))}
         </tbody>

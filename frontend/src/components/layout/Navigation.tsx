@@ -8,6 +8,10 @@ import { ThemeToggle } from "./ThemeToggle";
 import { HeaderSearch } from "./HeaderSearch";
 import { ServicesMenu } from "./ServicesMenu";
 import { AuthActions } from "@/components/auth/AuthActions";
+import { useAuth } from "@/components/auth/AuthProvider";
+import { CartButton } from "@/components/cart/CartButton";
+import { useNewRequestCount } from "@/hooks/useNewRequestCount";
+import { isOperator } from "@/lib/auth";
 
 /** The longest matching link wins, so /flights/deals marks "Săn vé rẻ" and not also "Vé máy bay". */
 function activeHref(pathname: string): string | undefined {
@@ -22,19 +26,26 @@ export function Navigation() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const current = activeHref(pathname);
+  const { session } = useAuth();
+  const newRequests = useNewRequestCount(Boolean(session?.termsAccepted) && isOperator(session?.user));
   return <>
     <nav id="main-navigation" aria-label="Điều hướng chính" className={open ? "nav-links open" : "nav-links"}>
       {navigation.map(item => (
         <Link key={item.label} href={item.href} aria-current={item.href === current ? "page" : undefined}
-          className={item.href === current ? "active" : ""} onClick={() => setOpen(false)}>
+          aria-label={item.ariaLabel} className={item.href === current ? "active" : ""}
+          onClick={() => setOpen(false)}>
           {item.label}
+          {item.badge && <span className="nav-badge" aria-hidden="true">{item.badge}</span>}
         </Link>
       ))}
       <ServicesMenu pathname={pathname} onNavigate={() => setOpen(false)} />
-      <div className="mobile-auth"><AuthActions onNavigate={() => setOpen(false)} /></div>
+      <div className="mobile-auth">
+        <AuthActions variant="panel" newRequests={newRequests} onNavigate={() => setOpen(false)} />
+      </div>
     </nav>
     <HeaderSearch />
-    <div className="nav-actions"><AuthActions /></div>
+    <CartButton pathname={pathname} />
+    <div className="nav-actions"><AuthActions newRequests={newRequests} /></div>
     <ThemeToggle />
     <button className="menu-btn" aria-expanded={open} aria-controls="main-navigation"
       aria-label={open ? "Đóng menu" : "Mở menu"} onClick={() => setOpen(!open)}

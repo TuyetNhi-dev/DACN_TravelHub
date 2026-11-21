@@ -1,8 +1,8 @@
-import { LegalPage } from "@/components/legal/LegalPage";
-import { termsOfUse } from "@/data/legal";
+import { ContentPage } from "@/components/content/ContentPage";
+import { termsOfUse } from "@/data/policies";
 
-export const metadata = { title: "Điều khoản sử dụng | SàiHành" };
+export const metadata = { title: "Thỏa thuận sử dụng | SàiHành" };
 
 export default function TermsPage() {
-  return <LegalPage document={termsOfUse} />;
+  return <ContentPage document={termsOfUse} />;
 }

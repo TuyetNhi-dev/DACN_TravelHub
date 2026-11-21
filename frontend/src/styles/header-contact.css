@@ -2,7 +2,7 @@
 .header .nav { height:90px; gap:16px; }
 .header .nav-links { gap:20px; }
 .header .theme-toggle { margin-left:0; }
-.contact-bar { background:linear-gradient(105deg,var(--brand),var(--blue-dark)); color:var(--on-brand); font-size:12px; }
+.contact-bar { background:linear-gradient(105deg,var(--brand),var(--blue-dark)); color:var(--on-brand); font-size:max(12px, var(--text-min)); }
 .contact-bar-inner { min-height:36px; display:flex; align-items:center; justify-content:space-between; gap:12px; }
 .contact-hotline { white-space:nowrap; }
 .contact-hotline:hover,.contact-bar-actions > a:hover { text-decoration:underline; }
@@ -11,7 +11,7 @@
 .contact-bar .departure-trigger span { display:inline; }
 .header-search { display:flex; align-items:center; flex:1 1 160px; min-width:130px; max-width:210px; border:1px solid var(--line); border-radius:10px; background:var(--surface); }
 .header-search:focus-within { outline:2px solid var(--blue); outline-offset:2px; }
-.header-search input { width:100%; min-width:0; border:0; outline:none; background:transparent; padding:11px 0 11px 12px; color:var(--ink); font-size:12px; }
+.header-search input { width:100%; min-width:0; border:0; outline:none; background:transparent; padding:11px 0 11px 12px; color:var(--ink); font-size:max(12px, var(--text-min)); }
 .header-search button { border:0; background:transparent; color:var(--blue); width:40px; min-height:42px; flex-shrink:0; display:grid; place-items:center; }
 html:root { scroll-padding-top:144px; }
 .filters,.detail-booking { top:144px; }
@@ -23,10 +23,10 @@ html:root { scroll-padding-top:144px; }
  .header .theme-toggle { grid-column:2; grid-row:1; }
  .header .menu-btn { grid-column:3; grid-row:1; }
  .header-search { grid-column:1/-1; grid-row:2; width:100%; max-width:none; margin-left:0; }
- .contact-bar { font-size:11px; }
+ .contact-bar { font-size:max(11px, var(--text-min)); }
  .contact-hotline > span { display:none; }
  .contact-bar-actions { gap:8px; }
- .contact-bar .departure-trigger { max-width:125px; font-size:11px; }
+ .contact-bar .departure-trigger { max-width:125px; font-size:max(11px, var(--text-min)); }
  .header .nav-links { top:167px; }
  .header .nav-links.open { max-height:calc(100dvh - 167px); }
  html:root { scroll-padding-top:184px; }

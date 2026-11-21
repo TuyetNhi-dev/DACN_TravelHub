@@ -6,7 +6,7 @@ import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useRequireSession } from "@/hooks/useRequireSession";
 import { ApiError } from "@/lib/api-client";
 import { isOperator, roleLabel } from "@/lib/auth";
-import { AuthActions } from "./AuthActions";
+import { SignOutButton } from "./SignOutButton";
 
 export function AccountPanel() {
   const { session, loading, error, refresh } = useRequireSession();
@@ -31,7 +31,7 @@ export function AccountPanel() {
             {isOperator(session.user) && (
               <Link className="btn btn-outline" href="/admin/service-requests">Yêu cầu tư vấn</Link>
             )}
-            <AuthActions />
+            <SignOutButton />
           </div>
         </section>
       )}

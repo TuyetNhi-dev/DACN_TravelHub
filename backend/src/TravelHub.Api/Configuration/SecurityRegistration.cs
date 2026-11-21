@@ -2,11 +2,13 @@ using System.Net;
 using System.Security.Claims;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using TravelHub.Api.Common.Errors;
 using TravelHub.Api.Features.Auth;
 using TravelHub.Api.Features.Bookings;
+using TravelHub.Api.Features.Cart;
 using TravelHub.Api.Features.ServiceRequests;
 
 namespace TravelHub.Api.Configuration;
@@ -16,6 +18,8 @@ public static class SecurityRegistration
     private const int AuthRequestsPerMinute = 20;
     private const int BookingsPerMinute = 10;
     private const int ServiceRequestsPerWindow = 5;
+    // The guest cart page asks for live prices on every visit; generous, but still a cap per client IP.
+    private const int CartQuotesPerMinute = 60;
     private static readonly TimeSpan ServiceRequestWindow = TimeSpan.FromMinutes(10);
 
     public static IServiceCollection AddTravelHubSecurity(this IServiceCollection services, IHostEnvironment env)
@@ -40,9 +44,23 @@ public static class SecurityRegistration
             .AddCookie(options => ConfigureCookie(options, securePolicy));
         services.AddOptions<CookieAuthenticationOptions>(CookieAuthenticationDefaults.AuthenticationScheme)
             .Configure<MemoryTicketStore>((options, store) => options.SessionStore = store);
-        services.AddAuthorization();
+        services.AddAuthorization(ConfigureAuthorization);
+        services.AddSingleton<IAuthorizationHandler, TermsAcceptedHandler>();
+        services.AddSingleton<IAuthorizationMiddlewareResultHandler, TermsAwareAuthorizationResultHandler>();
         services.AddRateLimiter(ConfigureRateLimits);
         return services;
+    }
+
+    /// <summary>
+    /// Every RequireAuthorization() (bookings, cart, account, back office) needs a session AND a stored agreement to
+    /// the data protection policy and terms of use. Only the endpoints used to agree or to leave ask for SignedIn.
+    /// </summary>
+    private static void ConfigureAuthorization(AuthorizationOptions options)
+    {
+        options.DefaultPolicy = new AuthorizationPolicyBuilder(CookieAuthenticationDefaults.AuthenticationScheme)
+            .RequireAuthenticatedUser().AddRequirements(new TermsAcceptedRequirement()).Build();
+        options.AddPolicy(AuthPolicies.SignedIn, policy => policy
+            .AddAuthenticationSchemes(CookieAuthenticationDefaults.AuthenticationScheme).RequireAuthenticatedUser());
     }
 
     private static void ConfigureCookie(CookieAuthenticationOptions options, CookieSecurePolicy securePolicy)
@@ -71,6 +89,8 @@ public static class SecurityRegistration
             context.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? ClientIp(context), BookingsPerMinute));
         options.AddPolicy(ServiceRequestEndpoints.CreateRateLimitPolicy, context => FixedWindow(
             ClientIp(context), ServiceRequestsPerWindow, ServiceRequestWindow));
+        options.AddPolicy(CartEndpoints.QuoteRateLimitPolicy,
+            context => FixedWindow(ClientIp(context), CartQuotesPerMinute));
     }
 
     /// <summary>

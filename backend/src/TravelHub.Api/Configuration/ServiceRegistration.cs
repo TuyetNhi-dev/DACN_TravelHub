@@ -2,11 +2,13 @@ using TravelHub.Api.Common.Email;
 using TravelHub.Api.Common.Http;
 using TravelHub.Api.Features.Auth.EmailVerification;
 using TravelHub.Api.Features.Auth.Google;
+using TravelHub.Api.Features.Auth.PasswordReset;
 using TravelHub.Api.Common.Time;
 using TravelHub.Api.Data;
 using TravelHub.Api.Features.Admin;
 using TravelHub.Api.Features.Auth;
 using TravelHub.Api.Features.Bookings;
+using TravelHub.Api.Features.Cart;
 using TravelHub.Api.Features.Branches;
 using TravelHub.Api.Features.Flights;
 using TravelHub.Api.Features.Health;
@@ -46,9 +48,11 @@ public static class ServiceRegistration
         services.AddSingleton<IEmailSender, SmtpEmailSender>();
         services.AddScoped<AuthRepository>().AddScoped<AuthService>();
         services.AddScoped<EmailVerificationRepository>().AddScoped<EmailVerificationService>();
+        services.AddScoped<PasswordResetService>();
         services.Configure<GoogleOptions>(config.GetSection("Google"));
         services.AddScoped<GoogleSignInService>();
         services.AddScoped<BookingRepository>().AddScoped<BookingService>().AddScoped<AdminBookingService>();
+        services.AddScoped<CartRepository>().AddScoped<CartService>();
         services.AddScoped<ServiceRequestRepository>().AddScoped<ServiceRequestService>()
             .AddScoped<AdminServiceRequestService>();
 
@@ -70,5 +74,6 @@ public static class ServiceRegistration
         app.MapBookingEndpoints();
         app.MapAdminEndpoints();
         app.MapServiceRequestEndpoints();
+        app.MapCartEndpoints();
     }
 }

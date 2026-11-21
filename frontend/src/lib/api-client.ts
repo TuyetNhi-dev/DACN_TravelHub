@@ -19,7 +19,7 @@ export class ApiError extends Error {
   }
 }
 
-type Method = "GET" | "POST";
+type Method = "GET" | "POST" | "DELETE";
 
 interface RequestOptions {
   method?: Method;
@@ -35,15 +35,18 @@ export function apiPost(path: string, body: unknown = {}, signal?: AbortSignal):
   return apiRequest(path, { method: "POST", body, signal });
 }
 
+/** Same CSRF header as POST: the backend's AntiforgeryFilter checks every non-GET request. */
+export function apiDelete(path: string, signal?: AbortSignal): Promise<unknown> {
+  return apiRequest(path, { method: "DELETE", signal });
+}
+
 async function apiRequest(path: string, { method = "GET", body, signal }: RequestOptions): Promise<unknown> {
   // One deadline covers the CSRF round trip, the request and reading the body.
   const timeout = AbortSignal.timeout(REQUEST_TIMEOUT_MS);
   const combined = signal ? AbortSignal.any([signal, timeout]) : timeout;
   const headers: Record<string, string> = { Accept: "application/json" };
-  if (method !== "GET") {
-    headers["Content-Type"] = "application/json";
-    headers[CSRF_HEADER] = await fetchCsrfToken(combined);
-  }
+  if (method !== "GET") headers[CSRF_HEADER] = await fetchCsrfToken(combined);
+  if (body !== undefined && method !== "GET") headers["Content-Type"] = "application/json";
   let response: Response;
   try {
     response = await fetch(path, {

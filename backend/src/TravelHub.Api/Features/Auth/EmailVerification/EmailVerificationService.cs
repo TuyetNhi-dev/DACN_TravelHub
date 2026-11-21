@@ -20,7 +20,8 @@ public sealed class EmailVerificationService(
     public async Task<bool> IssueAsync(ulong userId, string email, string fullName, CancellationToken ct)
     {
         var code = VerificationCode.Create();
-        await repository.SaveCodeAsync(userId, VerificationCode.Hash(userId, code), clock.UtcNow, ct);
+        await repository.SaveCodeAsync(userId, CodePurpose.VerifyEmail, VerificationCode.Hash(userId, code),
+            clock.UtcNow, ct);
         var message = VerificationEmail.Build(email, fullName, code, options.Value.FrontendBaseUrl);
         return await sender.SendAsync(message, ct);
     }
@@ -38,7 +39,7 @@ public sealed class EmailVerificationService(
 
         var userId = ParseId(account);
         var code = request.Code!.Trim();
-        var result = await repository.TryConsumeAsync(userId,
+        var result = await repository.TryVerifyEmailAsync(userId,
             pending => VerificationCode.Matches(pending.CodeHash, userId, code), clock.UtcNow, ct);
         if (result.Outcome == CodeCheck.Verified) return (await accounts.FindByIdAsync(userId, ct))!;
         throw ApiException.BadRequest(result.Outcome == CodeCheck.Wrong && result.AttemptsLeft > 0
@@ -56,7 +57,8 @@ public sealed class EmailVerificationService(
         var account = await accounts.FindByEmailAsync(AuthService.NormalizeEmail(request.Email!), ct);
         if (account is null || account.Status != AccountStatus.Pending) return;
         var userId = ParseId(account);
-        if (await repository.HasCodeSinceAsync(userId, clock.UtcNow - VerificationCode.ResendCooldown, ct)) return;
+        if (await repository.CountCodesSinceAsync(userId, CodePurpose.VerifyEmail,
+                clock.UtcNow - VerificationCode.ResendCooldown, ct) > 0) return;
         await IssueAsync(userId, account.User.Email, account.User.FullName, ct);
     }
 

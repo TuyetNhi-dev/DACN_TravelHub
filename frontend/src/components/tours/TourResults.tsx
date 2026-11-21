@@ -50,7 +50,8 @@ export function TourResults({ tours, region, initialFilters, showAll }: TourResu
 
   return (
     <div className="listing-layout">
-      <TourFiltersPanel filters={filters} activeCount={chips.length} destinations={destinationsOf(tours)}
+      <TourFiltersPanel filters={filters} activeCount={chips.length} resultCount={rows.length}
+        destinations={destinationsOf(tours)}
         priceCeiling={priceCeiling} onChange={change} onReset={reset} />
       <section className="listing-results" aria-label="Kết quả tìm tour">
         <div className="listing-toolbar">

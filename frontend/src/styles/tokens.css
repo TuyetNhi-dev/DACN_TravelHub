@@ -51,6 +51,15 @@
   --footer-muted: #a6c2d0;
   --nav-shadow: rgba(15,23,42,.08);
   --image-label-bg: rgba(15,23,42,.8);
+  /* Floor for every small font-size (written as max(12px, var(--text-min))): desktop keeps its compact
+     sizes, touch screens never drop below 14px. */
+  --text-min: 0px;
+  /* Promo red for the "Săn deal" tag; white text on it is 4.8:1 in both themes. */
+  --deal: #d92d20;
+}
+
+@media (max-width: 1023px) {
+  :root { --text-min: 14px; }
 }
 
 :root[data-theme="dark"] {
@@ -110,7 +119,8 @@
   --text-h1: clamp(32px, 4vw, 48px);
   --text-h2: clamp(26px, 3vw, 36px);
   --text-h3: clamp(18px, 1.6vw, 22px);
-  --text-body: 16px; --text-small: 14px; --text-caption: 13px; --text-eyebrow: 12px;
+  --text-body: 16px; --text-small: 14px; --text-caption: max(13px, var(--text-min));
+  --text-eyebrow: max(12px, var(--text-min));
   --shadow-sm: 0 1px 2px rgba(16, 63, 83, .06), 0 4px 14px rgba(16, 63, 83, .06);
   --shadow-md: 0 2px 6px rgba(16, 63, 83, .08), 0 18px 40px rgba(16, 63, 83, .12);
   --shadow-lg: 0 8px 20px rgba(16, 63, 83, .12), 0 32px 80px rgba(16, 63, 83, .2);

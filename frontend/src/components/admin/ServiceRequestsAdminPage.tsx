@@ -133,24 +133,30 @@ export function RequestStatusBadge({ status }: { status: string }) {
   return <Badge tone={meta.tone}>{meta.label}</Badge>;
 }
 
+// Header cells and the phone card labels (td[data-label]) share these names.
+const REQUEST_COLUMNS = ["Mã", "Dịch vụ", "Họ tên", "SĐT", "Ngày gửi", "Trạng thái", "Phụ trách"] as const;
+const [CODE, SERVICE, NAME, PHONE, SENT_AT, STATUS, ASSIGNEE] = REQUEST_COLUMNS;
+
 function RequestTable({ rows }: { rows: ServiceRequestSummary[] }) {
   return (
     <div className="sh-table-wrap">
-      <table className="sh-table">
+      <table className="sh-table sh-table--cards">
         <caption className="sr-only">Danh sách yêu cầu tư vấn, mới nhất trước</caption>
         <thead>
-          <tr><th>Mã</th><th>Dịch vụ</th><th>Họ tên</th><th>SĐT</th><th>Ngày gửi</th><th>Trạng thái</th><th>Phụ trách</th></tr>
+          <tr>{REQUEST_COLUMNS.map(column => <th key={column}>{column}</th>)}</tr>
         </thead>
         <tbody>
           {rows.map(row => (
             <tr key={row.id}>
-              <td><Link href={`/admin/service-requests/${encodeURIComponent(row.id)}`}>{row.code}</Link></td>
-              <td><ServiceTypeLabel type={row.serviceType} /></td>
-              <td>{row.fullName}{row.email && <small>{row.email}</small>}</td>
-              <td><a className="admin-phone" href={`tel:${row.phone}`}>{row.phone}</a></td>
-              <td>{formatDateTime(row.createdAt)}</td>
-              <td><RequestStatusBadge status={row.status} /></td>
-              <td>{row.assignedToName ?? <span className="admin-muted">Chưa có</span>}</td>
+              <td data-label={CODE}>
+                <Link href={`/admin/service-requests/${encodeURIComponent(row.id)}`}>{row.code}</Link>
+              </td>
+              <td data-label={SERVICE}><ServiceTypeLabel type={row.serviceType} /></td>
+              <td data-label={NAME}>{row.fullName}{row.email && <small>{row.email}</small>}</td>
+              <td data-label={PHONE}><a className="admin-phone" href={`tel:${row.phone}`}>{row.phone}</a></td>
+              <td data-label={SENT_AT}>{formatDateTime(row.createdAt)}</td>
+              <td data-label={STATUS}><RequestStatusBadge status={row.status} /></td>
+              <td data-label={ASSIGNEE}>{row.assignedToName ?? <span className="admin-muted">Chưa có</span>}</td>
             </tr>
           ))}
         </tbody>
