@@ -25,3 +25,32 @@ export function safeReturnPath(value: string | null, fallback = "/account"): str
 export function loginHref(returnPath: string): string {
   return "/login?next=" + encodeURIComponent(returnPath);
 }
+
+/** Avatar letters: first and last word ("Nguyễn Văn An" → "NA"), or the first two letters of a single word. */
+export function nameInitials(fullName: string): string {
+  const words = fullName.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "?";
+  const letters = words.length > 1 ? words[0][0] + words[words.length - 1][0] : words[0].slice(0, 2);
+  return letters.toLocaleUpperCase("vi");
+}
+
+export interface AccountLink {
+  href: string;
+  label: string;
+  /** The "Yêu cầu dịch vụ" entry shows how many requests nobody has contacted yet. */
+  showsNewRequests?: boolean;
+}
+
+/** Account menu entries; staff and admins also get the back-office queues (the server still checks roles). */
+export function accountLinks(user: AuthUser): AccountLink[] {
+  const links: AccountLink[] = [
+    { href: "/account", label: "Tài khoản của tôi" },
+    { href: "/bookings", label: "Đơn của tôi" },
+  ];
+  if (!isOperator(user)) return links;
+  return [
+    ...links,
+    { href: "/admin/bookings", label: "Quản trị đơn" },
+    { href: "/admin/service-requests", label: "Yêu cầu dịch vụ", showsNewRequests: true },
+  ];
+}

@@ -6,13 +6,13 @@
 .admin-nav a[aria-current="page"] { color: var(--blue); border-bottom-color: var(--brand); }
 .admin-nav a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; border-radius: 6px; }
 .admin-nav-badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px;
-  border-radius: var(--radius-pill); background: var(--brand); color: var(--on-brand); font-size: 11px; font-weight: 700; }
+  border-radius: var(--radius-pill); background: var(--brand); color: var(--on-brand); font-size: max(11px, var(--text-min)); font-weight: 700; }
 
 .admin-filters { align-items: end; }
 .admin-search { display: flex; gap: 8px; align-items: end; flex: 1 1 320px; }
 .admin-search .sh-field { flex: 1; }
 .admin-filters :is(input, select) { min-height: 42px; }
-.admin-count { margin: 0 0 10px; color: var(--muted); font-size: 13px; }
+.admin-count { margin: 0 0 10px; color: var(--muted); font-size: max(13px, var(--text-min)); }
 .admin-service { display: inline-flex; align-items: center; gap: 8px; white-space: nowrap; }
 .admin-service-tile { width: 28px; height: 28px; border-radius: 8px; }
 .admin-phone { font-variant-numeric: tabular-nums; }
@@ -38,12 +38,12 @@
 .admin-inline .sh-field { flex: 1 1 140px; }
 .admin-notes { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 10px; max-height: 360px; overflow-y: auto; }
 .admin-notes li { padding: 10px 12px; border-radius: 10px; background: var(--surface); }
-.admin-note-meta { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--muted); }
+.admin-note-meta { display: flex; justify-content: space-between; gap: 8px; font-size: max(12px, var(--text-min)); color: var(--muted); }
 .admin-note-meta b { color: var(--ink); }
 .admin-notes p { margin: 4px 0 0; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; }
 .admin-note-form { display: grid; gap: 8px; }
 .admin-note-form textarea { resize: vertical; }
-.admin-note-form small { font-size: 12px; }
+.admin-note-form small { font-size: max(12px, var(--text-min)); }
 
 @media (max-width: 960px) { .admin-request { grid-template-columns: minmax(0, 1fr); } }
 @media (max-width: 520px) {

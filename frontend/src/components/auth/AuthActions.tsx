@@ -1,42 +1,27 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Icon } from "@/components/ui/Icon";
-import { ApiError } from "@/lib/api-client";
 import { loginHref } from "@/lib/auth";
+import { AccountLinks } from "./AccountLinks";
+import { AccountMenu } from "./AccountMenu";
 import { useAuth } from "./AuthProvider";
 
 /** Pages that should not become the post-login destination. */
 const AUTH_PAGES = ["/login", "/register", "/verify-email"];
 
-function initials(fullName: string): string {
-  const words = fullName.trim().split(/\s+/);
-  const letters = words.length > 1 ? words[0][0] + words[words.length - 1][0] : words[0].slice(0, 2);
-  return letters.toUpperCase();
+interface AuthActionsProps {
+  /** "header": avatar dropdown in the desktop bar; "panel": the same entries listed in the hamburger panel. */
+  variant?: "header" | "panel";
+  /** New service requests (staff and admins), loaded once by the header for both variants. */
+  newRequests?: number;
+  onNavigate?: () => void;
 }
 
-export function AuthActions({ onNavigate }: { onNavigate?: () => void }) {
-  const { session, loading, logout } = useAuth();
+export function AuthActions({ variant = "header", newRequests = 0, onNavigate }: AuthActionsProps) {
+  const { session, loading } = useAuth();
   const pathname = usePathname();
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState("");
-  const router = useRouter();
-
-  async function signOut() {
-    setBusy(true);
-    setError("");
-    try {
-      await logout();
-      onNavigate?.();
-      router.push("/");
-    } catch (failure) {
-      setError(failure instanceof ApiError ? failure.message : "Không thể đăng xuất.");
-    } finally {
-      setBusy(false);
-    }
-  }
 
   if (loading) return <span className="auth-header-name" aria-live="polite">Đang kiểm tra phiên…</span>;
   if (!session) {
@@ -47,23 +32,22 @@ export function AuthActions({ onNavigate }: { onNavigate?: () => void }) {
           aria-current={pathname === "/login" ? "page" : undefined}>
           <Icon name="users" size={18} />Đăng nhập
         </Link>
-        <Link className="btn btn-primary" href="/register" onClick={onNavigate}
-          aria-current={pathname === "/register" ? "page" : undefined}>Đăng ký</Link>
+        {/* The desktop bar keeps one short account button (like the avatar when signed in): with the cart icon,
+            even "Đăng nhập / Đăng ký" overflows at 1220 and 1440px. Sign-up is a clear button on the login page,
+            and is also in the hamburger panel and the footer. */}
+        {variant === "panel" && (
+          <Link className="btn btn-primary" href="/register" onClick={onNavigate}
+            aria-current={pathname === "/register" ? "page" : undefined}>Đăng ký</Link>
+        )}
       </>
     );
   }
-  return (
-    <>
-      <Link className="btn btn-ghost auth-user-chip" href="/account" onClick={onNavigate}
-        title={session.user.fullName}>
-        <span className="auth-avatar" aria-hidden="true">{initials(session.user.fullName)}</span>
-        <span className="auth-header-name">{session.user.fullName}</span>
-      </Link>
-      <Link className="btn btn-ghost" href="/bookings" onClick={onNavigate}>Đơn của tôi</Link>
-      <button className="btn btn-ghost" disabled={busy} onClick={() => void signOut()}>
-        {busy ? "Đang thoát…" : "Đăng xuất"}
-      </button>
-      {error && <span role="alert">{error}</span>}
-    </>
-  );
+  if (variant === "panel") {
+    return (
+      <div className="account-panel account-panel--inline">
+        <AccountLinks user={session.user} pathname={pathname} newRequests={newRequests} onNavigate={onNavigate} />
+      </div>
+    );
+  }
+  return <AccountMenu user={session.user} pathname={pathname} newRequests={newRequests} />;
 }

@@ -1,7 +1,7 @@
 /* /flights/deals "Săn vé rẻ"; tokens come from globals.css. */
 .fd-origins{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 .fd-chip{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:9px 16px;
-  font-size:13px;text-decoration:none}
+  font-size:max(13px, var(--text-min));text-decoration:none}
 .fd-chip.is-active{background:var(--blue);border-color:var(--blue);color:#fff}
 .fd-chip:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
 .fd-grid{list-style:none;margin:0;padding:0;display:grid;gap:16px;
@@ -9,12 +9,12 @@
 .fd-card{height:100%;display:grid;gap:6px;align-content:start;background:var(--panel);border:1px solid var(--line);
   border-radius:16px;padding:20px}
 .fd-card.is-featured{border:2px solid var(--accent-warm)}
-.fd-badge{justify-self:start;font-size:11px;font-weight:600;letter-spacing:.4px;color:var(--green);
+.fd-badge{justify-self:start;font-size:max(11px, var(--text-min));font-weight:600;letter-spacing:.4px;color:var(--green);
   background:var(--blue-soft);border-radius:999px;padding:4px 10px}
 .fd-card.is-featured .fd-badge{color:var(--accent-warm)}
 .fd-card h2{font-size:18px!important;margin:6px 0 0!important}
 .fd-card p{margin:0}
-.fd-route,.fd-updated{font-size:12px!important;color:var(--muted)!important}
+.fd-route,.fd-updated{font-size:max(12px, var(--text-min))!important;color:var(--muted)!important}
 .fd-price strong{color:var(--blue);font-size:22px}
 .fd-card .btn{margin-top:10px}
 .fd-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center}

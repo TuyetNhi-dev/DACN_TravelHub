@@ -35,10 +35,18 @@ export const promises: { icon: IconName; title: string; text: string }[] = [
     text: "Xem trạng thái từng dịch vụ trong đơn và hủy đơn khi chính sách cho phép." },
 ];
 
-export const navigation = [
+export interface NavItem {
+  label: string;
+  href: string;
+  /** Short promo tag drawn beside the label; `ariaLabel` then names the link with it. */
+  badge?: string;
+  ariaLabel?: string;
+}
+
+export const navigation: readonly NavItem[] = [
   { label: "Trang chủ", href: "/" },
   { label: "Tour du lịch", href: "/tours" },
   { label: "Khách sạn", href: "/hotels" },
-  { label: "Vé máy bay", href: "/flights" },
+  { label: "Vé máy bay", href: "/flights", badge: "Săn deal", ariaLabel: "Vé máy bay, săn deal" },
   { label: "Văn phòng", href: "/branches" },
 ];

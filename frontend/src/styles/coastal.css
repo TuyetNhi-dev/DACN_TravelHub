@@ -165,7 +165,7 @@ body footer {
 
   body .kicker {
     letter-spacing: 1.3px;
-    font-size: 10px;
+    font-size: max(10px, var(--text-min));
   }
 
   body .floating-card {

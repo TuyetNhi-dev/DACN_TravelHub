@@ -32,10 +32,24 @@ export interface TourDeparture {
   isBookable: boolean;
 }
 
+/** Mirrors TourImageDto; the first photo of a tour is its cover. */
+export interface TourImage {
+  url: string;
+  alt: string | null;
+}
+
+/** Mirrors TourInclusionsDto: "Giá tour bao gồm" / "Không bao gồm", each in display order. */
+export interface TourInclusions {
+  included: string[];
+  excluded: string[];
+}
+
 export interface TourDetail {
   tour: TourSummary;
   itinerary: ItineraryDay[];
   departures: TourDeparture[];
+  images: TourImage[];
+  inclusions: TourInclusions;
 }
 
 /** Mirrors TourCollectionDto: a seasonal or themed group of tours. */

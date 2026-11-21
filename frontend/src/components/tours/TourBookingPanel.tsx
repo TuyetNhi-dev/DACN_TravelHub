@@ -1,30 +1,36 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ContactDetails, MissingPhoneHint, useHasContactPhone } from "@/components/bookings/ContactDetails";
 import { LoginPrompt } from "@/components/bookings/LoginPrompt";
 import { PassengerFields } from "@/components/bookings/PassengerFields";
 import { PriceSummary } from "@/components/bookings/PriceSummary";
+import { AddToCartButton } from "@/components/cart/AddToCartButton";
+import { useCart } from "@/components/cart/CartProvider";
 import { useBookingSubmit } from "@/hooks/useBookingSubmit";
 import {
   MAX_TOUR_TRAVELERS, emptyPassengers, passengersIssue, resizePassengers, trimPassengers,
 } from "@/lib/booking-rules";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { seatLabel, tourEstimate } from "@/lib/tour-display";
+import { tourEstimate } from "@/lib/tour-display";
 import { createTourBooking } from "@/services/bookings";
+import type { PassengerInput } from "@/types/booking";
 import type { TourDeparture } from "@/types/tour";
+import { TourChoiceFields } from "./TourChoiceFields";
 
 interface TourBookingPanelProps {
   departures: TourDeparture[];
   /** Chosen departure, shared with the departure calendar on the page. */
   departureId: string | null;
   onDepartureChange: (departureId: string) => void;
+  /** Head count filled in from the cart's "Đặt ngay" link. */
+  initialCounts?: { adultCount?: number; childCount?: number };
 }
 
-export function TourBookingPanel({ departures, departureId, onDepartureChange }: TourBookingPanelProps) {
-  const bookable = departures.filter(departure => departure.isBookable);
-  const { session, loading } = useAuth();
+export function TourBookingPanel(props: TourBookingPanelProps) {
+  const bookable = props.departures.filter(departure => departure.isBookable);
+  const { loading } = useAuth();
   if (bookable.length === 0) {
     return (
       <div className="sh-state">
@@ -34,100 +40,136 @@ export function TourBookingPanel({ departures, departureId, onDepartureChange }:
     );
   }
   if (loading) return <p role="status">Đang kiểm tra phiên đăng nhập…</p>;
-  if (!session) return <LoginPrompt action="giữ chỗ tour" />;
-  return <TourBookingForm departures={bookable} departureId={departureId} onDepartureChange={onDepartureChange} />;
+  return <TourBookingForm {...props} departures={bookable} />;
 }
 
-function TourBookingForm({ departures, departureId, onDepartureChange }: TourBookingPanelProps) {
-  const [adults, setAdults] = useState(1);
-  const [children, setChildren] = useState(0);
-  const [passengers, setPassengers] = useState(() => emptyPassengers(1, 0));
-  const { submit, busy, error, setError } = useBookingSubmit();
-  const hasPhone = useHasContactPhone();
+/**
+ * Counts from the cart are kept as they are, even above the seats left: silently dropping a traveller would
+ * book fewer people than the customer meant. The form shows why it cannot be booked instead.
+ */
+function startCounts(initial: TourBookingPanelProps["initialCounts"]) {
+  const adultCount = Math.min(Math.max(initial?.adultCount ?? 1, 1), MAX_TOUR_TRAVELERS);
+  return { adultCount, childCount: Math.min(Math.max(initial?.childCount ?? 0, 0), MAX_TOUR_TRAVELERS - adultCount) };
+}
+
+/** Guests choose a departure and head count to put in the cart; booking itself needs an account. */
+function TourBookingForm({ departures, departureId, onDepartureChange, initialCounts }: TourBookingPanelProps) {
+  const { session } = useAuth();
   const departure = departures.find(item => item.id === departureId) ?? departures[0];
   const maxTravelers = Math.min(MAX_TOUR_TRAVELERS, departure.availableSeats);
+  const [counts, setCounts] = useState(() => startCounts(initialCounts));
+  const [passengers, setPassengers] = useState(() => emptyPassengers(counts.adultCount, counts.childCount));
+  const { adultCount, childCount } = counts;
 
   function changeCounts(nextAdults: number, nextChildren: number) {
-    setAdults(nextAdults);
-    setChildren(nextChildren);
+    setCounts({ adultCount: nextAdults, childCount: nextChildren });
     setPassengers(current => resizePassengers(current, nextAdults, nextChildren));
   }
 
+  const choice = { departureId: departure.id, adultCount, childCount };
+  const prices = { adult: departure.adultPrice, child: departure.childPrice };
+  const tooMany = adultCount + childCount > maxTravelers;
+  return (
+    <div className="sh-form">
+      <TourChoiceFields departures={departures} departure={departure} adultCount={adultCount}
+        childCount={childCount} maxTravelers={maxTravelers} onDepartureChange={onDepartureChange}
+        onCountsChange={changeCounts} />
+      {tooMany && (
+        <p className="sh-hint" role="status">
+          Lịch này chỉ còn nhận tối đa {maxTravelers} khách cho một đơn. Vui lòng giảm số khách hoặc chọn ngày khác.
+        </p>
+      )}
+      {session ? (
+        <BookingFields departure={departure} adultCount={adultCount} childCount={childCount}
+          maxTravelers={maxTravelers} passengers={passengers} onPassengersChange={setPassengers}
+          cartButton={<AddToCartButton choice={choice} prices={prices} disabled={tooMany} />} />
+      ) : (
+        <>
+          <Estimate departure={departure} adultCount={adultCount} childCount={childCount} />
+          <AddToCartButton choice={choice} prices={prices} disabled={tooMany} />
+          <LoginPrompt action="giữ chỗ tour" />
+        </>
+      )}
+    </div>
+  );
+}
+
+interface EstimateProps {
+  departure: TourDeparture;
+  adultCount: number;
+  childCount: number;
+}
+
+function Estimate({ departure, adultCount, childCount }: EstimateProps) {
+  return (
+    <PriceSummary
+      lines={[
+        {
+          label: "Khởi hành – kết thúc",
+          value: `${formatDate(departure.departureDate)} – ${formatDate(departure.returnDate)}`,
+        },
+        { label: `Người lớn × ${adultCount}`, value: formatCurrency(departure.adultPrice) },
+        ...(childCount > 0
+          ? [{
+            label: `Trẻ em × ${childCount}`,
+            value: formatCurrency(departure.childPrice ?? departure.adultPrice),
+          }]
+          : []),
+      ]}
+      total={tourEstimate(departure, adultCount, childCount)}
+    />
+  );
+}
+
+interface BookingFieldsProps {
+  departure: TourDeparture;
+  adultCount: number;
+  childCount: number;
+  maxTravelers: number;
+  passengers: PassengerInput[];
+  onPassengersChange: (passengers: PassengerInput[]) => void;
+  cartButton: ReactNode;
+}
+
+function BookingFields(props: BookingFieldsProps) {
+  const { departure, adultCount, childCount, maxTravelers, passengers, onPassengersChange, cartButton } = props;
+  const { submit, busy, error, setError } = useBookingSubmit();
+  const { removeDeparture } = useCart();
+  const hasPhone = useHasContactPhone();
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const issue = adults + children > maxTravelers
+    const issue = adultCount + childCount > maxTravelers
       ? `Lịch này chỉ nhận tối đa ${maxTravelers} khách cho một đơn.`
       : passengersIssue(passengers);
     if (issue) { setError(issue); return; }
-    void submit(() => createTourBooking({
-      departureId: departure.id, adultCount: adults, childCount: children, passengers: trimPassengers(passengers),
-    }));
+    void submit(async () => {
+      const booking = await createTourBooking({
+        departureId: departure.id, adultCount, childCount, passengers: trimPassengers(passengers),
+      });
+      // The departure is booked now, so its cart line (if any) is no longer needed.
+      await removeDeparture(departure.id);
+      return booking;
+    });
   }
 
   return (
     <form className="sh-form" onSubmit={handleSubmit} aria-describedby="tour-booking-note">
-      <label className="sh-field">
-        Ngày khởi hành
-        <select value={departure.id} onChange={event => onDepartureChange(event.target.value)}>
-          {departures.map(item => (
-            <option key={item.id} value={item.id}>
-              {formatDate(item.departureDate)} · {item.departureFrom} · {seatLabel(item)}
-            </option>
-          ))}
-        </select>
-      </label>
-      <div className="sh-form-grid">
-        <CountField label="Người lớn" min={1} max={maxTravelers - children} value={adults}
-          onChange={value => changeCounts(value, children)} />
-        <CountField label="Trẻ em" min={0} max={maxTravelers - adults} value={children}
-          onChange={value => changeCounts(adults, value)} />
-      </div>
-      <PassengerFields passengers={passengers} onChange={setPassengers} idPrefix="tour-passenger" />
+      <PassengerFields passengers={passengers} onChange={onPassengersChange} idPrefix="tour-passenger" />
       <ContactDetails />
-      <PriceSummary
-        lines={[
-          {
-            label: "Khởi hành – kết thúc",
-            value: `${formatDate(departure.departureDate)} – ${formatDate(departure.returnDate)}`,
-          },
-          { label: `Người lớn × ${adults}`, value: formatCurrency(departure.adultPrice) },
-          ...(children > 0
-            ? [{ label: `Trẻ em × ${children}`, value: formatCurrency(departure.childPrice ?? departure.adultPrice) }]
-            : []),
-        ]}
-        total={tourEstimate(departure, adults, children)}
-      />
+      <Estimate departure={departure} adultCount={adultCount} childCount={childCount} />
       {error && <p className="sh-error" role="alert">{error}</p>}
       {!hasPhone && <MissingPhoneHint />}
-      <button className="btn btn-primary" type="submit" disabled={busy || !hasPhone}>
-        {busy ? "Đang giữ chỗ…" : "Giữ chỗ ngay"}
-      </button>
+      <div className="tour-booking-actions">
+        <button className="btn btn-primary" type="submit" disabled={busy || !hasPhone}>
+          {busy ? "Đang giữ chỗ…" : "Giữ chỗ ngay"}
+        </button>
+        {cartButton}
+      </div>
       <p id="tour-booking-note" className="tour-api-note">
         Hệ thống giữ chỗ ngay khi đặt. Tổng tiền được máy chủ tính lại theo giá của lịch khởi hành;
-        nhân viên sẽ liên hệ xác nhận và hướng dẫn thanh toán.
+        nhân viên sẽ liên hệ xác nhận và hướng dẫn thanh toán. Thêm vào giỏ chỉ lưu lựa chọn, chưa giữ chỗ.
       </p>
     </form>
-  );
-}
-
-interface CountFieldProps {
-  label: string;
-  min: number;
-  max: number;
-  value: number;
-  onChange: (value: number) => void;
-}
-
-function CountField({ label, min, max, value, onChange }: CountFieldProps) {
-  // Keep the current value selectable even when a newly chosen departure has fewer seats; submit re-checks.
-  const upper = Math.max(max, value);
-  const options = Array.from({ length: Math.max(0, upper - min + 1) }, (_, index) => min + index);
-  return (
-    <label className="sh-field">
-      {label}
-      <select value={value} onChange={event => onChange(Number(event.target.value))}>
-        {options.map(option => <option key={option} value={option}>{option}</option>)}
-      </select>
-    </label>
   );
 }

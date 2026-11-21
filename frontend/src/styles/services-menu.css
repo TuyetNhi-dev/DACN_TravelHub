@@ -27,7 +27,7 @@
 .svc-menu-tile { width: 40px; height: 40px; border-radius: 12px; }
 .svc-menu-text { display: grid; gap: 2px; min-width: 0; }
 .svc-menu-text b { font-size: 14px; font-weight: 600; }
-.svc-menu-text small { font-size: 12px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.svc-menu-text small { font-size: max(12px, var(--text-min)); color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 /* The desktop header starts at 1220px, the narrowest width where the sign-in buttons fit on one line
    (measured with Edge headless); the search box shrinks instead of the buttons wrapping. */

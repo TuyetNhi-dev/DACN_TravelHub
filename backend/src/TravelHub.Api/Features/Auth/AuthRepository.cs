@@ -6,7 +6,7 @@ namespace TravelHub.Api.Features.Auth;
 public sealed class AuthRepository(MySqlConnectionFactory connections)
 {
     private const string AccountColumns =
-        "SELECT id, full_name, email, phone, password_hash, google_subject, status FROM users";
+        "SELECT id, full_name, email, phone, password_hash, google_subject, status, terms_accepted_at FROM users";
 
     public Task<Account?> FindByEmailAsync(string email, CancellationToken ct) =>
         FindAsync(AccountColumns + " WHERE email = @value", email, ct);
@@ -31,12 +31,13 @@ public sealed class AuthRepository(MySqlConnectionFactory connections)
             Hash = reader.GetNullableString("password_hash"),
             GoogleSubject = reader.GetNullableString("google_subject"),
             Status = reader.GetString("status"),
+            TermsAcceptedAt = reader.GetNullableUtcDateTime("terms_accepted_at"),
         }, ct);
         if (row is null) return null;
         var roles = await ListActiveRolesAsync(connection, row.Id, ct);
         var user = new AuthUserDto(row.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
             row.FullName, row.Email, row.Phone, roles);
-        return new Account(user, row.Hash, row.GoogleSubject, row.Status);
+        return new Account(user, row.Hash, row.GoogleSubject, row.Status, row.TermsAcceptedAt);
     }
 
     private static async Task<IReadOnlyList<RoleAssignmentDto>> ListActiveRolesAsync(
@@ -62,8 +63,8 @@ public sealed class AuthRepository(MySqlConnectionFactory connections)
         await using var connection = await connections.OpenAsync(ct);
         await using var transaction = await connection.BeginTransactionAsync(ct);
         await using var command = new MySqlCommand("""
-            INSERT INTO users (full_name, email, phone, password_hash, google_subject, status)
-            VALUES (@name, @email, @phone, @hash, @google, @status)
+            INSERT INTO users (full_name, email, phone, password_hash, google_subject, status, terms_accepted_at)
+            VALUES (@name, @email, @phone, @hash, @google, @status, @terms)
             """, connection, transaction);
         command.Parameters.AddWithValue("@name", customer.FullName);
         command.Parameters.AddWithValue("@email", customer.Email);
@@ -71,6 +72,7 @@ public sealed class AuthRepository(MySqlConnectionFactory connections)
         command.Parameters.AddWithValue("@hash", customer.PasswordHash);
         command.Parameters.AddWithValue("@google", customer.GoogleSubject);
         command.Parameters.AddWithValue("@status", customer.Status);
+        command.Parameters.AddWithValue("@terms", customer.TermsAcceptedAt);
         await command.ExecuteNonQueryAsync(ct);
         var userId = command.LastInsertedId;
         await AssignCustomerRoleAsync(command, userId, ct);
@@ -84,6 +86,17 @@ public sealed class AuthRepository(MySqlConnectionFactory connections)
         await using var connection = await connections.OpenAsync(ct);
         await using var command = new MySqlCommand("UPDATE users SET phone = @phone WHERE id = @id", connection);
         command.Parameters.AddWithValue("@phone", phone);
+        command.Parameters.AddWithValue("@id", userId);
+        await command.ExecuteNonQueryAsync(ct);
+    }
+
+    /// <summary>Stores the agreement time once; a second call keeps the first time (the original consent).</summary>
+    public async Task AcceptTermsAsync(ulong userId, DateTime nowUtc, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand(
+            "UPDATE users SET terms_accepted_at = @now WHERE id = @id AND terms_accepted_at IS NULL", connection);
+        command.Parameters.AddWithValue("@now", nowUtc);
         command.Parameters.AddWithValue("@id", userId);
         await command.ExecuteNonQueryAsync(ct);
     }

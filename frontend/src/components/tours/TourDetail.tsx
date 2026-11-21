@@ -1,21 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Breadcrumb } from "@/components/ui/Breadcrumb";
-import { Gallery } from "@/components/ui/Gallery";
 import { Icon } from "@/components/ui/Icon";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useResource } from "@/hooks/useResource";
-import { formatCurrency } from "@/lib/format";
-import { getTourImages } from "@/lib/media";
 import { tourDuration } from "@/lib/tour-display";
 import { getTour } from "@/services/tours";
+import type { CartChoice } from "@/types/cart";
 import type { TourDetail as Detail } from "@/types/tour";
 import { DepartureTable } from "./DepartureTable";
 import { TourBookingPanel } from "./TourBookingPanel";
 import { TourDepartureCalendar } from "./TourDepartureCalendar";
+import { TourHeader } from "./TourHeader";
+import { TourInclusions } from "./TourInclusions";
+import { TourMobileBookBar } from "./TourMobileBookBar";
 
-export function TourDetail({ id }: { id: string }) {
+const BOOKING_PANEL_ID = "tour-booking";
+
+export function TourDetail({ id, prefill = {} }: { id: string; prefill?: Partial<CartChoice> }) {
   const { state, retry } = useResource(`tour:${id}`, signal => getTour(id, signal));
   return (
     <main id="main-content" className="page-main detail-page">
@@ -25,34 +27,26 @@ export function TourDetail({ id }: { id: string }) {
           <ErrorState error={state.error} onRetry={retry} backHref="/tours" backLabel="Về danh sách tour" />
         </div>
       )}
-      {state.status === "ready" && <TourDetailContent detail={state.data} />}
+      {state.status === "ready" && <TourDetailContent detail={state.data} prefill={prefill} />}
     </main>
   );
 }
 
-function TourDetailContent({ detail: { tour, itinerary, departures } }: { detail: Detail }) {
+interface TourDetailContentProps {
+  detail: Detail;
+  prefill: Partial<CartChoice>;
+}
+
+function TourDetailContent({ detail, prefill }: TourDetailContentProps) {
+  const { tour, itinerary, departures, images, inclusions } = detail;
   // Shared by the departure calendar and the booking panel's dropdown so both always agree.
-  const [departureId, setDepartureId] = useState<string | null>(
-    () => departures.find(departure => departure.isBookable)?.id ?? null);
+  // A departure pre-filled from the cart is used only while it can still be booked.
+  const [departureId, setDepartureId] = useState<string | null>(() =>
+    departures.find(departure => departure.isBookable && departure.id === prefill.departureId)?.id
+      ?? departures.find(departure => departure.isBookable)?.id ?? null);
   return (
     <>
-      <div className="container detail-breadcrumb">
-        <Breadcrumb items={[{ label: "Tour du lịch", href: "/tours" }, { label: tour.code }]} />
-      </div>
-      <div className="container detail-title">
-        <div>
-          <span className="kicker">MÃ TOUR {tour.code}</span>
-          <h1>{tour.title}</h1>
-          <p><Icon name="map" size={17} />{tour.destination}</p>
-        </div>
-        <div className="detail-price">
-          <small>Giá từ</small><strong>{formatCurrency(tour.basePrice)}</strong><span>/ người lớn</span>
-        </div>
-      </div>
-      <figure className="container detail-illustration">
-        <Gallery images={getTourImages(tour)} title={tour.title} />
-        <figcaption>Ảnh minh họa cho các điểm đến trong hành trình, không phải ảnh riêng của tour.</figcaption>
-      </figure>
+      <TourHeader tour={tour} images={images} />
       <div className="container detail-layout">
         <article className="detail-content">
           <div className="overview-strip">
@@ -74,6 +68,7 @@ function TourDetailContent({ detail: { tour, itinerary, departures } }: { detail
               </ol>
             ) : <p>Lịch trình chi tiết đang được cập nhật.</p>}
           </section>
+          <TourInclusions inclusions={inclusions} />
           <section>
             <h2>Lịch khởi hành</h2>
             {departures.length > 0 && (
@@ -90,12 +85,14 @@ function TourDetailContent({ detail: { tour, itinerary, departures } }: { detail
             </ul>
           </section>
         </article>
-        <aside className="detail-booking" aria-label="Đặt tour">
+        <aside id={BOOKING_PANEL_ID} className="detail-booking" aria-label="Đặt tour" tabIndex={-1}>
           <span className="kicker">ĐẶT TOUR</span>
           <h2>Chọn lịch &amp; số khách</h2>
-          <TourBookingPanel departures={departures} departureId={departureId} onDepartureChange={setDepartureId} />
+          <TourBookingPanel departures={departures} departureId={departureId} onDepartureChange={setDepartureId}
+            initialCounts={{ adultCount: prefill.adultCount, childCount: prefill.childCount }} />
         </aside>
       </div>
+      <TourMobileBookBar price={tour.basePrice} targetId={BOOKING_PANEL_ID} />
     </>
   );
 }

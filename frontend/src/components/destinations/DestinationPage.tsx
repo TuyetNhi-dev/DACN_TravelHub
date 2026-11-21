@@ -48,7 +48,7 @@ export function DestinationPage({ slug }: { slug: string }) {
           {settled
             ? (
               <EmptyState title="Chưa có dịch vụ tại điểm đến này">
-                Hãy xem các tour khác hoặc gọi hotline 1900 6886.
+                Hãy xem các tour khác hoặc xem mục Trợ giúp để liên hệ tư vấn.
               </EmptyState>
             )
             : <CardSkeletons count={3} label="Đang tải thông tin điểm đến…" />}

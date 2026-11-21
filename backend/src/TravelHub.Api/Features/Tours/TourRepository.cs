@@ -86,6 +86,32 @@ public sealed class TourRepository(MySqlConnectionFactory connections)
             reader.GetInt32("day_number"), reader.GetString("title"), reader.GetNullableString("description")), ct);
     }
 
+    /// <summary>Photos, cover (lowest sort_order) first; id breaks ties so the order never changes between calls.</summary>
+    public async Task<IReadOnlyList<TourImageRow>> ListImagesAsync(ulong tourId, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand("""
+            SELECT image_url, alt_text, sort_order FROM tour_images
+            WHERE tour_id = @id ORDER BY sort_order, id
+            """, connection);
+        command.Parameters.AddWithValue("@id", tourId);
+        return await command.ReadAllAsync(reader => new TourImageRow(
+            reader.GetString("image_url"), reader.GetNullableString("alt_text"), reader.GetInt32("sort_order")), ct);
+    }
+
+    /// <summary>Inclusion lines in insertion order, which is the order the operator wrote them in.</summary>
+    public async Task<IReadOnlyList<TourInclusionRow>> ListInclusionsAsync(ulong tourId, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand("""
+            SELECT description, is_included FROM tour_inclusions
+            WHERE tour_id = @id ORDER BY id
+            """, connection);
+        command.Parameters.AddWithValue("@id", tourId);
+        return await command.ReadAllAsync(reader => new TourInclusionRow(
+            reader.GetString("description"), reader.GetBoolean("is_included")), ct);
+    }
+
     /// <summary>Departures from today on, excluding cancelled ones, which customers never need to see.</summary>
     public async Task<IReadOnlyList<TourDepartureRow>> ListUpcomingDeparturesAsync(
         ulong tourId, DateOnly today, CancellationToken ct)

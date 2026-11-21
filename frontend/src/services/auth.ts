@@ -1,7 +1,7 @@
 import { ApiError, apiGet, apiPost } from "@/lib/api-client";
-import { invalid, isRecord, list, optStr, str, type Row } from "@/lib/decode";
+import { bool, invalid, isRecord, list, optStr, str, type Row } from "@/lib/decode";
 import type {
-  AuthUser, LoginInput, RegisterInput, RegisterResult, RoleAssignment, Session,
+  AuthUser, LoginInput, PasswordResetInput, RegisterInput, RegisterResult, RoleAssignment, Session,
 } from "@/types/auth";
 
 const RESOURCE = "tài khoản";
@@ -25,7 +25,10 @@ function decodeUser(value: unknown): AuthUser {
 
 function decodeSession(value: unknown): Session {
   if (!isRecord(value)) return invalid(RESOURCE);
-  return { user: decodeUser(value.user), expiresAt: optStr(value, "expiresAt", RESOURCE) };
+  return {
+    user: decodeUser(value.user), expiresAt: optStr(value, "expiresAt", RESOURCE),
+    termsAccepted: bool(value, "termsAccepted", RESOURCE),
+  };
 }
 
 /** Returns null when nobody is signed in instead of treating it as an error. */
@@ -71,6 +74,21 @@ export async function resendVerification(email: string): Promise<string> {
 
 function readMessage(value: unknown): string {
   return isRecord(value) ? str(value, "message", RESOURCE) : invalid(RESOURCE);
+}
+
+/** "Hoàn tất đăng ký": stores the agreement; the refreshed session has termsAccepted = true. */
+export async function acceptTerms(): Promise<Session> {
+  return decodeSession(await apiPost("/api/auth/accept-terms", { accept: true }));
+}
+
+/** Always answers the same message, whether or not the email is registered. */
+export async function requestPasswordReset(email: string): Promise<string> {
+  return readMessage(await apiPost("/api/auth/password-reset/request", { email }));
+}
+
+/** A correct code sets the new password and ends every other session of the account. */
+export async function confirmPasswordReset(input: PasswordResetInput): Promise<string> {
+  return readMessage(await apiPost("/api/auth/password-reset/confirm", input));
 }
 
 /** Saves the contact phone on the account; every later booking uses it without asking again. */

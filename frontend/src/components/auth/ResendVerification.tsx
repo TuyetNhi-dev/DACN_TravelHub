@@ -9,10 +9,12 @@ import { resendVerification } from "@/services/auth";
 const COOLDOWN_SECONDS = 60;
 const TICK_MS = 1000;
 
-export function ResendVerification({ email, startCoolingDown = false }: {
+export function ResendVerification({ email, startCoolingDown = false, send = resendVerification }: {
   email: string;
   /** True right after a mail was sent, so an immediate resend is not offered. */
   startCoolingDown?: boolean;
+  /** Which code to send again: sign-up verification by default, or a password-reset code. */
+  send?: (email: string) => Promise<string>;
 }) {
   const [secondsLeft, setSecondsLeft] = useState(startCoolingDown ? COOLDOWN_SECONDS : 0);
   const [busy, setBusy] = useState(false);
@@ -28,7 +30,7 @@ export function ResendVerification({ email, startCoolingDown = false }: {
     setBusy(true);
     setStatus(null);
     try {
-      setStatus({ ok: true, text: await resendVerification(email) });
+      setStatus({ ok: true, text: await send(email) });
       setSecondsLeft(COOLDOWN_SECONDS);
     } catch (failure) {
       setStatus({ ok: false, text: failure instanceof ApiError ? failure.message : "Không gửi lại được mã." });

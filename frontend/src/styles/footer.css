@@ -1,0 +1,64 @@
+/* Site footer (components/layout/Footer.tsx): the one place for its styles. Tokens from tokens.css only. */
+
+/* Brand column a little wider, the four link columns equal. Short labels keep every link on one line from 1280px. */
+.site-footer-grid { display: grid; grid-template-columns: 1.4fr repeat(4, minmax(0, 1fr)); gap: 32px;
+  padding-bottom: 36px; }
+.site-footer-grid > * { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.site-footer-grid b { margin-bottom: 4px; color: var(--on-brand); font-size: 14px; line-height: 1.5;
+  white-space: nowrap; }
+.site-footer-grid a, .site-footer-grid span, .site-footer-grid small { color: var(--footer-muted); font-size: 14px;
+  line-height: 1.5; }
+.site-footer-grid nav a { white-space: nowrap; }
+.site-footer-grid a:hover { color: var(--on-brand); }
+
+/* ---------- Brand column ---------- */
+/* No background chip: the navy lettering keeps the thin light outline from branding.css so it reads on the dark
+   footer. */
+.site-footer-brand .brand-logo.footer-logo { width: 176px; margin: 0 0 2px; padding: 0; background: none; }
+.site-footer-grid .site-footer-slogan { color: var(--on-brand); font-weight: 600; }
+.site-footer-grid .site-footer-line { display: flex; align-items: flex-start; gap: 8px; }
+.site-footer-line svg { flex-shrink: 0; margin-top: 2px; }
+.site-footer-hotline { display: inline-flex !important; align-items: center; align-self: flex-start; gap: 10px;
+  color: var(--on-brand) !important; }
+.site-footer-hotline:hover strong { text-decoration: underline; }
+.site-footer-hotline:focus-visible { outline: 2px solid var(--on-brand); outline-offset: 3px; border-radius: 6px; }
+.site-footer-hotline span { display: grid; line-height: 1.3; }
+.site-footer-hotline strong { color: var(--on-brand); font-size: 20px; font-weight: 800; letter-spacing: .02em; }
+.site-footer-grid .site-footer-hotline small { font-size: max(12px, var(--text-min)); white-space: nowrap; }
+
+/* ---------- Payment column ---------- */
+.site-footer-payment-logo { display: inline-flex; align-self: flex-start; padding: 6px 10px; border-radius: 8px;
+  background: #fff; }
+.site-footer-payment-logo img { display: block; width: auto; height: 28px; }
+.site-footer-grid .site-footer-payment-methods { font-size: max(13px, var(--text-min)); white-space: nowrap; }
+.site-footer-grid .site-footer-payment small { margin-top: -8px; font-size: max(12px, var(--text-min)); opacity: .8; }
+
+/* ---------- Bottom bar: project notice on the left, source and photo credit on the right ---------- */
+.site-footer-bottom { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px 32px;
+  padding-top: 20px; border-top: 1px solid var(--footer-line); color: var(--footer-muted);
+  font-size: max(13px, var(--text-min)); line-height: 1.6; }
+.site-footer-bottom p { margin: 0; }
+.site-footer-bottom .site-footer-simulated { font-size: max(12px, var(--text-min)); opacity: .8; }
+.site-footer-bottom-end { flex-shrink: 0; white-space: nowrap; }
+.site-footer-bottom a { display: inline-flex; align-items: center; gap: 6px; color: var(--footer-muted); }
+.site-footer-bottom a:hover { color: var(--on-brand); }
+
+/* Touch screens: links are 44px tall with no gap (mobile.css); the text-only columns keep their spacing. */
+@media (max-width: 1023px) {
+  .site-footer-grid > .site-footer-brand, .site-footer-grid > .site-footer-payment { gap: 10px; }
+  .site-footer-bottom a { min-height: 44px; }
+}
+
+/* Tablet: brand across the top, the four link columns in one row below. */
+@media (max-width: 1100px) {
+  .site-footer-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px 24px; }
+  .site-footer-brand { grid-column: 1 / -1; }
+  .site-footer-grid nav a, .site-footer-grid .site-footer-payment-methods { white-space: normal; }
+}
+/* Phones: brand on top, the four columns as a compact 2 × 2 grid, the bottom bar stacked. */
+@media (max-width: 767px) {
+  .site-footer-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px 16px; }
+  .site-footer-grid b { white-space: normal; }
+  .site-footer-bottom { flex-direction: column; }
+  .site-footer-bottom-end { white-space: normal; }
+}

@@ -22,7 +22,7 @@
 .collection-pill-photo img { object-fit: cover; }
 .collection-pill-text { display: grid; line-height: 1.25; }
 .collection-pill-text strong { font-size: .98rem; white-space: nowrap; }
-.collection-pill-text small { color: var(--muted); font-size: .78rem; white-space: nowrap; }
+.collection-pill-text small { color: var(--muted); font-size: max(.78rem, var(--text-min)); white-space: nowrap; }
 
 .home-collections { position: relative; z-index: 2; margin-top: var(--space-8); }
 .listing-body > .collection-strip { margin-bottom: var(--space-6); padding-top: 4px; }

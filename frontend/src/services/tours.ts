@@ -3,7 +3,8 @@ import {
   bool, invalid, isoDate, isRecord, itemEnvelope, list, listEnvelope, num, optNum, optStr, str, type Row,
 } from "@/lib/decode";
 import type {
-  ItineraryDay, TourCollection, TourCollectionDetail, TourDeparture, TourDetail, TourSummary,
+  ItineraryDay, TourCollection, TourCollectionDetail, TourDeparture, TourDetail, TourImage, TourInclusions,
+  TourSummary,
 } from "@/types/tour";
 
 const RESOURCE = "tour";
@@ -48,11 +49,26 @@ function decodeItineraryDay(row: Row): ItineraryDay {
   };
 }
 
+function decodeImage(row: Row): TourImage {
+  return { url: str(row, "url", RESOURCE), alt: optStr(row, "alt", RESOURCE) };
+}
+
+function decodeLines(value: unknown): string[] {
+  return Array.isArray(value) && value.every(line => typeof line === "string") ? value : invalid(RESOURCE);
+}
+
+function decodeInclusions(value: unknown): TourInclusions {
+  if (!isRecord(value)) return invalid(RESOURCE);
+  return { included: decodeLines(value.included), excluded: decodeLines(value.excluded) };
+}
+
 export function decodeTourDetail(row: Row): TourDetail {
   return {
     tour: isRecord(row.tour) ? decodeTour(row.tour) : invalid(RESOURCE),
     itinerary: list(row.itinerary, decodeItineraryDay, RESOURCE),
     departures: list(row.departures, decodeDeparture, RESOURCE),
+    images: list(row.images, decodeImage, RESOURCE),
+    inclusions: decodeInclusions(row.inclusions),
   };
 }
 

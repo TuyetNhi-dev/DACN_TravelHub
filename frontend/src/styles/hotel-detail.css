@@ -31,7 +31,7 @@
 }
 .hotel-times { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: var(--space-6) 0 0; }
 .hotel-times div { padding: 10px 16px; border-left: 3px solid var(--brand); background: var(--surface); }
-.hotel-times dt { color: var(--muted); font-size: .85rem; }
+.hotel-times dt { color: var(--muted); font-size: max(.85rem, var(--text-min)); }
 .hotel-times dd { margin: 2px 0 0; color: var(--ink); font-weight: 700; }
 
 .hotel-facility-groups {
@@ -45,7 +45,7 @@
 .hotel-facility-group li svg { flex: none; margin-top: 3px; color: var(--green); }
 .hotel-paid {
   flex: none; margin-left: auto; padding: 1px 8px; border-radius: var(--radius-pill); background: var(--surface);
-  color: var(--muted); font-size: .78rem; white-space: nowrap;
+  color: var(--muted); font-size: max(.78rem, var(--text-min)); white-space: nowrap;
 }
 .hotel-more {
   display: inline-flex; align-items: center; gap: 6px; margin-top: var(--space-6); padding: 10px 18px;
@@ -72,5 +72,5 @@
   .hotel-section-nav { top: 66px; }
   .hotel-rules > div { grid-template-columns: 1fr; gap: 4px; }
   .hotel-highlights { grid-template-columns: 1fr 1fr; }
-  .hotel-highlights li { padding: 10px; font-size: .88rem; }
+  .hotel-highlights li { padding: 10px; font-size: max(.88rem, var(--text-min)); }
 }

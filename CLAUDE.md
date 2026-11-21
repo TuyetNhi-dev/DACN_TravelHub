@@ -43,6 +43,10 @@ npm test          # nếu có test liên quan
 
 Không sửa test cũ chỉ để cho qua. Nếu test cũ fail do thay đổi đúng đắn, báo rõ lý do.
 
+## Giao diện điện thoại
+
+Mọi thay đổi giao diện phải kiểm tra ở 390px (điện thoại), 768px (tablet) và 1440px (desktop) trước khi báo xong.
+
 ## Bảo mật
 
 Không đưa mật khẩu, khóa API, chuỗi kết nối, file `.env` vào bất kỳ file nào trong repo.

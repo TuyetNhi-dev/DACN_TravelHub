@@ -7,6 +7,7 @@ using TravelHub.Api.Common.Http;
 using TravelHub.Api.Configuration;
 using TravelHub.Api.Features.Auth.EmailVerification;
 using TravelHub.Api.Features.Auth.Google;
+using TravelHub.Api.Features.Auth.PasswordReset;
 
 namespace TravelHub.Api.Features.Auth;
 
@@ -26,12 +27,21 @@ public static class AuthEndpoints
             CancellationToken ct) => await StartSessionAsync(context, await service.VerifyLoginAsync(request, ct)))
             .RequireRateLimiting(AuthOptions.RateLimitPolicy);
 
+        // SignedIn, not the default policy: an account that has not agreed yet must still learn that it has to.
         group.MapGet("/me", async (HttpContext context) =>
         {
             var account = context.GetRequiredAccount();
             var auth = await context.AuthenticateAsync();
-            return Results.Ok(new SessionDto(account.User, auth.Properties?.ExpiresUtc));
-        }).RequireAuthorization();
+            return Results.Ok(new SessionDto(account.User, auth.Properties?.ExpiresUtc, account.HasAcceptedTerms));
+        }).RequireAuthorization(AuthPolicies.SignedIn);
+
+        group.MapPost("/accept-terms", async (AcceptTermsRequest request, HttpContext context, AuthService service,
+            CancellationToken ct) =>
+        {
+            var account = await service.AcceptTermsAsync(context.GetRequiredUserId(), request, ct);
+            var auth = await context.AuthenticateAsync();
+            return Results.Ok(new SessionDto(account.User, auth.Properties?.ExpiresUtc, account.HasAcceptedTerms));
+        }).RequireAuthorization(AuthPolicies.SignedIn);
 
         group.MapPost("/logout", async (HttpContext context) =>
         {
@@ -40,6 +50,7 @@ public static class AuthEndpoints
         });
 
         MapVerificationEndpoints(group);
+        MapPasswordResetEndpoints(group);
         MapGoogleEndpoints(group);
         MapAccountEndpoints(app);
     }
@@ -71,6 +82,24 @@ public static class AuthEndpoints
         }).RequireRateLimiting(AuthOptions.RateLimitPolicy);
     }
 
+    private static void MapPasswordResetEndpoints(RouteGroupBuilder group)
+    {
+        // Same answer whether or not the email is registered (see PasswordResetService).
+        group.MapPost("/password-reset/request", async (PasswordResetRequest request, PasswordResetService service,
+            CancellationToken ct) =>
+        {
+            await service.RequestAsync(request, ct);
+            return Results.Ok(new MessageResponse(PasswordResetService.RequestMessage));
+        }).RequireRateLimiting(AuthOptions.RateLimitPolicy);
+
+        group.MapPost("/password-reset/confirm", async (PasswordResetConfirmRequest request,
+            PasswordResetService service, CancellationToken ct) =>
+        {
+            await service.ConfirmAsync(request, ct);
+            return Results.Ok(new MessageResponse(PasswordResetService.DoneMessage));
+        }).RequireRateLimiting(AuthOptions.RateLimitPolicy);
+    }
+
     private static void MapGoogleEndpoints(RouteGroupBuilder group)
     {
         // The browser needs the public Client ID to render Google's button; null hides the button.
@@ -96,6 +125,6 @@ public static class AuthEndpoints
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity),
             new AuthenticationProperties { IsPersistent = false, ExpiresUtc = expiresAt });
-        return Results.Ok(new SessionDto(account.User, expiresAt));
+        return Results.Ok(new SessionDto(account.User, expiresAt, account.HasAcceptedTerms));
     }
 }

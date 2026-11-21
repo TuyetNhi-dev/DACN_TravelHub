@@ -92,7 +92,7 @@ function FlightFiltersPanel({ offers, filters, onChange, onReset }: FlightFilter
       </label>
       <label>
         Giá tối đa (đ/khách)
-        <input type="number" min={0} step={50_000} value={filters.maxPrice}
+        <input type="number" inputMode="numeric" min={0} step={50_000} value={filters.maxPrice}
           onChange={event => onChange("maxPrice", event.target.value)} />
       </label>
       <label>
