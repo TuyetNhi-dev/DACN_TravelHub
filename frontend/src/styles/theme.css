@@ -18,10 +18,7 @@ option { color: var(--ink); background: var(--panel); }
 .menu-btn { color:var(--ink); }
 
 /* Animate only paint colors, not layout, images or every DOM node. */
-body, .header, footer, .nav-links, .theme-toggle, .search-box, .search-field,
-.tour-card, .hotel-card, .flight-card, .floating-card, .filters, .tour-list-card,
-.detail-content > section, .detail-booking, .overview-strip, .benefit, .tour-api-state,
-input, select, textarea {
+body, .header, footer, .nav-links, .theme-toggle, .search-box, .search-field, .filters, .detail-content > section, .detail-booking, .overview-strip, input, select, textarea {
   transition: background-color 180ms ease, color 180ms ease, border-color 180ms ease;
 }
 @media (min-width:901px) and (max-width:1200px) {
@@ -34,8 +31,5 @@ input, select, textarea {
   .theme-toggle { margin-left:auto; }
 }
 @media (prefers-reduced-motion:reduce) {
-  body, .header, footer, .nav-links, .theme-toggle, .search-box, .search-field,
-  .tour-card, .hotel-card, .flight-card, .floating-card, .filters, .tour-list-card,
-  .detail-content > section, .detail-booking, .overview-strip, .benefit, .tour-api-state,
-  input, select, textarea { transition:none; }
+  body, .header, footer, .nav-links, .theme-toggle, .search-box, .search-field, .filters, .detail-content > section, .detail-booking, .overview-strip, input, select, textarea { transition:none; }
 }

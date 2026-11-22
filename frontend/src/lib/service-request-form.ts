@@ -3,6 +3,7 @@
  * Rules, field keys and messages mirror ServiceRequestValidator on the server, so a server field error
  * ("details.visitDate") lands under the same input. Pure: no React, no fetch.
  */
+import { normalizeVietnamesePhone, VIETNAMESE_PHONE_MESSAGE } from "@/lib/phone-vn";
 import type { ServiceRequestType } from "@/types/service-request";
 
 export type FormValues = Record<string, string>;
@@ -34,7 +35,6 @@ export const LIMITS = {
 } as const;
 
 export const PRIVACY_HINT = "Không nhập số hộ chiếu/CCCD.";
-export const PHONE_MESSAGE = "Số điện thoại cần 9–15 chữ số, có thể bắt đầu bằng +.";
 export const DATE_MESSAGE = "Ngày phải từ hôm nay trở đi và trong vòng 2 năm.";
 export const RATE_LIMIT_MESSAGE = "Bạn gửi quá nhiều yêu cầu, thử lại sau ít phút.";
 
@@ -122,13 +122,7 @@ export function initialValues(type: ServiceRequestType): FormValues {
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const DAY_MS = 86_400_000;
-const PHONE = /^\+?[0-9]{9,15}$/;
 const EMAIL = /^[^\s@]+@[^\s@]+$/;
-
-/** Phone as the server stores it: spaces, dots, dashes and brackets removed. */
-export function normalizePhone(raw: string): string {
-  return raw.replace(/[\s.\-()]/g, "");
-}
 
 function dayNumber(iso: string): number | null {
   if (!ISO_DATE.test(iso)) return null;
@@ -186,7 +180,7 @@ function contactErrors(values: FormValues, consent: boolean): FormErrors {
   const name = values.fullName.trim();
   if (name.length < LIMITS.minName || name.length > LIMITS.maxName)
     errors.fullName = `Họ tên cần từ ${LIMITS.minName} đến ${LIMITS.maxName} ký tự.`;
-  if (!PHONE.test(normalizePhone(values.phone))) errors.phone = PHONE_MESSAGE;
+  if (!normalizeVietnamesePhone(values.phone)) errors.phone = VIETNAMESE_PHONE_MESSAGE;
   const email = values.email.trim();
   if (email && (email.length > LIMITS.maxEmail || !EMAIL.test(email))) errors.email = "Email không hợp lệ.";
   if (values.note.trim().length > LIMITS.maxNote) errors.note = `Ghi chú tối đa ${LIMITS.maxNote} ký tự.`;
@@ -231,7 +225,8 @@ export function buildPayload(type: ServiceRequestType, values: FormValues, conse
   return {
     serviceType: type,
     fullName: values.fullName.trim(),
-    phone: normalizePhone(values.phone),
+    // Sent as typed when it is not a Vietnamese number, so the server answers with its own field error.
+    phone: normalizeVietnamesePhone(values.phone) ?? values.phone.trim(),
     email: values.email.trim() || null,
     note: values.note.trim() || null,
     consent,

@@ -2,6 +2,7 @@
 
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
+import { useNewRequestCount } from "@/hooks/useNewRequestCount";
 import { useResource } from "@/hooks/useResource";
 import { formatDateTime } from "@/lib/format";
 import { describeDetails } from "@/lib/service-request-admin";
@@ -29,9 +30,16 @@ export function ServiceRequestAdminPage({ requestId }: { requestId: string }) {
 function RequestDetail({ requestId }: { requestId: string }) {
   const { state, retry, replace } = useResource(`admin-request:${requestId}`,
     signal => getAdminServiceRequest(requestId, signal));
+  const { refresh: refreshNewCount } = useNewRequestCount();
+  const onChanged = (next: ServiceRequestDetail) => {
+    const before = state.status === "ready" ? state.data.summary.status : null;
+    replace(next);
+    // Only a status change can move a request in or out of "new"; notes and assignment cannot.
+    if (next.summary.status !== before) refreshNewCount();
+  };
   return (
     <>
-      <AdminNav current="requests" refreshKey={state.status === "ready" ? state.data.summary.status : ""} />
+      <AdminNav current="requests" />
       {state.status === "loading" && <LoadingState label="Đang tải yêu cầu…" />}
       {state.status === "error" && (
         <ErrorState error={state.error} onRetry={retry} backHref={LIST_HREF} backLabel="Danh sách yêu cầu" />
@@ -39,7 +47,7 @@ function RequestDetail({ requestId }: { requestId: string }) {
       {state.status === "ready" && (
         <div className="admin-request">
           <RequestInfo detail={state.data} />
-          <RequestFollowUp detail={state.data} onChanged={replace} />
+          <RequestFollowUp detail={state.data} onChanged={onChanged} />
         </div>
       )}
     </>

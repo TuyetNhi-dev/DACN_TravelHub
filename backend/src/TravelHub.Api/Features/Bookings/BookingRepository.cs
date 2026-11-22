@@ -1,6 +1,7 @@
 using System.Text;
 using MySqlConnector;
 using TravelHub.Api.Data;
+using TravelHub.Api.Features.Admin.Access;
 
 namespace TravelHub.Api.Features.Bookings;
 
@@ -8,7 +9,7 @@ public sealed record BookingDetailRow(BookingSummaryDto Summary, decimal Subtota
     ulong CustomerId, ulong? SellingBranchId, string? ConfirmationCode, DateTime? PaidAt,
     BookingSnapshot? Snapshot, IReadOnlyList<PassengerDto> Passengers);
 
-public sealed record StaffBookingFilter(string? ItemStatus, string? ServiceType);
+public sealed record StaffBookingFilter(string? ItemStatus, string? ServiceType, ScopeSet Scope);
 
 public sealed class BookingRepository(MySqlConnectionFactory connections)
 {
@@ -51,13 +52,14 @@ public sealed class BookingRepository(MySqlConnectionFactory connections)
         return await command.ReadAllAsync(reader => ReadSummary(reader, includeCustomer: false), ct);
     }
 
-    /// <summary>Staff and admins see every order (global scope), newest first.</summary>
+    /// <summary>Orders sold by a branch of the scope (global also sees orders without a branch), newest first.</summary>
     public async Task<IReadOnlyList<BookingSummaryDto>> ListForStaffAsync(StaffBookingFilter filter,
         CancellationToken ct)
     {
         await using var connection = await connections.OpenAsync(ct);
         await using var command = new MySqlCommand { Connection = connection };
         var sql = new StringBuilder(SummarySelect).Append(" WHERE 1 = 1");
+        ScopeSql.AppendBranchFilter(sql, command, "b.selling_branch_id", filter.Scope);
         if (filter.ItemStatus is not null)
         {
             sql.Append(" AND i.status = @itemStatus");

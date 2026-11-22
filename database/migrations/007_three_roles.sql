@@ -3,7 +3,8 @@
 --   CUSTOMER (scope self), STAFF (scope global), ADMIN (scope global).
 -- Existing assignments of the old roles are mapped, never deleted:
 --   SUPER_ADMIN -> ADMIN; REGIONAL_MANAGER, BRANCH_MANAGER, STAFF -> STAFF; all operators become global.
--- Run AFTER 006 on the operator-selected database. Re-runnable.
+-- Run AFTER 006 on the operator-selected database. Re-runnable ONLY before 015: once BRANCH_MANAGER is back
+-- (seeds/001 after migration 015, decision 003) running this again would turn branch managers into global STAFF.
 
 INSERT INTO roles (code, name) VALUES
   ('CUSTOMER', 'Khách hàng'),

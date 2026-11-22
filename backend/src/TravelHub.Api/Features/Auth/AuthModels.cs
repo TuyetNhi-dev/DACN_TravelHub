@@ -92,14 +92,18 @@ public static class AuthPolicies
     public const string SignedIn = "signed-in";
 }
 
-/// <summary>Three roles: customers act on their own orders (self); staff and admins see everything (global).</summary>
+/// <summary>
+/// Customers act on their own orders (self). Staff and branch managers work inside a branch, region or global
+/// scope; admins are always global (decision 003, docs/architecture/admin-spec.md).
+/// </summary>
 public static class RoleCodes
 {
     public const string Customer = "CUSTOMER";
     public const string Staff = "STAFF";
+    public const string BranchManager = "BRANCH_MANAGER";
     public const string Admin = "ADMIN";
 
-    public static readonly IReadOnlySet<string> Operators = new HashSet<string> { Staff, Admin };
+    public static readonly IReadOnlySet<string> Operators = new HashSet<string> { Staff, BranchManager, Admin };
 }
 
 public static class RoleScopes

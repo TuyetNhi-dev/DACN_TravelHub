@@ -6,7 +6,7 @@ import { SITE_CONTACT } from "@/data/site-contact";
 import { Logo } from "./Logo";
 
 const COPYRIGHT_YEAR = 2026;
-// Official logo, source in docs/image-credits.md. viewBox 138.32 × 42, shown 28px tall.
+// Official logo, source in docs/design/image-credits.md. viewBox 138.32 × 42, shown 28px tall.
 const VNPAY_LOGO = { src: "/payments/vnpay-logo.svg", width: 92, height: 28 };
 
 /** Short labels keep every link on one line; the pages themselves keep their full titles. */

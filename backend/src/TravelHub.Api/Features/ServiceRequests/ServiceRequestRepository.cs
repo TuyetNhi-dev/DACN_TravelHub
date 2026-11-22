@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using MySqlConnector;
 using TravelHub.Api.Data;
+using TravelHub.Api.Features.Admin.Audit;
 
 namespace TravelHub.Api.Features.ServiceRequests;
 
@@ -98,43 +99,31 @@ public sealed class ServiceRequestRepository(MySqlConnectionFactory connections)
         return new ServiceRequestDetailDto(head.Summary, head.Note, head.Details, head.ConsentAt, noteRows);
     }
 
-    /// <summary>False when no request has this id.</summary>
-    public async Task<bool> UpdateStatusAsync(ulong id, string status, CancellationToken ct)
-    {
-        await using var connection = await connections.OpenAsync(ct);
-        await using var command = new MySqlCommand(
-            "UPDATE service_requests SET status = @status WHERE id = @id", connection);
-        command.Parameters.AddWithValue("@status", status);
-        command.Parameters.AddWithValue("@id", id);
+    /// <summary>False when no request has this id. The audit row is written in the same transaction.</summary>
+    public Task<bool> UpdateStatusAsync(ulong id, string status, AuditEntry audit, CancellationToken ct) =>
         // MySqlConnector reports matched rows by default, so an unchanged status still counts as found.
-        return await command.ExecuteNonQueryAsync(ct) > 0;
-    }
+        WriteAsync("UPDATE service_requests SET status = @status WHERE id = @id", audit, ct,
+            ("@status", status), ("@id", id));
 
     /// <summary>Sets or clears (null) the staff member in charge; false when no request has this id.</summary>
-    public async Task<bool> AssignAsync(ulong id, ulong? userId, CancellationToken ct)
-    {
-        await using var connection = await connections.OpenAsync(ct);
-        await using var command = new MySqlCommand(
-            "UPDATE service_requests SET assigned_user_id = @user WHERE id = @id", connection);
-        command.Parameters.AddWithValue("@user", userId);
-        command.Parameters.AddWithValue("@id", id);
-        return await command.ExecuteNonQueryAsync(ct) > 0;
-    }
+    public Task<bool> AssignAsync(ulong id, ulong? userId, AuditEntry audit, CancellationToken ct) =>
+        WriteAsync("UPDATE service_requests SET assigned_user_id = @user WHERE id = @id", audit, ct,
+            ("@user", userId), ("@id", id));
 
     /// <summary>Appends a note (notes are never edited or deleted); false when no request has this id.</summary>
-    public async Task<bool> AddNoteAsync(ulong id, ulong authorId, string note, DateTime nowUtc, CancellationToken ct)
-    {
-        await using var connection = await connections.OpenAsync(ct);
-        await using var command = new MySqlCommand("""
+    public Task<bool> AddNoteAsync(ulong id, ulong authorId, string note, DateTime nowUtc, AuditEntry audit,
+        CancellationToken ct) => WriteAsync("""
             INSERT INTO service_request_notes (service_request_id, author_user_id, note, created_at)
             SELECT id, @author, @note, @now FROM service_requests WHERE id = @id
-            """, connection);
-        command.Parameters.AddWithValue("@id", id);
-        command.Parameters.AddWithValue("@author", authorId);
-        command.Parameters.AddWithValue("@note", note);
-        command.Parameters.AddWithValue("@now", nowUtc);
-        return await command.ExecuteNonQueryAsync(ct) > 0;
-    }
+            """, audit, ct, ("@id", id), ("@author", authorId), ("@note", note), ("@now", nowUtc));
+
+    private Task<bool> WriteAsync(string sql, AuditEntry audit, CancellationToken ct,
+        params (string, object?)[] parameters) => connections.InTransactionAsync(async tx =>
+        {
+            if (await tx.ExecuteAsync(sql, ct, parameters) == 0) return false;
+            await AuditLogWriter.WriteAsync(tx.Connection, tx.Inner, audit, ct);
+            return true;
+        }, ct);
 
     private static string Where(ServiceRequestFilter filter, MySqlCommand command)
     {
@@ -158,9 +147,7 @@ public sealed class ServiceRequestRepository(MySqlConnectionFactory connections)
         return sql.ToString();
     }
 
-    /// <summary>Makes % and _ typed by staff match literally (MySQL's default LIKE escape is backslash).</summary>
-    public static string EscapeLike(string value) =>
-        value.Replace(@"\", @"\\").Replace("%", @"\%").Replace("_", @"\_");
+    public static string EscapeLike(string value) => SqlText.EscapeLike(value);
 
     private static JsonElement ParseJson(string json)
     {

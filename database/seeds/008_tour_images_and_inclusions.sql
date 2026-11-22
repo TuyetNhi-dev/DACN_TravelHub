@@ -2,8 +2,8 @@
 -- DEMO photos (tour_images) and "giá bao gồm / không bao gồm" lines (tour_inclusions) for the tour detail page.
 -- Requires seeds/002 and seeds/005 (tours are matched by code, not id).
 --
--- Photos: only the curated, credited Unsplash photos of frontend/src/data/photo-library.ts (docs/image-credits.md),
--- and only for tours whose destination has a set taken AT that place. Tours to Quy Nhơn, Vũng Tàu, Cần Thơ, An Giang,
+-- Photos: only the curated, credited Unsplash photos of frontend/src/data/photo-library.ts
+-- (docs/design/image-credits.md), and only for tours whose destination has a set taken AT that place. Tours to Quy Nhơn, Vũng Tàu, Cần Thơ, An Giang,
 -- Hà Giang, Quảng Bình, Mũi Né, Buôn Ma Thuột, Côn Đảo, Mộc Châu, Tây Ninh, Bến Tre, Lý Sơn, Pleiku and Tam Đảo get
 -- no rows on purpose: the site keeps showing labelled illustrations for them instead of photos of another place.
 -- The lowest sort_order is the cover photo.

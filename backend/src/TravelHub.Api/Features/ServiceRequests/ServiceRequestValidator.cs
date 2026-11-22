@@ -14,7 +14,6 @@ namespace TravelHub.Api.Features.ServiceRequests;
 public static class ServiceRequestValidator
 {
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
-    private static readonly char[] PhoneSeparators = [' ', '.', '-', '(', ')'];
 
     public static ValidServiceRequest Create(CreateServiceRequestRequest request, DateOnly today)
     {
@@ -174,10 +173,9 @@ public static class ServiceRequestValidator
 
     private static string? Phone(string? raw, ValidationErrors errors)
     {
-        var phone = raw is null ? null : string.Concat(raw.Split(PhoneSeparators, StringSplitOptions.RemoveEmptyEntries));
-        var valid = PhoneNumber.IsValid(phone);
-        errors.AddIf(!valid, "phone", PhoneNumber.InvalidMessage);
-        return valid ? phone : null;
+        var phone = PhoneNumber.NormalizeVietnamese(raw);
+        errors.AddIf(phone is null, "phone", PhoneNumber.InvalidMessage);
+        return phone;
     }
 
     private static string? Email(string? raw, ValidationErrors errors)

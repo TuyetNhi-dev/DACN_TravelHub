@@ -1,10 +1,11 @@
 import type { AuthUser, RoleCode } from "@/types/auth";
 
-const OPERATOR_ROLES: readonly RoleCode[] = ["STAFF", "ADMIN"];
+const OPERATOR_ROLES: readonly RoleCode[] = ["STAFF", "BRANCH_MANAGER", "ADMIN"];
 
 export const ROLE_LABELS: Record<RoleCode, string> = {
   CUSTOMER: "Khách hàng",
   STAFF: "Nhân viên",
+  BRANCH_MANAGER: "Quản lý chi nhánh",
   ADMIN: "Quản trị viên",
 };
 

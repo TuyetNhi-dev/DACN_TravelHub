@@ -58,7 +58,7 @@ test('contact details are visibly simulated and the old 1900 hotline is gone fro
   const files = dir => readdirSync(dir, { withFileTypes: true }).flatMap(entry => (entry.isDirectory()
     ? files(`${dir}/${entry.name}`) : [`${dir}/${entry.name}`]));
   const offenders = files('src').filter(path => /\.(tsx?|css)$/.test(path) && !path.endsWith('lib/branches.ts')
-    && !path.endsWith('data/legal.ts') && /1900\s?6886|19006886/.test(readFileSync(path, 'utf8')));
+    && /1900\s?6886|19006886/.test(readFileSync(path, 'utf8')));
   assert.deepEqual(offenders, []);
 });
 

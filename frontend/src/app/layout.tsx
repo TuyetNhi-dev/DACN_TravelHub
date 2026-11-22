@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Be_Vietnam_Pro } from "next/font/google";
 import type { ReactNode } from "react";
+import { NewRequestCountProvider } from "@/components/admin/NewRequestCountProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
 import { TermsGate } from "@/components/auth/TermsGate";
 import { CartProvider } from "@/components/cart/CartProvider";
@@ -39,14 +40,16 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       </head>
       <body id="top">
         <AuthProvider>
-          <CartProvider>
-            <DepartureProvider>
-              <a className="skip-link" href="#main-content">Đến nội dung chính</a>
-              <Header />
-              <TermsGate>{children}</TermsGate>
-              <Footer />
-            </DepartureProvider>
-          </CartProvider>
+          <NewRequestCountProvider>
+            <CartProvider>
+              <DepartureProvider>
+                <a className="skip-link" href="#main-content">Đến nội dung chính</a>
+                <Header />
+                <TermsGate>{children}</TermsGate>
+                <Footer />
+              </DepartureProvider>
+            </CartProvider>
+          </NewRequestCountProvider>
         </AuthProvider>
       </body>
     </html>

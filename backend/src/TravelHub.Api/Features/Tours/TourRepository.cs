@@ -18,19 +18,36 @@ public sealed class TourRepository(MySqlConnectionFactory connections)
             (SELECT GROUP_CONCAT(d.departure_date ORDER BY d.departure_date SEPARATOR ',')
              FROM tour_departures d
              WHERE d.tour_id = t.id AND d.status = 'open' AND d.departure_date > @today
-               AND d.reserved_seats < d.capacity) AS upcoming_dates
+               AND d.reserved_seats < d.capacity) AS upcoming_dates,
+            (SELECT GROUP_CONCAT(DISTINCT r.code ORDER BY r.code SEPARATOR ',')
+             FROM tour_departures d
+             JOIN branches b ON b.id = d.operating_branch_id
+             JOIN regions r ON r.id = b.region_id
+             WHERE d.tour_id = t.id AND d.status = 'open' AND d.departure_date > @today) AS departure_regions
         FROM tours t
         JOIN locations destination ON destination.id = t.destination_id
         WHERE t.status = 'published'
         """;
 
-    public async Task<IReadOnlyList<TourSummaryDto>> ListPublishedAsync(DateOnly today, CancellationToken ct)
+    /// <summary>Tours with an open departure run from the chosen region first; nothing is filtered out.</summary>
+    private const string RegionFirstOrder = """
+         ORDER BY EXISTS (SELECT 1 FROM tour_departures d
+             JOIN branches b ON b.id = d.operating_branch_id JOIN regions r ON r.id = b.region_id
+             WHERE d.tour_id = t.id AND d.status = 'open' AND d.departure_date > @today AND r.code = @region) DESC,
+             t.id
+        """;
+
+    public async Task<IReadOnlyList<TourSummaryDto>> ListPublishedAsync(DateOnly today, string? region,
+        CancellationToken ct)
     {
         await using var connection = await connections.OpenAsync(ct);
-        await using var command = new MySqlCommand(SummarySelect + " ORDER BY t.id", connection);
+        await using var command = new MySqlCommand(SummarySelect + Order(region), connection);
         command.Parameters.AddWithValue("@today", today);
+        command.Parameters.AddWithValue("@region", region);
         return await command.ReadAllAsync(ReadSummary, ct);
     }
+
+    private static string Order(string? region) => region is null ? " ORDER BY t.id" : RegionFirstOrder;
 
     public async Task<int> CountPublishedAsync(CancellationToken ct)
     {
@@ -40,11 +57,13 @@ public sealed class TourRepository(MySqlConnectionFactory connections)
     }
 
     public async Task<IReadOnlyList<TourSummaryDto>> ListPublishedPagedAsync(
-        DateOnly today, int offset, int limit, CancellationToken ct)
+        DateOnly today, string? region, int offset, int limit, CancellationToken ct)
     {
         await using var connection = await connections.OpenAsync(ct);
-        await using var command = new MySqlCommand(SummarySelect + " ORDER BY t.id LIMIT @limit OFFSET @offset", connection);
+        await using var command = new MySqlCommand(SummarySelect + Order(region) + " LIMIT @limit OFFSET @offset",
+            connection);
         command.Parameters.AddWithValue("@today", today);
+        command.Parameters.AddWithValue("@region", region);
         command.Parameters.AddWithValue("@limit", limit);
         command.Parameters.AddWithValue("@offset", offset);
         return await command.ReadAllAsync(ReadSummary, ct);
@@ -140,7 +159,11 @@ public sealed class TourRepository(MySqlConnectionFactory connections)
         reader.GetNullableString("transport"),
         reader.GetDecimal("base_price"),
         reader.GetNullableString("description"),
-        reader.GetDateList("upcoming_dates"));
+        reader.GetDateList("upcoming_dates"),
+        SplitCodes(reader.GetNullableString("departure_regions")));
+
+    private static IReadOnlyList<string> SplitCodes(string? value) =>
+        string.IsNullOrEmpty(value) ? [] : value.Split(',');
 
     private static TourDepartureRow ReadDeparture(MySqlDataReader reader) => new(
         reader.GetId("id"),

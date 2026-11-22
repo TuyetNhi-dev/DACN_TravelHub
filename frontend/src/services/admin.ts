@@ -13,8 +13,10 @@ export interface AdminBookingFilter {
 
 export type AdminAction = "confirm" | "reject" | "complete";
 
-export async function getAdminBookings(filter: AdminBookingFilter, signal?: AbortSignal): Promise<BookingSummary[]> {
-  const params = new URLSearchParams();
+/** scope: the top-bar choice ("all", "region:SOUTH", "branch:HCM"); the server checks it against the roles. */
+export async function getAdminBookings(filter: AdminBookingFilter, scope: string, signal?: AbortSignal)
+  : Promise<BookingSummary[]> {
+  const params = new URLSearchParams({ scope });
   if (filter.status) params.set("status", filter.status);
   if (filter.serviceType) params.set("serviceType", filter.serviceType);
   const query = params.size ? "?" + params : "";

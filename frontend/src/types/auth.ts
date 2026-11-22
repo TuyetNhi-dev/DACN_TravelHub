@@ -1,6 +1,6 @@
 /** Mirrors TravelHub.Api.Features.Auth DTOs. */
-/** Three roles: customers (scope self), staff and admins (scope global). */
-export type RoleCode = "CUSTOMER" | "STAFF" | "ADMIN";
+/** Customers (scope self); staff and branch managers (branch, region or global); admins (global). */
+export type RoleCode = "CUSTOMER" | "STAFF" | "BRANCH_MANAGER" | "ADMIN";
 
 export interface RoleAssignment {
   code: string;
@@ -39,10 +39,6 @@ export const EMAIL_NOT_VERIFIED = "email_not_verified";
 export const PHONE_REQUIRED = "phone_required";
 /** API answer for any signed-in feature while the account has not agreed to the terms yet. */
 export const TERMS_REQUIRED = "terms_required";
-
-/** Same rule as the backend PhoneNumber: 9–15 digits, optional leading +. */
-export const PHONE_PATTERN = "\\+?[0-9]{9,15}";
-export const PHONE_HINT = "9–15 chữ số, có thể bắt đầu bằng +";
 
 export interface RegisterInput extends LoginInput {
   fullName: string;

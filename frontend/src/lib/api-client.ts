@@ -19,7 +19,7 @@ export class ApiError extends Error {
   }
 }
 
-type Method = "GET" | "POST" | "DELETE";
+type Method = "GET" | "POST" | "PUT" | "DELETE";
 
 interface RequestOptions {
   method?: Method;
@@ -33,6 +33,11 @@ export function apiGet(path: string, signal?: AbortSignal): Promise<unknown> {
 
 export function apiPost(path: string, body: unknown = {}, signal?: AbortSignal): Promise<unknown> {
   return apiRequest(path, { method: "POST", body, signal });
+}
+
+/** Replaces a whole resource (admin editor lists: images, itinerary, inclusions). Same CSRF header as POST. */
+export function apiPut(path: string, body: unknown, signal?: AbortSignal): Promise<unknown> {
+  return apiRequest(path, { method: "PUT", body, signal });
 }
 
 /** Same CSRF header as POST: the backend's AntiforgeryFilter checks every non-GET request. */

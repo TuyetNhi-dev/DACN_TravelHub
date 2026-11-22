@@ -1,5 +1,5 @@
 # Quy tắc riêng cho backend
-- Minimal API đặt trong Api/. Truy cập dữ liệu trong Data/ bằng MySqlConnector với câu SQL tham số hóa.
+- Project ở src/TravelHub.Api/, test ở tests/TravelHub.Api.Tests/. Mỗi nghiệp vụ một thư mục Features/<Tên>/ gồm *Endpoints.cs (minimal API, mỏng) → *Service.cs (nghiệp vụ) → *Repository.cs (MySqlConnector, SQL tham số hóa), kèm *Dtos.cs. Phần dùng chung ở Common/, cấu hình và DI ở Configuration/, MySqlConnectionFactory ở Data/. Xem docs/architecture/overview.md.
 - Async đến cùng, truyền CancellationToken. Không dùng .Result hay .Wait(). Bật Nullable.
 - Chuỗi kết nối và khóa đọc từ user-secrets hoặc biến môi trường, không để trong appsettings được commit.
 - Đặt chỗ tour phải nằm trong transaction và giữ chỗ bằng MỘT câu UPDATE có điều kiện, kiểm tra số dòng bị ảnh hưởng. Ví dụ: UPDATE tour_departures SET reserved_seats = reserved_seats + @n WHERE id = @id AND status = 'open' AND reserved_seats + @n <= capacity. Nếu không có dòng nào bị ảnh hưởng thì trả 409.

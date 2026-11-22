@@ -33,9 +33,7 @@ body { padding-inline: env(safe-area-inset-left) env(safe-area-inset-right); }
   small { font-size: max(14px, .8em); }
 
   /* ---------- 44px touch targets ---------- */
-  .contact-hotline, .contact-bar-actions > a, .contact-bar .departure-trigger,
-  .ui-view-all, .sh-breadcrumb a, .breadcrumb a, .detail-breadcrumb a,
-  .hotel-section-head a, .auth-switch a, a[href^="tel:"], .sh-table a {
+  .contact-hotline, .contact-bar-actions > a, .contact-bar .departure-trigger, .ui-view-all, .sh-breadcrumb a, .detail-breadcrumb a, .hotel-section-head a, .auth-switch a, a[href^="tel:"], .sh-table a {
     /* column-gap restores the word space flex drops between a text run and a following <strong>. */
     display: inline-flex; align-items: center; column-gap: .3em; min-height: 44px;
   }

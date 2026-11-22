@@ -6,16 +6,24 @@ namespace TravelHub.Api.Features.Tours;
 
 public sealed class TourService(TourRepository repository, VietnamClock clock)
 {
-    public Task<IReadOnlyList<TourSummaryDto>> ListAsync(CancellationToken ct) =>
-        repository.ListPublishedAsync(clock.Today, ct);
+    /// <summary>Codes of the regions table (seeds/002); the customer's departure choice maps onto them.</summary>
+    public static readonly IReadOnlySet<string> RegionCodes = new HashSet<string> { "NORTH", "CENTRAL", "SOUTH" };
+
+    public Task<IReadOnlyList<TourSummaryDto>> ListAsync(string? region, CancellationToken ct) =>
+        repository.ListPublishedAsync(clock.Today, ValidRegion(region), ct);
 
     public async Task<(IReadOnlyList<TourSummaryDto> Rows, int Total)> ListPagedAsync(
-        int page, int pageSize, CancellationToken ct)
+        int page, int pageSize, string? region, CancellationToken ct)
     {
+        var code = ValidRegion(region);
         var total = await repository.CountPublishedAsync(ct);
-        var rows = await repository.ListPublishedPagedAsync(clock.Today, (page - 1) * pageSize, pageSize, ct);
+        var rows = await repository.ListPublishedPagedAsync(clock.Today, code, (page - 1) * pageSize, pageSize, ct);
         return (rows, total);
     }
+
+    public static string? ValidRegion(string? region) => string.IsNullOrWhiteSpace(region)
+        ? null
+        : RegionCodes.Contains(region) ? region : throw ApiException.BadRequest("Khu vực khởi hành không hợp lệ.");
 
     public async Task<TourDetailDto> GetAsync(string rawId, CancellationToken ct)
     {

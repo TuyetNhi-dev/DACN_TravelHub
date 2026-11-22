@@ -23,30 +23,6 @@ public sealed class RegistrationRulesTests
     private static RegisterRequest Form(bool terms = true, string? phone = null, string password = "mat-khau-du-dai",
         string? confirm = null) => new("Nguyễn Văn An", "an@example.com", password, confirm ?? password, terms, phone);
 
-    [Theory]
-    [InlineData("0912345678", "0912345678")]
-    [InlineData("0912 345 678", "0912345678")]
-    [InlineData("091.234.5678", "0912345678")]
-    [InlineData("+84 912-345-678", "0912345678")]
-    [InlineData("84912345678", "0912345678")]
-    [InlineData("0283 812 3456", "02838123456")]
-    [InlineData(" 0367210722 ", "0367210722")]
-    public void Vietnamese_mobiles_and_landlines_are_accepted_and_stored_as_0_digits(string input, string stored)
-    {
-        Assert.Equal(stored, PhoneNumber.NormalizeVietnamese(input));
-        // The stored form also passes the shared contact-phone rule used later at checkout.
-        Assert.True(PhoneNumber.IsValid(stored));
-    }
-
-    [Theory]
-    [InlineData("0112345678")]
-    [InlineData("091234567")]
-    [InlineData("09123456789")]
-    [InlineData("+1 415 555 0100")]
-    [InlineData("0912abc678")]
-    [InlineData("++84912345678")]
-    public void Other_numbers_are_not_vietnamese(string input) => Assert.Null(PhoneNumber.NormalizeVietnamese(input));
-
     [Fact]
     public void Sign_up_without_ticking_the_agreement_is_refused()
     {

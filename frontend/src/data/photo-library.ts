@@ -1,5 +1,5 @@
 /**
- * Curated free-licence Unsplash photos (no Unsplash+), credited in docs/image-credits.md.
+ * Curated free-licence Unsplash photos (no Unsplash+), credited in docs/design/image-credits.md.
  * Read ONLY through src/lib/media.ts so the site has a single image source.
  * `id` is the images.unsplash.com file id, `page` the unsplash.com/photos/{page} id.
  */

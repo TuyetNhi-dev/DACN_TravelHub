@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ApiError } from "@/lib/api-client";
 import { safeReturnPath } from "@/lib/auth";
-import { normalizeVietnamesePhone } from "@/lib/phone-vn";
+import { normalizeVietnamesePhone, VIETNAMESE_PHONE_MESSAGE } from "@/lib/phone-vn";
 import { login, register } from "@/services/auth";
 import { EMAIL_NOT_VERIFIED } from "@/types/auth";
 
@@ -73,8 +73,7 @@ export function useAuthFormSubmit(mode: AuthMode) {
   /** Instant checks; the server repeats every one of them. */
   function registerIssue(values: Values): string {
     if (values.password !== values.confirmPassword) return "Mật khẩu xác nhận không khớp.";
-    if (values.phone?.trim() && !normalizeVietnamesePhone(values.phone))
-      return "Số điện thoại chưa đúng định dạng Việt Nam, ví dụ 0912 345 678.";
+    if (values.phone?.trim() && !normalizeVietnamesePhone(values.phone)) return VIETNAMESE_PHONE_MESSAGE;
     return "";
   }
 

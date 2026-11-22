@@ -6,6 +6,7 @@ using TravelHub.Api.Common.Errors;
 using TravelHub.Api.Common.Time;
 using TravelHub.Api.Configuration;
 using TravelHub.Api.Data;
+using TravelHub.Api.Features.Admin.Access;
 using TravelHub.Api.Features.Auth;
 using TravelHub.Api.Features.ServiceRequests;
 
@@ -53,6 +54,17 @@ public sealed class ServiceRequestValidatorTests
         Assert.Null(ServiceRequestValidator.Create(Request(ServiceRequestType.Visa, details, email: "  "), Today).Email);
         AssertFields(() => ServiceRequestValidator.Create(Request(ServiceRequestType.Visa, details, email: "not-an-email"),
             Today), "email");
+    }
+
+    [Fact]
+    public void Phone_follows_the_vietnamese_rule_and_is_stored_as_0_digits()
+    {
+        var details = new { country = "Thái Lan", visaType = "tourist", travelDate = "2027-01-10", applicants = 1 };
+        var valid = ServiceRequestValidator.Create(Request(ServiceRequestType.Visa, details, phone: "+84 (90) 312-3456"),
+            Today);
+        Assert.Equal("0903123456", valid.Phone);
+        AssertFields(() => ServiceRequestValidator.Create(Request(ServiceRequestType.Visa, details,
+            phone: "+1 415 555 0100"), Today), "phone");
     }
 
     [Fact]
@@ -215,7 +227,8 @@ public sealed class ServiceRequestServiceTests
     [Fact]
     public async Task Customers_are_refused_before_any_query()
     {
-        var service = new AdminServiceRequestService(NoDatabase(), Clock);
+        var service = new AdminServiceRequestService(NoDatabase(), new AdminAccessService(new OrganizationRepository(
+            new MySqlConnectionFactory(Options.Create(new DatabaseOptions())))), Clock);
         var customer = AccountWith(RoleCodes.Customer);
 
         var error = await Assert.ThrowsAsync<ApiException>(() => service.CountNewAsync(customer, CancellationToken.None));

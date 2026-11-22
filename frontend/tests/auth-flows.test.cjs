@@ -30,7 +30,7 @@ test('password hint follows the server rule: 12–128 characters and a matching 
 
 test('Vietnamese phone numbers mirror the server rule and normalise to 0…', () => {
   for (const [input, expected] of [['0912 345 678', '0912345678'], ['+84 912-345-678', '0912345678'],
-    ['84912345678', '0912345678'], ['028.3812.3456', '02838123456']])
+    ['84912345678', '0912345678'], ['028.3812.3456', '02838123456'], ['(028) 3812 3456', '02838123456']])
     assert.equal(phone.normalizeVietnamesePhone(input), expected, input);
   for (const input of ['0112345678', '091234567', '+1 415 555 0100', 'abc'])
     assert.equal(phone.normalizeVietnamesePhone(input), null, input);

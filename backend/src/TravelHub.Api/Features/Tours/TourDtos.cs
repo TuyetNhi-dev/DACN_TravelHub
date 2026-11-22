@@ -11,7 +11,9 @@ public sealed record TourSummaryDto(
     string? Transport,
     decimal BasePrice,
     string? Description,
-    IReadOnlyList<DateOnly> UpcomingDepartureDates);
+    IReadOnlyList<DateOnly> UpcomingDepartureDates,
+    /// <summary>Region codes (NORTH, CENTRAL, SOUTH) of the branches running its open future departures.</summary>
+    IReadOnlyList<string> DepartureRegions);
 
 public sealed record ItineraryDayDto(int DayNumber, string Title, string? Description);
 

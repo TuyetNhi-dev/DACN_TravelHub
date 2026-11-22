@@ -11,10 +11,10 @@ public static class AdminEndpoints
         var group = app.MapGroup("/api/admin/bookings").WithTags("Admin")
             .RequireAuthorization().AddEndpointFilter<AntiforgeryFilter>();
 
-        group.MapGet("/", async (string? status, string? serviceType, HttpContext http,
+        group.MapGet("/", async (string? status, string? serviceType, string? scope, HttpContext http,
             AdminBookingService service, CancellationToken ct) =>
             Results.Ok(ListResponse<BookingSummaryDto>.From(
-                await service.ListAsync(http.GetRequiredAccount(), status, serviceType, ct))));
+                await service.ListAsync(http.GetRequiredAccount(), status, serviceType, scope, ct))));
         group.MapGet("/{id}", async (string id, HttpContext http, AdminBookingService service,
             CancellationToken ct) => Item(await service.GetAsync(http.GetRequiredAccount(), id, ct)));
         group.MapPost("/{id}/confirm", async (string id, ConfirmBookingRequest request, HttpContext http,

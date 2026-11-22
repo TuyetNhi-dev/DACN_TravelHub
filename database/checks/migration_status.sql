@@ -1,5 +1,5 @@
 -- migration_status.sql
--- READ-ONLY. Reports whether migrations 002–012 have been applied to the CURRENT database (USE <db> first).
+-- READ-ONLY. Reports whether migrations 002–015 have been applied to the CURRENT database (USE <db> first).
 -- Only SELECTs on information_schema: no table data is read, nothing is written.
 --
 -- Each migration is detected by the tables/columns/ENUM values it creates:
@@ -86,9 +86,29 @@ FROM (
   SELECT '012_service_requests', 12, 2,
     (SELECT COUNT(*) FROM information_schema.TABLES
       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('service_requests', 'service_request_notes'))
+
+  UNION ALL
+  SELECT '013_cart_items', 13, 1,
+    (SELECT COUNT(*) FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cart_items')
+
+  UNION ALL
+  SELECT '014_terms_consent_and_password_reset', 14, 2,
+    (SELECT COUNT(*) FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND (TABLE_NAME, COLUMN_NAME) IN (('users', 'terms_accepted_at'),
+                                          ('email_verification_tokens', 'purpose')))
+
+  UNION ALL
+  SELECT '015_branch_operations_and_audit', 15, 3,
+    (SELECT COUNT(*) FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'tour_departures'
+        AND COLUMN_NAME IN ('operating_branch_id', 'min_guests'))
+    + (SELECT COUNT(*) FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'audit_logs')
 ) AS checks
 ORDER BY sort_order;
 
 -- Optional, NOT information_schema (reads the roles table, still read-only). 007 is applied when this returns
--- CUSTOMER, STAFF, ADMIN and none of SUPER_ADMIN / REGIONAL_MANAGER / BRANCH_MANAGER:
+-- none of SUPER_ADMIN / REGIONAL_MANAGER. After seeds/001 is re-run it also returns BRANCH_MANAGER:
 -- SELECT code FROM roles ORDER BY code;

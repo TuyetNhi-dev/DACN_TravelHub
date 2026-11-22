@@ -5,7 +5,8 @@ const { loadTs, plain } = require('./load-ts.cjs');
 
 const { EXTRA_SERVICES, findExtraService } = loadTs('src/data/extra-services.ts');
 const { SERVICE_REQUEST_TYPES } = loadTs('src/types/service-request.ts');
-const form = loadTs('src/lib/service-request-form.ts', {}, { Date });
+const phoneVn = loadTs('src/lib/phone-vn.ts');
+const form = loadTs('src/lib/service-request-form.ts', { '@/lib/phone-vn': phoneVn }, { Date });
 
 const textOf = service => [service.name, service.summary, service.lead, ...service.intro,
   ...service.highlights.flatMap(h => [h.title, h.text]), ...service.faqs.flatMap(f => [f.question, f.answer])].join('\n');

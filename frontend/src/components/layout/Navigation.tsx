@@ -8,10 +8,8 @@ import { ThemeToggle } from "./ThemeToggle";
 import { HeaderSearch } from "./HeaderSearch";
 import { ServicesMenu } from "./ServicesMenu";
 import { AuthActions } from "@/components/auth/AuthActions";
-import { useAuth } from "@/components/auth/AuthProvider";
 import { CartButton } from "@/components/cart/CartButton";
 import { useNewRequestCount } from "@/hooks/useNewRequestCount";
-import { isOperator } from "@/lib/auth";
 
 /** The longest matching link wins, so /flights/deals marks "Săn vé rẻ" and not also "Vé máy bay". */
 function activeHref(pathname: string): string | undefined {
@@ -26,8 +24,7 @@ export function Navigation() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
   const current = activeHref(pathname);
-  const { session } = useAuth();
-  const newRequests = useNewRequestCount(Boolean(session?.termsAccepted) && isOperator(session?.user));
+  const { count: newRequests } = useNewRequestCount();
   return <>
     <nav id="main-navigation" aria-label="Điều hướng chính" className={open ? "nav-links open" : "nav-links"}>
       {navigation.map(item => (

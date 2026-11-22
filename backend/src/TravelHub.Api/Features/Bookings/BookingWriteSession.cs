@@ -2,6 +2,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using MySqlConnector;
 using TravelHub.Api.Data;
+using TravelHub.Api.Features.Admin.Audit;
 
 namespace TravelHub.Api.Features.Bookings;
 
@@ -52,7 +53,7 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
     public async Task<TourPricingRow> GetTourPricingAsync(ulong departureId, CancellationToken ct)
     {
         await using var command = Command("""
-            SELECT t.title, t.code, t.operating_branch_id, l.name AS departure_from, d.departure_date,
+            SELECT t.title, t.code, d.operating_branch_id, l.name AS departure_from, d.departure_date,
                 d.return_date, d.adult_price, d.child_price
             FROM tour_departures d
             JOIN tours t ON t.id = d.tour_id
@@ -382,6 +383,10 @@ public sealed class BookingWriteSession(MySqlConnection connection, MySqlTransac
 
     private static readonly JsonSerializerOptions GatewayMetaJson =
         new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull };
+
+    /// <summary>Back-office changes log themselves in the same transaction (audit_logs, migration 015).</summary>
+    public Task WriteAuditAsync(AuditEntry entry, CancellationToken ct) =>
+        AuditLogWriter.WriteAsync(connection, transaction, entry, ct);
 
     public Task CommitAsync(CancellationToken ct) => transaction.CommitAsync(ct);
 

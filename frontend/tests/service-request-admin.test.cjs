@@ -3,7 +3,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { loadTs, plain } = require('./load-ts.cjs');
 
-const form = loadTs('src/lib/service-request-form.ts', {}, { Date });
+const phoneVn = loadTs('src/lib/phone-vn.ts');
+const form = loadTs('src/lib/service-request-form.ts', { '@/lib/phone-vn': phoneVn }, { Date });
 const types = loadTs('src/types/service-request.ts');
 const admin = loadTs('src/lib/service-request-admin.ts', {
   '@/lib/service-request-form': form,

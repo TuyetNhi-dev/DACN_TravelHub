@@ -6,9 +6,11 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   {
+    // Limits from AGENTS.md, as warnings until existing code is brought under them.
     rules: {
-      "max-lines": ["warn", 300],
-      "max-lines-per-function": ["warn", 80],
+      "max-len": ["warn", { code: 120, ignoreUrls: true }],
+      "max-lines": ["warn", { max: 200, skipBlankLines: true, skipComments: true }],
+      "max-lines-per-function": ["warn", { max: 40, skipBlankLines: true, skipComments: true }],
       complexity: ["warn", 12],
       "no-console": "warn",
       eqeqeq: "warn",

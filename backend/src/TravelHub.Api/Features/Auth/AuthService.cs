@@ -63,12 +63,12 @@ public sealed class AuthService(AuthRepository repository, IPasswordHasher<strin
     /// <summary>Stores the signed-in customer's contact phone and returns the refreshed profile.</summary>
     public async Task<AuthUserDto> UpdatePhoneAsync(ulong userId, UpdatePhoneRequest request, CancellationToken ct)
     {
-        if (!PhoneNumber.IsValid(request.Phone))
-            throw new ApiValidationException(new Dictionary<string, string[]>
+        var phone = PhoneNumber.NormalizeVietnamese(request.Phone)
+            ?? throw new ApiValidationException(new Dictionary<string, string[]>
             {
                 ["phone"] = [PhoneNumber.InvalidMessage],
             });
-        await repository.UpdatePhoneAsync(userId, request.Phone!.Trim(), ct);
+        await repository.UpdatePhoneAsync(userId, phone, ct);
         return (await repository.FindByIdAsync(userId, ct))!.User;
     }
 
@@ -101,8 +101,7 @@ public sealed class AuthService(AuthRepository repository, IPasswordHasher<strin
         errors.AddIf(!IsValidEmail(request.Email), "email", "Email không hợp lệ.");
         PasswordRules.AddErrors(errors, request.Password, request.ConfirmPassword);
         var phone = PhoneNumber.NormalizeVietnamese(request.Phone);
-        errors.AddIf(!string.IsNullOrWhiteSpace(request.Phone) && phone is null, "phone",
-            PhoneNumber.InvalidVietnameseMessage);
+        errors.AddIf(!string.IsNullOrWhiteSpace(request.Phone) && phone is null, "phone", PhoneNumber.InvalidMessage);
         errors.AddIf(!request.AcceptTerms, "acceptTerms", TermsRequiredMessage);
         errors.ThrowIfAny();
         return phone;

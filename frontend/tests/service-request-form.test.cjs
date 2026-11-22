@@ -3,7 +3,8 @@ const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const { loadTs, plain } = require('./load-ts.cjs');
 
-const form = loadTs('src/lib/service-request-form.ts', {}, { Date });
+const phoneVn = loadTs('src/lib/phone-vn.ts');
+const form = loadTs('src/lib/service-request-form.ts', { '@/lib/phone-vn': phoneVn }, { Date });
 const TODAY = '2026-11-20';
 
 const contact = { fullName: 'Nguyễn Văn A', phone: '0903 123 456', email: '', note: '', website: '' };
@@ -30,7 +31,7 @@ test('an empty form reports every required field with the server keys and messag
   assert.deepEqual(Object.keys(errors).sort(), [
     'consent', 'details.adults', 'details.destination', 'details.visitDate', 'fullName', 'phone',
   ]);
-  assert.equal(errors.phone, 'Số điện thoại cần 9–15 chữ số, có thể bắt đầu bằng +.');
+  assert.equal(errors.phone, 'Số điện thoại chưa đúng định dạng Việt Nam, ví dụ 0912 345 678 hoặc 028 3812 3456.');
   assert.equal(errors['details.adults'], 'Số người lớn từ 1 đến 50.');
   assert.equal(errors['details.visitDate'], 'Ngày phải từ hôm nay trở đi và trong vòng 2 năm.');
 });
@@ -50,9 +51,10 @@ test('valid requests for every service pass', () => {
   }
 });
 
-test('contact rules: phone separators, optional email, note length', () => {
+test('contact rules: Vietnamese phone with separators, optional email, note length', () => {
   const values = withDetails('visa', { country: 'Úc', visaType: 'tourist', travelDate: '2027-01-10', applicants: '1' });
-  assert.equal(form.normalizePhone(' (090) 312-34.56 '), '0903123456');
+  assert.equal(form.buildPayload('visa', { ...values, phone: ' (090) 312-34.56 ' }, true).phone, '0903123456');
+  assert.deepEqual(Object.keys(errorsOf('visa', { ...values, phone: '+1 415 555 0100' })), ['phone']);
   assert.deepEqual(Object.keys(errorsOf('visa', { ...values, phone: '12ab', email: 'khach@', note: 'x'.repeat(1001) })).sort(),
     ['email', 'note', 'phone']);
   assert.deepEqual(errorsOf('visa', { ...values, phone: '+84903123456', email: 'khach@example.com' }), {});

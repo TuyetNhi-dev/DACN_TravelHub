@@ -6,14 +6,12 @@ import { NewRequestBadge } from "./NewRequestBadge";
 
 interface AdminNavProps {
   current: "bookings" | "requests";
-  /** Changing it reloads the "new" count, e.g. after a request's status was updated. */
-  refreshKey?: string;
 }
 
 /** Switches between the two back-office queues; the badge counts requests nobody has contacted yet. */
-export function AdminNav({ current, refreshKey = "" }: AdminNavProps) {
-  // Admin pages sit behind OperatorGate, so the viewer is staff or an admin.
-  const count = useNewRequestCount(true, refreshKey);
+export function AdminNav({ current }: AdminNavProps) {
+  // Same count as the header badge (NewRequestCountProvider), so the page does not load it twice.
+  const { count } = useNewRequestCount();
   return (
     <nav className="admin-nav" aria-label="Khu quản trị">
       <Link href="/admin/bookings" aria-current={current === "bookings" ? "page" : undefined}>Đơn đặt chỗ</Link>
