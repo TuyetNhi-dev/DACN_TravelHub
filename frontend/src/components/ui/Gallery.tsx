@@ -7,6 +7,10 @@ import { GallerySwipe } from "./GallerySwipe";
 import { Icon } from "./Icon";
 import { Lightbox } from "./Lightbox";
 
+// Grid is 2fr 1fr 1fr inside the 1180px container and hidden at <=640px (see ui.css).
+const FIRST_TILE_SIZES = "(max-width: 640px) 1px, (max-width: 1240px) 50vw, 600px";
+const TILE_SIZES = "(max-width: 640px) 1px, (max-width: 1240px) 25vw, 300px";
+
 const GRID_TILES = 5;
 
 /**
@@ -26,9 +30,10 @@ export function Gallery({ images, title }: { images: MediaImage[]; title: string
         {tiles.map((image, index) => (
           <button key={image.src} type="button" className="ui-gallery-tile" onClick={() => setOpen(index)}
             aria-label={`Xem ảnh ${index + 1} trên ${images.length} của ${title} toàn màn hình`}>
-            {/* Lazy, not priority: an eager photo would also download on phones, where this mosaic is hidden. */}
-            <Image src={image.src} alt={image.alt} fill
-              sizes={index === 0 ? "(max-width: 768px) 100vw, 60vw" : "(max-width: 768px) 50vw, 20vw"} />
+            {/* The first tile is the desktop LCP, so it loads eagerly. Phones hide this mosaic: "1px" there makes
+                the browser fetch only the smallest variant instead of a full photo nobody sees. */}
+            <Image src={image.src} alt={image.alt} fill loading={index === 0 ? "eager" : "lazy"}
+              sizes={index === 0 ? FIRST_TILE_SIZES : TILE_SIZES} />
             {hidden > 0 && index === tiles.length - 1 && (
               <span className="ui-gallery-more" aria-hidden="true">+{hidden} ảnh</span>
             )}

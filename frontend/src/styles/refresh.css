@@ -1,0 +1,284 @@
+/* Customer-site visual refresh (docs/design/theme.md, "Quy ước giao diện").
+   Loaded last so it wins over older page styles. Rules that restyle shared elements (buttons, cards, states)
+   sit under `body:not(:has(.adm-shell))` so /admin keeps its own look; new components are named and need no scope.
+   Tokens only; motion stops under prefers-reduced-motion at the end of this file. */
+
+/* ---------- Page entrance: a short fade when a route mounts ---------- */
+@media (prefers-reduced-motion: no-preference) {
+  body:not(:has(.adm-shell)) #main-content { animation: page-in var(--duration-page) var(--ease-out) both; }
+}
+@keyframes page-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+body:not(:has(.adm-shell)) {
+  /* ---------- Typography rhythm ---------- */
+  h1, h2, h3 { text-wrap: balance; }
+  p { text-wrap: pretty; }
+  .sh-page-head h1, .content-head h1, .detail-title h1 {
+    font-size: var(--text-h1); font-weight: var(--weight-heavy); line-height: var(--leading-tight);
+    letter-spacing: var(--tracking-tight); }
+  .sh-page-head p, .content-intro { font-size: var(--text-lead); line-height: var(--leading-body); }
+  .ui-section-head h2 { font-weight: var(--weight-heavy); }
+  .ui-eyebrow::before { background: var(--sun); height: 3px; border-radius: 2px; }
+
+  /* ---------- Buttons: clear hover, press, focus and disabled states ---------- */
+  .btn { min-height: var(--tap-min); font-weight: var(--weight-bold); border-radius: var(--radius-pill); }
+  .btn-primary { box-shadow: 0 6px 16px var(--brand-shadow); }
+  .btn-primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 10px 22px var(--brand-shadow); }
+  .btn:active:not(:disabled) { transform: translateY(0) scale(.98); }
+  .btn:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }
+  .btn:disabled, .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; box-shadow: none; transform: none; }
+  .btn-outline { border-width: 1.5px; }
+
+  /* ---------- Cards: soft radius, light shadow, slow photo zoom ---------- */
+  .ui-card { border-radius: var(--radius-lg); border-color: var(--line-subtle); }
+  .ui-card:hover, .ui-card:focus-within { transform: translateY(-6px); box-shadow: var(--shadow-hover); }
+  .ui-media img { transition-duration: 900ms; }
+  .ui-card:hover .ui-media img { transform: scale(1.06); }
+  .tour-tile h3 { font-size: var(--text-h4); line-height: var(--leading-snug); font-weight: var(--weight-bold); }
+  .ui-price strong { font-size: 22px; }
+
+  /* ---------- Loading, empty and error states ---------- */
+  .sh-state { justify-items: center; text-align: center; padding: clamp(32px, 5vw, 56px) 24px;
+    border: 1px solid var(--line-subtle); border-radius: var(--radius-lg);
+    background: linear-gradient(180deg, var(--panel), var(--surface)); }
+  .sh-state p { max-width: 460px; line-height: var(--leading-body); }
+  .sh-state h2, .sh-state h3 { font-size: 20px; }
+  .sh-state-actions { justify-content: center; }
+  .sh-state--loading { justify-items: stretch; text-align: left; }
+  .sh-state[role="alertdialog"] { justify-items: start; text-align: left; }
+
+  /* ---------- Forms: 44px touch targets and a visible focus ring ---------- */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="range"]), select, textarea { min-height: var(--tap-min); }
+  input:focus-visible, select:focus-visible, textarea:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+
+  /* ---------- Shared panels ---------- */
+  .sh-panel, .detail-content > section, .detail-booking, .filters, .cart-summary, .cart-item {
+    border-radius: var(--radius-lg); border-color: var(--line-subtle); box-shadow: var(--shadow-sm); }
+}
+
+/* ---------- Badge: warm tone ---------- */
+.sh-badge--sun { color: var(--sun-ink); background: var(--sun-soft); }
+
+/* ---------- State icon ---------- */
+.sh-state-icon { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 50%;
+  color: var(--blue); background: var(--blue-soft); }
+.sh-state--error .sh-state-icon { color: var(--brand); background: color-mix(in srgb, var(--brand) 10%, transparent); }
+
+/* ---------- Review score (sample reviews only) ---------- */
+.ui-review-score { display: inline-flex; gap: 2px; color: var(--line-strong); }
+.ui-review-score .is-on { color: var(--sun); }
+.ui-review-score svg { fill: currentColor; }
+
+/* ---------- Checkout steps ---------- */
+.ui-steps { margin: 0 0 var(--space-6); }
+.ui-steps ol { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none;
+  counter-reset: step; }
+.ui-steps li { position: relative; display: grid; justify-items: center; gap: 8px; text-align: center;
+  color: var(--muted); font-size: var(--text-caption); font-weight: var(--weight-semibold); }
+/* Connector line between dots; drawn from the previous dot to this one. */
+.ui-steps li + li::before { content: ""; position: absolute; top: 17px; right: 50%; width: 100%; height: 2px;
+  background: var(--line); z-index: 0; }
+.ui-steps li.is-done + li::before, .ui-steps li.is-done + li.is-current::before { background: var(--green); }
+.ui-steps-dot { position: relative; z-index: 1; width: 36px; height: 36px; display: grid; place-items: center;
+  border-radius: 50%; border: 2px solid var(--line); background: var(--panel); color: var(--muted);
+  font-weight: var(--weight-bold); }
+.ui-steps .is-done .ui-steps-dot { border-color: var(--green); background: var(--green); color: var(--panel); }
+.ui-steps .is-current { color: var(--ink); }
+.ui-steps .is-current .ui-steps-dot { border-color: var(--brand); color: var(--brand);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--brand) 14%, transparent); }
+
+/* ---------- Trust notes ---------- */
+.ui-trust { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-4); margin: 0 0 var(--space-6);
+  padding: 0; list-style: none; }
+.ui-trust li { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-4);
+  border-radius: var(--radius-md); background: var(--panel); border: 1px solid var(--line-subtle); }
+.ui-trust-icon { flex: none; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 12px;
+  color: var(--sun-ink); background: var(--sun-soft); }
+.ui-trust b { display: block; color: var(--ink); font-size: var(--text-small); }
+.ui-trust small { display: block; margin-top: 2px; color: var(--muted); font-size: var(--text-caption);
+  line-height: 1.55; }
+.ui-trust--compact { grid-template-columns: 1fr; gap: var(--space-2); margin: var(--space-4) 0 0; }
+.ui-trust--compact li { padding: 0; border: 0; background: none; }
+
+/* ---------- Home: rhythm and warm section ---------- */
+.home-section--sun { background:
+  radial-gradient(ellipse 60% 80% at 100% 0%, var(--sun-soft), transparent 70%), var(--canvas); }
+.home-deals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); margin-top: var(--space-6); }
+.home-deals .fd-card { height: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+  transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base); }
+.home-deals .fd-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); }
+
+/* ---------- Home: destinations as tall cards that widen ---------- */
+.dest-accordion { display: flex; gap: var(--space-3); height: clamp(420px, 42vw, 520px); margin: 0; padding: 0;
+  list-style: none; }
+.dest-panel { position: relative; flex: 1 1 0; min-width: 0; overflow: hidden; isolation: isolate;
+  border-radius: var(--radius-lg); color: #fff; box-shadow: var(--shadow-sm);
+  transition: flex-grow var(--duration-slow) var(--ease-out); }
+.dest-panel.is-open { flex-grow: 3.2; }
+.dest-panel img { object-fit: cover; z-index: -2; transition: transform 1.2s var(--ease-out); }
+.dest-panel.is-open img { transform: scale(1.04); }
+.dest-panel-shade { position: absolute; inset: 0; z-index: -1;
+  background: linear-gradient(0deg, rgba(5, 16, 38, .86) 0%, rgba(5, 16, 38, .25) 55%, rgba(5, 16, 38, .1) 100%); }
+.dest-panel-toggle { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end;
+  align-items: flex-start; gap: 4px; padding: var(--space-6) var(--space-6) 104px; border: 0; background: none;
+  color: inherit; text-align: left; cursor: pointer; }
+.dest-panel-toggle small { color: #ffe1b0; font-size: var(--text-eyebrow); font-weight: var(--weight-heavy);
+  letter-spacing: .16em; text-transform: uppercase; }
+.dest-panel-toggle b { font-size: clamp(22px, 2.2vw, 32px); line-height: 1.1; letter-spacing: var(--tracking-tight);
+  white-space: nowrap; }
+.dest-panel:not(.is-open) .dest-panel-toggle { padding-bottom: var(--space-6); }
+.dest-panel:not(.is-open) .dest-panel-toggle b { font-size: 20px; writing-mode: vertical-rl; transform: rotate(180deg); }
+.dest-panel:not(.is-open) .dest-panel-toggle small { display: none; }
+.dest-panel-toggle:focus-visible { outline: 3px solid #fff; outline-offset: -6px; border-radius: var(--radius-lg); }
+.dest-panel-body { position: absolute; left: var(--space-6); right: var(--space-6); bottom: var(--space-6);
+  display: flex; align-items: center; justify-content: space-between; gap: var(--space-4);
+  opacity: 0; transform: translateY(12px); pointer-events: none;
+  transition: opacity var(--duration-base) ease, transform var(--duration-base) var(--ease-out); }
+.dest-panel.is-open .dest-panel-body { opacity: 1; transform: none; pointer-events: auto;
+  transition-delay: 150ms; }
+.dest-panel-body p { margin: 0; color: #e3ecf1; font-size: var(--text-body); }
+.dest-panel-link { position: relative; z-index: 2; flex: none; display: inline-flex; align-items: center; gap: 8px;
+  min-height: var(--tap-min); padding: 0 18px; border-radius: var(--radius-pill); color: #142f3d; background: #fff;
+  font-weight: var(--weight-bold); font-size: var(--text-small); }
+.dest-panel-link:hover { background: var(--sun-soft); }
+.dest-panel-link:focus-visible { outline: 3px solid var(--sun); outline-offset: 3px; }
+.dest-panel .ui-media-note { top: 14px; right: 14px; bottom: auto; }
+.dest-panel:not(.is-open) .ui-media-note { display: none; }
+
+/* ---------- Home: guides and sample reviews ---------- */
+.guide-card { border-radius: var(--radius-lg); border-color: var(--line-subtle); background: var(--panel);
+  box-shadow: var(--shadow-sm); transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base); }
+.guide-card:hover, .guide-card:focus-within { transform: translateY(-6px); box-shadow: var(--shadow-hover); }
+.guide-card-media { overflow: hidden; }
+.guide-card-media img { transition: transform 900ms var(--ease-out); }
+.guide-card:hover .guide-card-media img { transform: scale(1.06); }
+.guide-card h3 { margin: 0; font-size: var(--text-h4); line-height: var(--leading-snug); }
+.guide-card :is(h2, h3) a { color: var(--ink); }
+.guide-card:hover :is(h2, h3) a { color: var(--blue); }
+.guide-card:has(.ui-stretched:focus-visible) { outline: var(--focus-ring); outline-offset: 3px; }
+.home-guides { margin: 0; padding: 0; list-style: none; }
+
+.review-sample-note { display: inline-flex; align-items: center; gap: 8px; margin: 0 0 var(--space-6);
+  padding: 8px 14px; border-radius: var(--radius-pill); color: var(--sun-ink); background: var(--sun-soft);
+  font-size: var(--text-caption); font-weight: var(--weight-semibold); }
+.review-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); margin: 0;
+  padding: 0; list-style: none; }
+.review-card { position: relative; display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-8);
+  border-radius: var(--radius-lg); background: var(--panel); border: 1px solid var(--line-subtle);
+  box-shadow: var(--shadow-sm); }
+.review-quote { position: absolute; top: 24px; right: 24px; color: var(--blue-soft); }
+.review-card blockquote { margin: 0; flex: 1; }
+.review-card blockquote p { margin: 0; color: var(--text-secondary); font-size: var(--text-body);
+  line-height: var(--leading-body); }
+.review-author { display: grid; gap: 2px; margin: 0; padding-top: var(--space-4); border-top: 1px solid var(--line-subtle); }
+.review-author b { color: var(--ink); }
+.review-author span { color: var(--muted); font-size: var(--text-caption); }
+
+/* ---------- Tour detail: icon highlights and timeline ---------- */
+.tour-highlights { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-3);
+  margin: 0 0 18px; padding: 0; list-style: none; }
+.tour-highlights li { display: grid; grid-template-columns: 44px minmax(0, 1fr); column-gap: var(--space-3);
+  align-items: center; padding: var(--space-4); border-radius: var(--radius-md); background: var(--panel);
+  border: 1px solid var(--line-subtle); box-shadow: var(--shadow-sm); }
+.tour-highlights-icon { grid-row: span 2; width: 44px; height: 44px; display: grid; place-items: center;
+  border-radius: 14px; color: var(--blue); background: var(--blue-soft); }
+.tour-highlights li:nth-child(4) .tour-highlights-icon { color: var(--sun-ink); background: var(--sun-soft); }
+.tour-highlights small { color: var(--muted); font-size: var(--text-caption); }
+.tour-highlights b { color: var(--ink); font-size: var(--text-small); line-height: 1.4; overflow-wrap: anywhere; }
+
+.tour-timeline { gap: 0; }
+.tour-timeline li { position: relative; grid-template-columns: 84px minmax(0, 1fr); padding-bottom: var(--space-6); }
+.tour-timeline li::before { content: ""; position: absolute; left: 74px; top: 6px; width: 12px; height: 12px;
+  border-radius: 50%; background: var(--panel); border: 3px solid var(--brand); }
+.tour-timeline li:not(:last-child)::after { content: ""; position: absolute; left: 79px; top: 22px; bottom: 2px;
+  width: 2px; background: var(--line); }
+.tour-timeline li > div { padding-left: var(--space-4); }
+.tour-timeline h3 { font-size: var(--text-h4); }
+.tour-timeline p { line-height: var(--leading-body); }
+
+/* ---------- Cart and payment: total stands out ---------- */
+body:not(:has(.adm-shell)) {
+  .cart-summary-total strong, .sh-total dd { font-size: clamp(24px, 2.4vw, 30px); font-weight: var(--weight-heavy);
+    letter-spacing: var(--tracking-tight); color: var(--brand); }
+  .payment-panel { border-radius: var(--radius-lg); }
+  .payment-timer { font-variant-numeric: tabular-nums; }
+}
+
+/* ---------- Auth: softer card on the brand stage ---------- */
+body:not(:has(.adm-shell)) {
+  .auth-stage { background: radial-gradient(ellipse at 8% 18%, #2a7fa3 0, transparent 46%),
+    radial-gradient(ellipse at 96% 92%, color-mix(in srgb, var(--sun) 45%, #0f4a63) 0, transparent 42%), #0f2f45; }
+  .auth-stage .auth-form-card { border-radius: var(--radius-xl); }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1080px) {
+  .home-deals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .review-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tour-highlights { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 760px) {
+  /* Phones: panels stack; the open one is tall, the others are slim bars with a horizontal title. */
+  .dest-accordion { flex-direction: column; height: auto; gap: var(--space-2); }
+  .dest-panel { flex: none; height: 72px; transition: height var(--duration-slow) var(--ease-out); }
+  .dest-panel.is-open { height: 340px; }
+  .dest-panel:not(.is-open) .dest-panel-toggle { justify-content: center; padding: 0 var(--space-6); }
+  .dest-panel:not(.is-open) .dest-panel-toggle b { writing-mode: horizontal-tb; transform: none; }
+  .dest-panel-body { left: var(--space-4); right: var(--space-4); bottom: var(--space-4); flex-direction: column;
+    align-items: flex-start; gap: var(--space-3); }
+  .dest-panel-toggle { padding: var(--space-4) var(--space-4) 116px; }
+  .ui-trust { grid-template-columns: 1fr; }
+  .ui-steps-label { font-size: max(12px, var(--text-min)); }
+}
+
+@media (max-width: 640px) {
+  .home-deals, .review-grid { grid-template-columns: minmax(0, 1fr); }
+  .review-card { padding: var(--space-6); }
+  .tour-highlights { grid-template-columns: minmax(0, 1fr); }
+  .tour-timeline li { grid-template-columns: 64px minmax(0, 1fr); }
+  .tour-timeline li::before { left: 54px; }
+  .tour-timeline li:not(:last-child)::after { left: 59px; }
+  .ui-steps li { font-size: 12px; }
+  .ui-steps-dot { width: 32px; height: 32px; }
+  .ui-steps li + li::before { top: 15px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dest-panel, .dest-panel img, .dest-panel-body, .guide-card, .guide-card-media img, .home-deals .fd-card {
+    transition: none; }
+  .dest-panel.is-open img, .guide-card:hover, .guide-card:hover .guide-card-media img,
+  .home-deals .fd-card:hover { transform: none; }
+  body:not(:has(.adm-shell)) .btn:active:not(:disabled), body:not(:has(.adm-shell)) .btn-primary:hover:not(:disabled),
+  body:not(:has(.adm-shell)) .ui-card:hover, body:not(:has(.adm-shell)) .ui-card:focus-within { transform: none; }
+}
+
+/* ---------- Home deals: the deal notice reads as a quiet note, not an alert ---------- */
+.home-section--sun .fd-notice { border: 0; border-left: 4px solid var(--sun); border-radius: var(--radius-sm);
+  background: var(--panel); box-shadow: var(--shadow-sm); }
+.home-deals .fd-pills { margin-top: 0; }
+.home-deals .fd-price strong { font-size: 26px; font-weight: var(--weight-heavy); }
+
+/* ---------- Cart total: label above a large amount, so the amount never wraps ---------- */
+@media (min-width: 768px) {
+  body:not(:has(.adm-shell)) .cart-summary-total { display: grid; gap: 4px; justify-items: start; }
+}
+/* Phones: the summary is a slim fixed bar (cart.css); the reassurance list would crowd it. */
+@media (max-width: 767px) {
+  .cart-summary .ui-trust { display: none; }
+  body:not(:has(.adm-shell)) .cart-summary-total strong { font-size: 22px; }
+}
+
+/* ---------- Page heroes share one heading weight and rhythm ---------- */
+body:not(:has(.adm-shell)) :is(.listing-hero h1, .svc-hero h1, .auth-form-card .auth-intro h1) {
+  font-weight: var(--weight-heavy); letter-spacing: var(--tracking-tight); line-height: var(--leading-tight); }
+body:not(:has(.adm-shell)) .content-page .content-head { max-width: 760px; }
+
+/* ---------- Section headings inside pages: bold, so long articles keep a clear rhythm ---------- */
+body:not(:has(.adm-shell)) #main-content :is(h2, h3) { font-weight: var(--weight-bold); }
+
+/* /admin keeps its previous state blocks: the shared StateMessage icon is shown on customer pages only. */
+.adm-shell .sh-state-icon { display: none; }
+
+/* Cart item titles are links: extend their hit area to 44px without moving the text. */
+.cart-item-body h2 a { display: inline-block; padding-block: 10px; margin-block: -10px; }

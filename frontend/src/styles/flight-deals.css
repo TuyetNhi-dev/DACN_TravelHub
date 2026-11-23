@@ -12,7 +12,7 @@
 .fd-badge{justify-self:start;font-size:max(11px, var(--text-min));font-weight:600;letter-spacing:.4px;color:var(--green);
   background:var(--blue-soft);border-radius:999px;padding:4px 10px}
 .fd-card.is-featured .fd-badge{color:var(--accent-warm)}
-.fd-card h2{font-size:18px!important;margin:6px 0 0!important}
+.fd-card h2,.fd-card h3{font-size:18px!important;margin:6px 0 0!important}
 .fd-card p{margin:0}
 .fd-route,.fd-updated{font-size:max(12px, var(--text-min))!important;color:var(--muted)!important}
 .fd-price strong{color:var(--blue);font-size:22px}

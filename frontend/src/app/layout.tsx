@@ -11,6 +11,7 @@ import { Header } from "@/components/layout/Header";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 import "../styles/coastal.css";
+import "../styles/refresh.css";
 
 const font = Be_Vietnam_Pro({
   subsets: ["latin", "vietnamese"],

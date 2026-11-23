@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
-export type BadgeTone = "info" | "success" | "warning" | "danger" | "neutral" | "brand" | "image";
+export type BadgeTone = "info" | "success" | "warning" | "danger" | "neutral" | "brand" | "image" | "sun";
 
-/** "image" sits on top of photos (dark glass), the other tones on page surfaces. */
+/** "image" sits on top of photos (dark glass), "sun" is the warm accent (urgency), the rest on page surfaces. */
 export function Badge({ tone = "neutral", children, className }: {
   tone?: BadgeTone;
   children: ReactNode;

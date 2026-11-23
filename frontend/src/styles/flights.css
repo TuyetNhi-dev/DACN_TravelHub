@@ -15,5 +15,5 @@
   background:var(--blue-soft);color:var(--blue)}
 .fd-pill.is-instant{background:var(--green);color:#fff}
 .fd-pill.is-pending{background:var(--surface);color:var(--muted);border:1px solid var(--line)}
-.fd-pill.is-low{background:var(--accent-warm);color:#fff}
+.fd-pill.is-low{background:var(--sun-soft);color:var(--sun-ink)}
 .fd-shortage{margin:0;font-size:max(12px, var(--text-min));color:var(--accent-warm);font-weight:600}
