@@ -18,7 +18,8 @@ export function GuideArticle({ guide }: { guide: TravelGuide }) {
           <p className="content-intro">{guide.summary}</p>
           {cover && (
             <figure className="guide-cover">
-              <Image src={cover.src} alt={cover.alt} fill sizes="(max-width: 900px) 100vw, 760px" />
+              <Image src={cover.src} alt={cover.alt} fill loading="eager" fetchPriority="high"
+                sizes="(max-width: 900px) 100vw, 760px" />
               {cover.illustrative && <figcaption>Ảnh minh họa</figcaption>}
             </figure>
           )}

@@ -9,19 +9,22 @@ import { tourDuration, tourHref } from "@/lib/tour-display";
 import type { TourSummary } from "@/types/tour";
 import { DepartureChips } from "./DepartureChips";
 
+/** Carousel slides are 85% of a phone screen; the /tours grid fills it (see LISTING_CARD_SIZES). */
 export const TOUR_CARD_SIZES = "(max-width: 640px) 85vw, (max-width: 1080px) 45vw, 380px";
+export const LISTING_CARD_SIZES = "(max-width: 640px) 100vw, (max-width: 1080px) 45vw, 300px";
 
 interface TourCardProps {
   tour: TourSummary;
   /** Package layout: departure city, date chips and a "Xem chi tiết" pill instead of the next date. */
   showDepartureDates?: boolean;
+  sizes?: string;
 }
 
 /** The whole card is one link (stretched title link) so it is a single tab stop. */
-export function TourCard({ tour, showDepartureDates = false }: TourCardProps) {
+export function TourCard({ tour, showDepartureDates = false, sizes = TOUR_CARD_SIZES }: TourCardProps) {
   return (
     <Card className="tour-tile">
-      <MediaFrame image={getTourImages(tour)[0]} sizes={TOUR_CARD_SIZES}>
+      <MediaFrame image={getTourImages(tour)[0]} sizes={sizes}>
         <Badge tone="image">{tour.code}</Badge>
         <Badge tone="image"><Icon name="clock" size={13} />{tourDuration(tour)}</Badge>
       </MediaFrame>

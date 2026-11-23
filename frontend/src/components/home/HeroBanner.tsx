@@ -69,7 +69,8 @@ function HeroBackdrop({ index }: { index: number }) {
       {heroSlides.map((item, i) => (
         // Decorative: the headline already names the destination.
         <Image key={item.place} src={getDestinationImages(item.place)[0].src} alt="" fill sizes="100vw"
-          priority={i === 0} className={i === index ? "is-active" : ""} />
+          loading={i === 0 ? "eager" : "lazy"}
+          fetchPriority={i === 0 ? "high" : "auto"} className={i === index ? "is-active" : ""} />
       ))}
       <span className="hero-shade" />
     </div>
