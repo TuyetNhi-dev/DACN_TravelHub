@@ -7,16 +7,21 @@ public static class TourEndpoints
     public static void MapTourEndpoints(this IEndpointRouteBuilder app)
     {
         var group = app.MapGroup("/api/tours").WithTags("Tours");
-        group.MapGet("/", async (int? page, int? pageSize, string? region, TourService service,
-            CancellationToken ct) =>
+        // Without page/pageSize the answer is the full (filtered) list, as before; with them it is paged.
+        group.MapGet("/", async ([AsParameters] TourSearchQuery query, TourService service, CancellationToken ct) =>
         {
-            if (page is null && pageSize is null)
-                return Results.Ok(ListResponse<TourSummaryDto>.From(await service.ListAsync(region, ct)));
-            var p = Math.Max(1, page ?? 1);
-            var size = Math.Clamp(pageSize ?? 20, 1, 200);
-            var (rows, total) = await service.ListPagedAsync(p, size, region, ct);
+            if (query.Page is null && query.PageSize is null)
+                return Results.Ok(ListResponse<TourSummaryDto>.From(await service.ListAsync(query, ct)));
+            var page = Math.Max(1, query.Page ?? 1);
+            var size = Math.Clamp(query.PageSize ?? 20, 1, 200);
+            var (rows, total) = await service.ListPagedAsync(query, page, size, ct);
             return Results.Ok(ListResponse<TourSummaryDto>.Paged(rows, total));
         });
+        group.MapGet("/destinations", async (TourService service, CancellationToken ct) =>
+            Results.Ok(ListResponse<TourDestinationDto>.From(await service.ListDestinationsAsync(ct))));
+        group.MapGet("/departures/upcoming", async (int? days, int? limit, TourService service,
+            CancellationToken ct) =>
+            Results.Ok(ListResponse<UpcomingDepartureDto>.From(await service.ListDepartingSoonAsync(days, limit, ct))));
         group.MapGet("/{id}", async (string id, TourService service, CancellationToken ct) =>
             Results.Ok(new ItemResponse<TourDetailDto>(await service.GetAsync(id, ct))));
 

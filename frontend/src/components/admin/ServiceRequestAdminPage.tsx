@@ -8,8 +8,6 @@ import { formatDateTime } from "@/lib/format";
 import { describeDetails } from "@/lib/service-request-admin";
 import { getAdminServiceRequest } from "@/services/admin-service-requests";
 import type { ServiceRequestDetail } from "@/types/service-request";
-import { AdminNav } from "./AdminNav";
-import { OperatorGate } from "./OperatorGate";
 import { RequestFollowUp } from "./ServiceRequestFollowUp";
 import { RequestStatusBadge, ServiceTypeLabel } from "./ServiceRequestsAdminPage";
 
@@ -17,12 +15,12 @@ const LIST_HREF = "/admin/service-requests";
 
 export function ServiceRequestAdminPage({ requestId }: { requestId: string }) {
   return (
-    <main id="main-content" className="container sh-page">
+    <main id="main-content" className="sh-page adm-page">
       <div className="sh-page-head">
         <Breadcrumb items={[{ label: "Yêu cầu tư vấn", href: LIST_HREF }, { label: "Chi tiết yêu cầu" }]} />
         <h1>Xử lý yêu cầu tư vấn</h1>
       </div>
-      <OperatorGate><RequestDetail requestId={requestId} /></OperatorGate>
+      <RequestDetail requestId={requestId} />
     </main>
   );
 }
@@ -39,7 +37,6 @@ function RequestDetail({ requestId }: { requestId: string }) {
   };
   return (
     <>
-      <AdminNav current="requests" />
       {state.status === "loading" && <LoadingState label="Đang tải yêu cầu…" />}
       {state.status === "error" && (
         <ErrorState error={state.error} onRetry={retry} backHref={LIST_HREF} backLabel="Danh sách yêu cầu" />

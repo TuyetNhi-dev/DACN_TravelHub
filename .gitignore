@@ -1,0 +1,27 @@
+# Repo-wide safety net; backend/ and frontend/ keep their own, more specific .gitignore files.
+
+# Claude Code: personal settings stay local, shared settings.json is committed for the team.
+.claude/settings.local.json
+
+# Secrets and certificates
+.env*
+!.env.example
+*.pem
+*.pfx
+
+# Per-developer ASP.NET Core settings. The existing tracked copy (logging only) stays tracked;
+# put connection strings and keys in user-secrets, never in this file.
+appsettings.Development.json
+
+# Build output and dependencies
+node_modules/
+bin/
+obj/
+.next/
+
+# IDE
+.vs/
+*.user
+
+# Local database dumps (see docs/database/backup-restore.md)
+/backup/

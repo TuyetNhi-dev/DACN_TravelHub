@@ -16,8 +16,10 @@ Quy ước chung:
 | Phương thức | Đường dẫn | Ghi chú |
 |---|---|---|
 | GET | `/api/health/database` | Kiểm tra kết nối, trả tên database |
-| GET | `/api/tours` | `page`, `pageSize` |
+| GET | `/api/tours` | Không tham số: toàn bộ tour đang bán (như trước). Lọc (tùy chọn): `q` (tên, mã, điểm đến; không phân biệt hoa thường, không dấu, kể cả đ/d; tối đa 100 ký tự), `destinationId`, `minDays`/`maxDays` (1–60), `dateFrom`/`dateTo` (có lịch còn đặt được trong khoảng), `maxPrice` (giá từ), `sort` (`price_asc`, `price_desc`; mặc định theo id), `region` (`NORTH`/`CENTRAL`/`SOUTH`, chỉ xếp tour của khu vực lên đầu, không lọc bỏ; `sort` theo giá được ưu tiên hơn). Phân trang offset `page`, `pageSize` (1–200); có phân trang thì `total` là số tour khớp bộ lọc. Sai tham số: 400 kèm lỗi theo trường |
+| GET | `/api/tours/destinations` | Điểm đến có tour đang bán: `id`, `name`, `tourCount`, xếp theo tên |
 | GET | `/api/tours/{id}` | Chi tiết, lịch khởi hành, ảnh, bao gồm/không bao gồm |
+| GET | `/api/tours/departures/upcoming` | `days` (mặc định 14, 1–30), `limit` (mặc định 8, 1–20). Lịch còn đặt được (open, sau hôm nay, còn chỗ), sớm nhất trước; có `availableSeats`, `adultPrice`, `daysUntilDeparture` tính theo giờ Việt Nam |
 | GET | `/api/tour-collections`, `/api/tour-collections/{slug}` | Bộ sưu tập tour theo mùa/chủ đề |
 | GET | `/api/hotels`, `/api/hotels/{id}` | Giá tham khảo, chờ xác nhận |
 | GET | `/api/flights` | `from`, `to`, `date`, `cabin` |

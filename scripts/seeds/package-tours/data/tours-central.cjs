@@ -1,0 +1,312 @@
+// Miền Trung và Tây Nguyên: 15 tour chi nhánh Đà Nẵng (khởi hành Đà Nẵng), 5 tour chi nhánh TP.HCM.
+module.exports = [
+  {
+    code: 'SH-MT-001', branch: 'DN', tier: 'CC', transport: ['o-to'], days: 1, nights: 0, dest: 'city-da-nang', dow: 6,
+    title: 'Bà Nà Hills một ngày: Cầu Vàng – Làng Pháp',
+    photos: ['danang'],
+    highlights: 'Cáp treo Bà Nà, Cầu Vàng, vườn hoa Le Jardin D’Amour, Làng Pháp',
+    itinerary: [
+      ['Đà Nẵng – Bà Nà Hills',
+        'Xe đón tại khách sạn, lên Bà Nà bằng cáp treo. Dạo Cầu Vàng, vườn hoa Le Jardin D’Amour, hầm rượu Debay và '
+        + 'Làng Pháp, ăn trưa buffet trên núi. Chiều xuống núi, về lại khách sạn. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-002', branch: 'DN', tier: 'TK', transport: ['o-to'], days: 1, nights: 0, dest: 'city-hoi-an', dow: 6,
+    title: 'Hội An một ngày: rừng dừa Bảy Mẫu – phố cổ đèn lồng',
+    photos: ['hoian'],
+    highlights: 'Rừng dừa Bảy Mẫu Cẩm Thanh, chùa Cầu, hội quán Phúc Kiến, thả đèn hoa đăng sông Hoài',
+    itinerary: [
+      ['Đà Nẵng – Cẩm Thanh – phố cổ Hội An',
+        'Chiều đi Hội An, ngồi thuyền thúng trong rừng dừa Bảy Mẫu Cẩm Thanh. Vào phố cổ thăm chùa Cầu, hội quán '
+        + 'Phúc Kiến và nhà cổ Tấn Ký, ăn tối cao lầu. Thả đèn hoa đăng trên sông Hoài rồi về Đà Nẵng. Kết thúc '
+        + 'chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-003', branch: 'DN', tier: 'TC', transport: ['o-to'], days: 2, nights: 1, dest: 'city-hue', dow: 6,
+    title: 'Cố đô Huế 2 ngày 1 đêm qua đèo Hải Vân',
+    photos: ['hue'],
+    highlights: 'Đèo Hải Vân, Đại Nội, chùa Thiên Mụ, lăng Khải Định, ca Huế trên sông Hương',
+    itinerary: [
+      ['Đà Nẵng – đèo Hải Vân – Đại Nội',
+        'Vượt đèo Hải Vân, dừng ở đầm Lập An. Chiều tham quan Đại Nội, tối nghe ca Huế trên thuyền rồng sông Hương.'],
+      ['Thiên Mụ – lăng Khải Định – về Đà Nẵng',
+        'Thăm chùa Thiên Mụ, lăng Khải Định, mua mè xửng ở chợ Đông Ba rồi về Đà Nẵng. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-004', branch: 'DN', tier: 'TC', transport: ['o-to'], days: 4, nights: 3, dest: 'city-hoi-an', dow: 4,
+    title: 'Đà Nẵng – Hội An – Huế 4 ngày 3 đêm',
+    photos: ['danang', 'hoian', 'hue'],
+    highlights: 'Bán đảo Sơn Trà, Ngũ Hành Sơn, phố cổ Hội An, Đại Nội Huế',
+    itinerary: [
+      ['Sơn Trà – Ngũ Hành Sơn – Hội An',
+        'Viếng chùa Linh Ứng trên bán đảo Sơn Trà, thăm Ngũ Hành Sơn và làng đá Non Nước. Chiều vào Hội An, tối dạo '
+        + 'phố cổ.'],
+      ['Làng rau Trà Quế – rừng dừa Bảy Mẫu',
+        'Sáng làm nông dân ở làng rau Trà Quế, chiều đi thuyền thúng Cẩm Thanh. Nghỉ đêm tại Hội An.'],
+      ['Hội An – đèo Hải Vân – Huế',
+        'Ra Huế qua đèo Hải Vân, chiều tham quan Đại Nội và chùa Thiên Mụ. Nghỉ đêm tại Huế.'],
+      ['Lăng Tự Đức – về Đà Nẵng',
+        'Thăm lăng Tự Đức, sau bữa trưa bánh bèo, bánh nậm về Đà Nẵng. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-005', branch: 'DN', tier: 'TC', transport: ['o-to'], days: 3, nights: 2, dest: 'city-quang-binh',
+    dow: 5,
+    title: 'Quảng Bình 3 ngày 2 đêm: Phong Nha – động Thiên Đường',
+    photos: [],
+    highlights: 'Động Phong Nha, động Thiên Đường, sông Chày – hang Tối, Vũng Chùa – đảo Yến',
+    itinerary: [
+      ['Đà Nẵng – Đồng Hới',
+        'Khởi hành ra Quảng Bình qua Huế và Quảng Trị. Tối dạo biển Nhật Lệ, nghỉ đêm tại Đồng Hới.'],
+      ['Động Phong Nha – động Thiên Đường',
+        'Đi thuyền trên sông Son vào động Phong Nha, chiều khám phá động Thiên Đường. Nghỉ đêm tại Phong Nha.'],
+      ['Sông Chày – hang Tối – Vũng Chùa',
+        'Chèo kayak, đu dây và tắm bùn ở sông Chày – hang Tối. Trên đường về viếng mộ Đại tướng Võ Nguyên Giáp tại '
+        + 'Vũng Chùa – đảo Yến. Về Đà Nẵng buổi tối. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-006', branch: 'DN', tier: 'TK', transport: ['o-to'], days: 3, nights: 2, dest: 'city-ly-son', dow: 5,
+    title: 'Đảo Lý Sơn 3 ngày 2 đêm',
+    photos: [],
+    highlights: 'Cổng Tò Vò, chùa Hang, đỉnh Thới Lới, đảo Bé, cánh đồng tỏi',
+    itinerary: [
+      ['Đà Nẵng – cảng Sa Kỳ – Lý Sơn',
+        'Xe đưa vào Quảng Ngãi, đi tàu cao tốc từ cảng Sa Kỳ ra đảo. Chiều thăm chùa Hang và cổng Tò Vò lúc hoàng '
+        + 'hôn.'],
+      ['Đảo Bé – đỉnh Thới Lới',
+        'Đi ca nô sang đảo Bé tắm biển, lặn ngắm san hô. Chiều lên đỉnh Thới Lới ngắm toàn cảnh đảo và những ruộng '
+        + 'tỏi.'],
+      ['Lý Sơn – về Đà Nẵng',
+        'Mua tỏi Lý Sơn làm quà, lên tàu về đất liền rồi về Đà Nẵng. Lịch tàu phụ thuộc thời tiết biển. Kết thúc '
+        + 'chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-007', branch: 'DN', tier: 'TC', transport: ['o-to'], days: 3, nights: 2, dest: 'city-quy-nhon', dow: 4,
+    title: 'Quy Nhơn 3 ngày 2 đêm: Eo Gió – Kỳ Co',
+    photos: [],
+    highlights: 'Eo Gió, bãi Kỳ Co, Ghềnh Ráng Tiên Sa, tháp Đôi, làng chài Nhơn Lý',
+    itinerary: [
+      ['Đà Nẵng – Quy Nhơn',
+        'Theo cao tốc và quốc lộ 1 vào Bình Định. Chiều thăm tháp Đôi của người Chăm, tối dạo biển Quy Nhơn.'],
+      ['Eo Gió – Kỳ Co',
+        'Đi ca nô ra bãi Kỳ Co tắm biển, ăn trưa hải sản ở làng chài Nhơn Lý, chiều ngắm Eo Gió.'],
+      ['Ghềnh Ráng – về Đà Nẵng',
+        'Thăm Ghềnh Ráng Tiên Sa và mộ nhà thơ Hàn Mặc Tử, mua bánh ít lá gai rồi về Đà Nẵng. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-008', branch: 'DN', tier: 'TC', transport: ['o-to'], days: 4, nights: 3, dest: 'city-phu-yen', dow: 3,
+    title: 'Quy Nhơn – Phú Yên 4 ngày 3 đêm: Gành Đá Đĩa – Mũi Điện',
+    photos: [],
+    highlights: 'Kỳ Co, Eo Gió, Gành Đá Đĩa, Bãi Xép, Mũi Điện, tháp Nhạn',
+    itinerary: [
+      ['Đà Nẵng – Quy Nhơn',
+        'Khởi hành vào Quy Nhơn, chiều thăm Ghềnh Ráng Tiên Sa. Nghỉ đêm tại Quy Nhơn.'],
+      ['Kỳ Co – Eo Gió – Phú Yên',
+        'Tắm biển Kỳ Co, ngắm Eo Gió, chiều theo quốc lộ 1 vào Phú Yên. Trên đường ghé Gành Đá Đĩa. Nghỉ đêm tại Tuy '
+        + 'Hòa.'],
+      ['Mũi Điện – Bãi Xép – tháp Nhạn',
+        'Đón bình minh ở Mũi Điện, cực Đông đất liền, tắm biển Bãi Môn. Chiều thăm Bãi Xép và tháp Nhạn bên sông Đà '
+        + 'Rằng.'],
+      ['Tuy Hòa – về Đà Nẵng',
+        'Thưởng thức mắt cá ngừ đại dương, sau đó về Đà Nẵng. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-009', branch: 'DN', tier: 'TK', transport: ['o-to'], days: 4, nights: 3, dest: 'city-buon-ma-thuot',
+    dow: 2,
+    title: 'Tây Nguyên 4 ngày 3 đêm: Kon Tum – Pleiku – Buôn Ma Thuột',
+    photos: [],
+    highlights: 'Nhà thờ gỗ Kon Tum, làng Kon Klor, Biển Hồ Pleiku, Bảo tàng Thế giới Cà phê, thác Dray Nur, Buôn Đôn',
+    itinerary: [
+      ['Đà Nẵng – Kon Tum',
+        'Qua Quảng Nam lên Kon Tum theo đường Hồ Chí Minh. Chiều thăm nhà thờ gỗ Kon Tum và nhà rông Kon Klor.'],
+      ['Kon Tum – Pleiku',
+        'Đến Pleiku thăm Biển Hồ, đồi chè Biển Hồ và chùa Minh Thành. Nghỉ đêm tại Pleiku.'],
+      ['Pleiku – Buôn Ma Thuột – Buôn Đôn',
+        'Vào Đắk Lắk, thăm Bảo tàng Thế giới Cà phê, chiều qua cầu treo Buôn Đôn và thác Dray Nur. Tối thưởng thức '
+        + 'cà phê Ban Mê.'],
+      ['Buôn Ma Thuột – về Đà Nẵng',
+        'Xe đưa về Đà Nẵng theo quốc lộ 14 và cao tốc, về đến nơi buổi tối. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-010', branch: 'DN', tier: 'TK', transport: ['o-to'], days: 3, nights: 2, dest: 'city-hue', dow: 5,
+    title: 'Huế – Phong Nha 3 ngày 2 đêm',
+    photos: ['hue'],
+    highlights: 'Đại Nội, chùa Thiên Mụ, động Phong Nha, cầu Hiền Lương – sông Bến Hải',
+    itinerary: [
+      ['Đà Nẵng – Huế',
+        'Qua hầm Hải Vân ra Huế, tham quan Đại Nội và chùa Thiên Mụ. Nghỉ đêm tại Huế.'],
+      ['Cầu Hiền Lương – động Phong Nha',
+        'Dừng ở cầu Hiền Lương bên sông Bến Hải, chiều đi thuyền vào động Phong Nha. Nghỉ đêm tại Phong Nha.'],
+      ['Phong Nha – về Đà Nẵng',
+        'Sáng tự do, sau bữa trưa về Đà Nẵng. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-011', branch: 'DN', tier: 'CC', transport: ['o-to'], days: 3, nights: 2, dest: 'city-hoi-an', dow: 5,
+    title: 'Hội An nghỉ dưỡng 3 ngày 2 đêm: resort ven biển – Cù Lao Chàm',
+    photos: ['hoian'],
+    highlights: 'Resort 5 sao ven biển An Bàng, Cù Lao Chàm, lớp nấu ăn làng rau Trà Quế, phố cổ về đêm',
+    itinerary: [
+      ['Đà Nẵng – Hội An',
+        'Nhận phòng resort ven biển, chiều tự do. Tối ăn tối tại một nhà hàng trong phố cổ, thả đèn trên sông Hoài.'],
+      ['Cù Lao Chàm',
+        'Ca nô từ cảng Cửa Đại ra Cù Lao Chàm, lặn ngắm san hô, thăm chùa Hải Tạng và chợ Tân Hiệp. Chiều về resort.'],
+      ['Lớp nấu ăn Trà Quế – về Đà Nẵng',
+        'Học nấu món Quảng tại làng rau Trà Quế, sau bữa trưa xe đưa về Đà Nẵng. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-012', branch: 'DN', tier: 'TC', transport: ['may-bay'], days: 3, nights: 2, dest: 'city-nha-trang',
+    dow: 5,
+    title: 'Nha Trang 3 ngày 2 đêm: Hòn Mun – tắm bùn khoáng',
+    photos: ['nhatrang'],
+    highlights: 'Tháp Bà Ponagar, lặn ngắm san hô Hòn Mun, tắm bùn khoáng, chợ Đầm',
+    itinerary: [
+      ['Đà Nẵng – Nha Trang',
+        'Bay vào Cam Ranh, chiều thăm tháp Bà Ponagar và chùa Long Sơn. Tối dạo biển Trần Phú.'],
+      ['Vịnh Nha Trang – Hòn Mun',
+        'Đi tàu ra Hòn Mun lặn ngắm san hô, ăn trưa trên đảo, chiều tắm bùn khoáng nóng.'],
+      ['Chợ Đầm – về Đà Nẵng',
+        'Mua hải sản khô ở chợ Đầm, ra sân bay Cam Ranh bay về Đà Nẵng. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-013', branch: 'DN', tier: 'CC', transport: ['may-bay'], days: 3, nights: 2, dest: 'city-da-lat',
+    dow: 4,
+    title: 'Đà Lạt 3 ngày 2 đêm: nghỉ dưỡng hồ Tuyền Lâm',
+    photos: ['dalat'],
+    highlights: 'Resort ven hồ Tuyền Lâm, Thiền viện Trúc Lâm, đồi chè Cầu Đất, núi Langbiang',
+    itinerary: [
+      ['Đà Nẵng – Đà Lạt',
+        'Bay đến Liên Khương, nhận phòng resort bên hồ Tuyền Lâm. Chiều thăm Thiền viện Trúc Lâm, tối dạo hồ Xuân '
+        + 'Hương.'],
+      ['Đồi chè Cầu Đất – Langbiang',
+        'Săn mây và thăm đồi chè Cầu Đất buổi sáng, chiều lên đỉnh Langbiang bằng xe jeep. Ăn tối lẩu gà lá é.'],
+      ['Ga Đà Lạt – về Đà Nẵng',
+        'Thăm ga Đà Lạt và chợ Đà Lạt, ra sân bay Liên Khương bay về. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-014', branch: 'DN', tier: 'CC', transport: ['o-to'], days: 6, nights: 5, dest: 'city-hoi-an', dow: 1,
+    title: 'Con đường di sản miền Trung 6 ngày: Phong Nha – Huế – Hội An – Mỹ Sơn',
+    photos: ['hue', 'danang', 'hoian'],
+    highlights: 'Động Phong Nha, Đại Nội Huế, đèo Hải Vân, phố cổ Hội An, thánh địa Mỹ Sơn',
+    itinerary: [
+      ['Đà Nẵng – Huế',
+        'Qua đèo Hải Vân ra Huế, chiều thăm chùa Thiên Mụ, tối nghe ca Huế trên sông Hương. Nghỉ đêm khách sạn 5 sao.'],
+      ['Huế – Phong Nha',
+        'Ra Quảng Bình, đi thuyền vào động Phong Nha. Nghỉ đêm resort tại Phong Nha.'],
+      ['Động Thiên Đường – về Huế',
+        'Khám phá động Thiên Đường, chiều về Huế. Tối thưởng thức ẩm thực cung đình.'],
+      ['Đại Nội – lăng Tự Đức – Đà Nẵng',
+        'Tham quan Đại Nội và lăng Tự Đức, chiều về Đà Nẵng ngắm cầu Rồng về đêm.'],
+      ['Thánh địa Mỹ Sơn – Hội An',
+        'Thăm thánh địa Mỹ Sơn, chiều vào Hội An dạo phố cổ, thả đèn hoa đăng.'],
+      ['Hội An – Đà Nẵng',
+        'Sáng tự do tại Hội An, trưa về Đà Nẵng. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-015', branch: 'DN', tier: 'TK', transport: ['o-to'], days: 1, nights: 0, dest: 'city-da-nang', dow: 6,
+    title: 'Đà Nẵng một ngày: Sơn Trà – Ngũ Hành Sơn – cầu Rồng',
+    photos: ['danang'],
+    highlights: 'Chùa Linh Ứng Sơn Trà, Ngũ Hành Sơn, làng đá Non Nước, cầu Rồng phun lửa',
+    itinerary: [
+      ['Sơn Trà – Ngũ Hành Sơn – cầu Rồng',
+        'Viếng chùa Linh Ứng trên bán đảo Sơn Trà, sau đó thăm Ngũ Hành Sơn và làng đá mỹ nghệ Non Nước. Ăn trưa mì '
+        + 'Quảng, chiều tắm biển Mỹ Khê. Tối xem cầu Rồng phun lửa và phun nước lúc 21 giờ thứ Bảy. Kết thúc chương '
+        + 'trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-016', branch: 'HCM', tier: 'TK', transport: ['o-to'], days: 3, nights: 2, dest: 'city-da-lat', dow: 5,
+    title: 'Đà Lạt 3 ngày 2 đêm từ TP. Hồ Chí Minh',
+    photos: ['dalat'],
+    highlights: 'Hồ Xuân Hương, thác Datanla, Thiền viện Trúc Lâm, chợ đêm Đà Lạt',
+    itinerary: [
+      ['TP. Hồ Chí Minh – Đà Lạt',
+        'Khởi hành sáng sớm theo cao tốc Dầu Giây và đèo Bảo Lộc lên Đà Lạt. Tối dạo chợ đêm, ăn bánh tráng nướng.'],
+      ['Datanla – Trúc Lâm – hồ Tuyền Lâm',
+        'Đi máng trượt xuống thác Datanla, lên cáp treo đến Thiền viện Trúc Lâm và hồ Tuyền Lâm. Chiều thăm ga Đà '
+        + 'Lạt.'],
+      ['Đà Lạt – TP. Hồ Chí Minh',
+        'Mua dâu tây, mứt Đà Lạt làm quà rồi về TP. Hồ Chí Minh. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-017', branch: 'HCM', tier: 'CC', transport: ['may-bay'], days: 4, nights: 3, dest: 'city-nha-trang',
+    dow: 4,
+    title: 'Nha Trang 4 ngày 3 đêm: resort vịnh Ninh Vân',
+    photos: ['nhatrang'],
+    highlights: 'Resort 5 sao vịnh Ninh Vân, tháp Bà Ponagar, lặn ngắm san hô Hòn Mun',
+    itinerary: [
+      ['TP. Hồ Chí Minh – Nha Trang – Ninh Vân',
+        'Bay ra Cam Ranh, ca nô riêng đưa đến resort vịnh Ninh Vân. Chiều tự do tắm biển, ngắm hoàng hôn.'],
+      ['Nghỉ dưỡng tại resort',
+        'Tự do sử dụng hồ bơi, spa và các hoạt động thể thao biển của resort.'],
+      ['Hòn Mun – thành phố Nha Trang',
+        'Đi tàu riêng ra Hòn Mun lặn ngắm san hô, chiều về thành phố thăm tháp Bà Ponagar, nghỉ đêm khách sạn ven '
+        + 'biển.'],
+      ['Nha Trang – TP. Hồ Chí Minh',
+        'Sáng tắm biển Trần Phú, ra sân bay Cam Ranh bay về. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-018', branch: 'HCM', tier: 'CC', transport: ['may-bay'], days: 5, nights: 4, dest: 'city-da-nang',
+    dow: 3,
+    title: 'Đà Nẵng – Hội An – Huế 5 ngày 4 đêm',
+    photos: ['danang', 'hoian', 'hue'],
+    highlights: 'Bà Nà Hills, Cầu Vàng, phố cổ Hội An, Đại Nội Huế, đèo Hải Vân',
+    itinerary: [
+      ['TP. Hồ Chí Minh – Đà Nẵng',
+        'Bay ra Đà Nẵng, chiều viếng chùa Linh Ứng Sơn Trà, tắm biển Mỹ Khê. Nghỉ đêm khách sạn 5 sao ven biển.'],
+      ['Bà Nà Hills',
+        'Lên Bà Nà bằng cáp treo, dạo Cầu Vàng và Làng Pháp, ăn trưa buffet trên núi.'],
+      ['Ngũ Hành Sơn – Hội An',
+        'Thăm Ngũ Hành Sơn, chiều vào Hội An dạo phố cổ, tối ăn tối bên sông Hoài.'],
+      ['Hội An – Hải Vân – Huế',
+        'Ra Huế qua đèo Hải Vân, tham quan Đại Nội, tối nghe ca Huế trên sông Hương.'],
+      ['Huế – TP. Hồ Chí Minh',
+        'Thăm chùa Thiên Mụ và lăng Khải Định, ra sân bay Phú Bài bay về. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-019', branch: 'HCM', tier: 'TC', transport: ['may-bay'], days: 4, nights: 3, dest: 'city-quy-nhon',
+    dow: 4,
+    title: 'Quy Nhơn – Phú Yên 4 ngày 3 đêm bay từ TP. Hồ Chí Minh',
+    photos: [],
+    highlights: 'Kỳ Co, Eo Gió, tháp Đôi, Gành Đá Đĩa, Mũi Điện',
+    itinerary: [
+      ['TP. Hồ Chí Minh – Quy Nhơn',
+        'Bay đến Phù Cát, chiều thăm tháp Đôi và Ghềnh Ráng Tiên Sa. Nghỉ đêm tại Quy Nhơn.'],
+      ['Kỳ Co – Eo Gió',
+        'Ca nô ra Kỳ Co tắm biển, ăn trưa hải sản tại Nhơn Lý, chiều ngắm Eo Gió.'],
+      ['Quy Nhơn – Gành Đá Đĩa – Tuy Hòa',
+        'Vào Phú Yên thăm Gành Đá Đĩa, chiều tắm biển Bãi Xép. Nghỉ đêm tại Tuy Hòa.'],
+      ['Mũi Điện – TP. Hồ Chí Minh',
+        'Đón bình minh ở Mũi Điện, sau bữa trưa ra sân bay Tuy Hòa bay về. Kết thúc chương trình.'],
+    ],
+  },
+  {
+    code: 'SH-MT-020', branch: 'HCM', tier: 'TK', transport: ['o-to'], days: 2, nights: 1, dest: 'city-mui-ne', dow: 6,
+    title: 'Mũi Né 2 ngày 1 đêm: đồi cát bay – Bàu Trắng',
+    photos: [],
+    highlights: 'Đồi cát bay, đồi cát trắng Bàu Trắng, suối Tiên, làng chài Mũi Né, tháp Pô Sah Inư',
+    itinerary: [
+      ['TP. Hồ Chí Minh – Mũi Né',
+        'Theo cao tốc Long Thành – Dầu Giây và cao tốc Phan Thiết ra Mũi Né. Chiều thăm tháp Pô Sah Inư, trượt cát ở '
+        + 'đồi cát bay và lội suối Tiên. Tối ăn hải sản ở làng chài.'],
+      ['Bàu Trắng – làng chài – về TP. Hồ Chí Minh',
+        'Đón bình minh ở đồi cát trắng Bàu Trắng, ghé làng chài Mũi Né mua hải sản, sau bữa trưa về TP. Hồ Chí Minh. '
+        + 'Kết thúc chương trình.'],
+    ],
+  },
+];

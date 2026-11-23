@@ -18,21 +18,16 @@ import { getAdminServiceRequests } from "@/services/admin-service-requests";
 import {
   SERVICE_REQUEST_STATUSES, type ServiceRequestStatus, type ServiceRequestSummary, type ServiceRequestType,
 } from "@/types/service-request";
-import { AdminNav } from "./AdminNav";
-import { OperatorGate } from "./OperatorGate";
 
 export function ServiceRequestsAdminPage() {
   return (
-    <main id="main-content" className="container sh-page">
+    <main id="main-content" className="sh-page adm-page">
       <div className="sh-page-head">
         <span className="kicker">QUẢN TRỊ · DỊCH VỤ CỘNG THÊM</span>
         <h1>Yêu cầu tư vấn</h1>
         <p>Yêu cầu gửi từ các trang dịch vụ cộng thêm. Liên hệ khách trong 24 giờ và cập nhật trạng thái sau mỗi lần trao đổi.</p>
       </div>
-      <OperatorGate>
-        <AdminNav current="requests" />
-        <RequestQueue />
-      </OperatorGate>
+      <RequestQueue />
     </main>
   );
 }

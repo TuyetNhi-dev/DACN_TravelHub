@@ -15,6 +15,9 @@ public sealed record TourSummaryDto(
     /// <summary>Region codes (NORTH, CENTRAL, SOUTH) of the branches running its open future departures.</summary>
     IReadOnlyList<string> DepartureRegions);
 
+/// <summary>One option of the /tours destination filter: a place with at least one published tour.</summary>
+public sealed record TourDestinationDto(string Id, string Name, int TourCount);
+
 public sealed record ItineraryDayDto(int DayNumber, string Title, string? Description);
 
 public sealed record TourDepartureDto(
@@ -28,6 +31,39 @@ public sealed record TourDepartureDto(
     decimal? ChildPrice,
     string Status,
     bool IsBookable);
+
+/// <summary>
+/// One bookable departure leaving soon (home "Sắp khởi hành"). Seats and price are this departure's own values
+/// at request time; <see cref="DaysUntilDeparture"/> counts from today in Vietnam, so the client clock never matters.
+/// </summary>
+public sealed record UpcomingDepartureDto(
+    string DepartureId,
+    string TourId,
+    string TourCode,
+    string TourTitle,
+    string Destination,
+    string DepartureFrom,
+    DateOnly DepartureDate,
+    int DurationDays,
+    int DurationNights,
+    int AvailableSeats,
+    decimal AdultPrice,
+    int DaysUntilDeparture);
+
+/// <summary>Raw row behind <see cref="UpcomingDepartureDto"/>; the service derives seats and day count.</summary>
+public sealed record UpcomingDepartureRow(
+    string DepartureId,
+    string TourId,
+    string TourCode,
+    string TourTitle,
+    string Destination,
+    string DepartureFrom,
+    DateOnly DepartureDate,
+    int DurationDays,
+    int DurationNights,
+    int Capacity,
+    int ReservedSeats,
+    decimal AdultPrice);
 
 /// <summary>A tour photo; the first one of <see cref="TourDetailDto.Images"/> is the cover.</summary>
 public sealed record TourImageDto(string Url, string? Alt);

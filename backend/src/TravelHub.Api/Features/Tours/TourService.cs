@@ -9,17 +9,55 @@ public sealed class TourService(TourRepository repository, VietnamClock clock)
     /// <summary>Codes of the regions table (seeds/002); the customer's departure choice maps onto them.</summary>
     public static readonly IReadOnlySet<string> RegionCodes = new HashSet<string> { "NORTH", "CENTRAL", "SOUTH" };
 
-    public Task<IReadOnlyList<TourSummaryDto>> ListAsync(string? region, CancellationToken ct) =>
-        repository.ListPublishedAsync(clock.Today, ValidRegion(region), ct);
+    /// <summary>Every matching published tour (no paging), as GET /api/tours answers without page.</summary>
+    public Task<IReadOnlyList<TourSummaryDto>> ListAsync(TourSearchQuery query, CancellationToken ct) =>
+        repository.SearchAsync(clock.Today, TourSearchRules.Parse(query), null, ct);
 
-    public async Task<(IReadOnlyList<TourSummaryDto> Rows, int Total)> ListPagedAsync(
-        int page, int pageSize, string? region, CancellationToken ct)
+    public async Task<(IReadOnlyList<TourSummaryDto> Rows, int Total)> ListPagedAsync(TourSearchQuery query,
+        int page, int pageSize, CancellationToken ct)
     {
-        var code = ValidRegion(region);
-        var total = await repository.CountPublishedAsync(ct);
-        var rows = await repository.ListPublishedPagedAsync(clock.Today, code, (page - 1) * pageSize, pageSize, ct);
+        var search = TourSearchRules.Parse(query);
+        var today = clock.Today;
+        var total = await repository.CountAsync(today, search, ct);
+        var rows = await repository.SearchAsync(today, search, ((page - 1) * pageSize, pageSize), ct);
         return (rows, total);
     }
+
+    public Task<IReadOnlyList<TourDestinationDto>> ListDestinationsAsync(CancellationToken ct) =>
+        repository.ListDestinationsAsync(ct);
+
+    public const int DefaultSoonDays = 14;
+    public const int MaxSoonDays = 30;
+    public const int DefaultSoonLimit = 8;
+    public const int MaxSoonLimit = 20;
+
+    /// <summary>
+    /// Bookable departures within the next <paramref name="days"/> days; out-of-range values are clamped,
+    /// like the page size of GET /api/tours.
+    /// </summary>
+    public async Task<IReadOnlyList<UpcomingDepartureDto>> ListDepartingSoonAsync(int? days, int? limit,
+        CancellationToken ct)
+    {
+        var today = clock.Today;
+        var window = Math.Clamp(days ?? DefaultSoonDays, 1, MaxSoonDays);
+        var size = Math.Clamp(limit ?? DefaultSoonLimit, 1, MaxSoonLimit);
+        var rows = await repository.ListDepartingSoonAsync(today, today.AddDays(window), size, ct);
+        return rows.Select(row => ToUpcoming(row, today)).ToList();
+    }
+
+    public static UpcomingDepartureDto ToUpcoming(UpcomingDepartureRow row, DateOnly today) => new(
+        row.DepartureId,
+        row.TourId,
+        row.TourCode,
+        row.TourTitle,
+        row.Destination,
+        row.DepartureFrom,
+        row.DepartureDate,
+        row.DurationDays,
+        row.DurationNights,
+        Math.Max(0, row.Capacity - row.ReservedSeats),
+        row.AdultPrice,
+        row.DepartureDate.DayNumber - today.DayNumber);
 
     public static string? ValidRegion(string? region) => string.IsNullOrWhiteSpace(region)
         ? null

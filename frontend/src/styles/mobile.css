@@ -46,7 +46,7 @@ body { padding-inline: env(safe-area-inset-left) env(safe-area-inset-right); }
   .auth-password button { width: 44px; height: 44px; top: 50%; right: 2px; transform: translateY(-50%); }
   .pagination button { min-width: 44px; min-height: 44px; }
   .listing-pills button, .listing-context button, .listing-filters-title button, .ui-gallery-all,
-  .hotel-section-nav a, .admin-nav a, .fd-tab, .fd-chip, .sh-hotel-filter-head button {
+  .hotel-section-nav a, .fd-tab, .fd-chip, .sh-hotel-filter-head button {
     display: inline-flex; align-items: center; min-height: 44px;
   }
   .departure-close { width: 44px; height: 44px; }

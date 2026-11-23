@@ -52,6 +52,29 @@
 .tour-tile-go { width: 40px; height: 40px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%;
   color: var(--on-brand); background: var(--brand); transition: transform var(--duration-base) var(--ease-out); }
 .tour-tile:hover .tour-tile-go { transform: translateX(4px); }
+.tour-tile-cta { flex-shrink: 0; min-height: 40px; padding: 0 18px; display: inline-flex; align-items: center;
+  border-radius: var(--radius-pill); color: var(--on-brand); background: var(--brand); font-weight: 700;
+  font-size: max(14px, var(--text-min)); white-space: nowrap; transition: background var(--duration-fast); }
+.tour-tile:hover .tour-tile-cta { background: var(--blue-dark); }
+
+/* Departure date chips on package tour cards */
+.tour-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.tour-chips li { min-height: 28px; padding: 0 10px; display: inline-flex; align-items: center;
+  border: 1px solid var(--blue); border-radius: var(--radius-sm); color: var(--blue); background: var(--blue-soft);
+  font-size: max(13px, var(--text-min)); font-weight: 600; font-variant-numeric: tabular-nums; }
+.tour-chips .tour-chips-more { border-style: dashed; background: transparent; }
+
+/* ---------- "Sắp khởi hành" band ---------- */
+.soon-band { padding: clamp(24px, 4vw, 48px); border-radius: var(--radius-xl); color: #fff;
+  background: linear-gradient(135deg, var(--promo-start), var(--promo-end)); box-shadow: 0 24px 48px var(--promo-shadow); }
+.soon-band .ui-eyebrow { color: #ffd0ea; }
+.soon-band .ui-section-head h2 { color: #fff; }
+.soon-band .ui-section-head p { color: var(--text-on-promo); }
+.soon-band .ui-view-all { color: #fff; }
+.soon-band .sh-state { background: var(--panel); }
+.soon-seats { font-weight: 600; }
+.soon-seats.is-few { color: var(--deal); }
+:root[data-theme="dark"] .soon-seats.is-few { color: #ff9b8f; }
 .tour-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
 .tour-grid-3 > * { animation: home-fade-up var(--duration-slow) var(--ease-out) both; }
 .tour-grid-3 > :nth-child(2) { animation-delay: 60ms; }
@@ -125,6 +148,8 @@
   .hotel-tiles { gap: 14px; }
   .hotel-tile .ui-media--portrait { aspect-ratio: 1; }
   .cta-band { border-radius: var(--radius-lg); min-height: 0; }
+  /* Thin side padding on phones so the cards inside the band keep most of the screen width. */
+  .soon-band { padding: 24px 12px; border-radius: var(--radius-lg); }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -4,10 +4,13 @@ import {
 } from "@/lib/decode";
 import type {
   ItineraryDay, TourCollection, TourCollectionDetail, TourDeparture, TourDetail, TourImage, TourInclusions,
-  TourSummary,
+  TourSummary, UpcomingDeparture,
 } from "@/types/tour";
 
 const RESOURCE = "tour";
+/** Home "Sắp khởi hành": departures within this many days, at most SOON_LIMIT cards. */
+export const SOON_DAYS = 14;
+const SOON_LIMIT = 8;
 
 export function decodeTour(row: Row): TourSummary {
   const dates = row.upcomingDepartureDates;
@@ -79,6 +82,29 @@ export async function getTours(signal?: AbortSignal): Promise<TourSummary[]> {
 export async function getTour(id: string, signal?: AbortSignal): Promise<TourDetail> {
   const value = await apiGet("/api/tours/" + encodeURIComponent(id), signal);
   return itemEnvelope(value, decodeTourDetail, RESOURCE);
+}
+
+export function decodeUpcomingDeparture(row: Row): UpcomingDeparture {
+  return {
+    departureId: str(row, "departureId", RESOURCE),
+    tourId: str(row, "tourId", RESOURCE),
+    tourCode: str(row, "tourCode", RESOURCE),
+    tourTitle: str(row, "tourTitle", RESOURCE),
+    destination: str(row, "destination", RESOURCE),
+    departureFrom: str(row, "departureFrom", RESOURCE),
+    departureDate: isoDate(row, "departureDate", RESOURCE),
+    durationDays: num(row, "durationDays", RESOURCE),
+    durationNights: num(row, "durationNights", RESOURCE),
+    availableSeats: num(row, "availableSeats", RESOURCE),
+    adultPrice: num(row, "adultPrice", RESOURCE),
+    daysUntilDeparture: num(row, "daysUntilDeparture", RESOURCE),
+  };
+}
+
+export async function getUpcomingDepartures(signal?: AbortSignal): Promise<UpcomingDeparture[]> {
+  const query = new URLSearchParams({ days: String(SOON_DAYS), limit: String(SOON_LIMIT) });
+  return listEnvelope(await apiGet(`/api/tours/departures/upcoming?${query}`, signal), decodeUpcomingDeparture,
+    RESOURCE);
 }
 
 const COLLECTION_RESOURCE = "bộ sưu tập tour";

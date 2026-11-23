@@ -9,31 +9,29 @@ import { ITEM_STATUS_OPTIONS, SERVICE_LABELS } from "@/lib/booking-rules";
 import { formatCurrency, formatDate, formatDateTime } from "@/lib/format";
 import { getAdminBookings, type AdminBookingFilter } from "@/services/admin";
 import type { BookingItemStatus, BookingSummary, ServiceType } from "@/types/booking";
-import { AdminNav } from "./AdminNav";
-import { OperatorGate } from "./OperatorGate";
+import { useAdmin } from "./shell/AdminProvider";
 
 const DEFAULT_FILTER: AdminBookingFilter = { status: "", serviceType: "" };
 
+/** Rendered inside app/admin/layout.tsx, which already checks the operator role and loads the scope. */
 export function AdminBookingsPage() {
   return (
-    <main id="main-content" className="container sh-page">
+    <main id="main-content" className="sh-page adm-page">
       <div className="sh-page-head">
         <span className="kicker">QUẢN TRỊ · ĐIỀU HÀNH ĐƠN</span>
         <h1>Đơn đặt chỗ</h1>
         <p>Xác nhận giữ chỗ tour và phản hồi của đối tác khách sạn, vé máy bay trong phạm vi bạn phụ trách.</p>
       </div>
-      <OperatorGate>
-        <AdminNav current="bookings" />
-        <BookingQueue />
-      </OperatorGate>
+      <BookingQueue />
     </main>
   );
 }
 
 function BookingQueue() {
+  const { scope } = useAdmin();
   const [filter, setFilter] = useState<AdminBookingFilter>(DEFAULT_FILTER);
-  const { state, retry } = useResource(`admin:${JSON.stringify(filter)}`,
-    signal => getAdminBookings(filter, signal));
+  const { state, retry } = useResource(`admin:${scope}:${JSON.stringify(filter)}`,
+    signal => getAdminBookings(filter, scope, signal));
   return (
     <>
       <div className="sh-toolbar" role="search" aria-label="Lọc đơn">

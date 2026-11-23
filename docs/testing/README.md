@@ -29,20 +29,22 @@ Logic thuần (lọc, tính tiền, định dạng, lịch âm, ngày lễ) ph�
 Lint báo cảnh báo theo quy tắc của `AGENTS.md` (hàm khoảng 40 dòng, file dưới 200 dòng, dòng tối đa 120 ký tự).
 Đây là cảnh báo (`warn`), chưa chặn build; không thêm cảnh báo mới ở file mình sửa.
 
-## Kiểm thử tích hợp xác thực
+## Kiểm thử tích hợp xác thực (lỗi thời)
 
-`backend/tests/Auth.Integration.ps1` gọi API auth qua frontend đang chạy:
+`backend/tests/scripts/Auth.Integration.ps1` gọi API auth qua frontend đang chạy. Script đặt trong `scripts/`
+để tách khỏi project xUnit, và **không** chạy trong `dotnet test`:
 
 ```powershell
-powershell -File backend/tests/Auth.Integration.ps1 -BaseUrl http://localhost:3000
+powershell -File backend/tests/scripts/Auth.Integration.ps1 -BaseUrl http://localhost:3000
 ```
 
 Lưu ý:
 
+- **Lỗi thời**: script viết trước khi có OTP email (17/11/2026). Luồng hiện tại phải xác minh OTP sau khi đăng
+  ký, nên bước đăng ký rồi đăng nhập ngay có thể fail. Chưa được chạy lại sau thay đổi đó; cần viết lại trước khi
+  dùng làm bằng chứng kiểm thử.
 - Script **ghi vào database**: mỗi lần chạy tạo một tài khoản `auth-test-…@example.invalid` và không tự xóa.
   Chỉ chạy trên database thử (ví dụ `saihanh_test`, xem [sao lưu và khôi phục](../database/backup-restore.md)).
-- Script viết trước khi có OTP email (17/11/2026), nên bước đăng ký rồi đăng nhập ngay có thể không còn khớp
-  luồng hiện tại. Chưa được chạy lại sau thay đổi đó.
 
 ## Kiểm tra giao diện
 

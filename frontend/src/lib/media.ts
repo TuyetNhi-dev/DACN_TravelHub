@@ -140,6 +140,20 @@ export function getRoomImages(room: Pick<RoomType, "id" | "name"> & WithApiImage
   return rotate(photoLibrary.room, room.id).slice(0, ROOM_GALLERY_SIZE).map(photo => fromLibrary(photo, true));
 }
 
+export interface LibraryChoice {
+  place: string;
+  url: string;
+  alt: string;
+}
+
+/** Credited place photos an operator may attach to a tour; hotel and room sets are never tour photos. */
+export function libraryPhotoChoices(): LibraryChoice[] {
+  return (Object.entries(SET_PLACES) as [PhotoSetKey, string][]).flatMap(([set, place]) =>
+    photoLibrary[set].map(photo => ({
+      place, url: IMAGE_HOST + photo.id + SOURCE_PARAMS, alt: `${place}: ${photo.alt}`,
+    })));
+}
+
 function fromLibrary(photo: LibraryPhoto, illustrative: boolean): MediaImage {
   return {
     src: IMAGE_HOST + photo.id + SOURCE_PARAMS,

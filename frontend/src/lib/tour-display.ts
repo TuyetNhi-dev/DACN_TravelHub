@@ -3,6 +3,19 @@ import type { TourDeparture, TourSummary } from "@/types/tour";
 
 export const tourHref = (id: string) => "/tours/" + encodeURIComponent(id);
 
+/** Tour page with this departure already picked in the booking panel (read by parseBookingPrefill). */
+export const departureHref = (tourId: string, departureId: string) =>
+  `${tourHref(tourId)}?departure=${encodeURIComponent(departureId)}`;
+
+/** Up to this many seats left, the count is highlighted; it is the real count either way. */
+const FEW_SEATS = 5;
+export const isFewSeats = (seats: number) => seats <= FEW_SEATS;
+
+/** The API only returns departures after today, so 1 is the smallest value. */
+export function departsInLabel(days: number): string {
+  return days <= 1 ? "Khởi hành ngày mai" : `Khởi hành sau ${days} ngày`;
+}
+
 export function tourDuration(tour: Pick<TourSummary, "durationDays" | "durationNights">): string {
   return tour.durationNights > 0
     ? `${tour.durationDays} ngày ${tour.durationNights} đêm`

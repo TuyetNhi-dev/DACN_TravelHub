@@ -10,7 +10,7 @@ Chạy **tất cả migration theo số tăng dần, rồi tất cả seed theo 
 
 ```
 migrations/001 → 002 → … → 015
-seeds/001 → 002 → … → 009
+seeds/001 → 002 → … → 010
 ```
 
 Với `mysql` CLI (PowerShell, thay `<...>` bằng giá trị của bạn, mật khẩu sẽ được hỏi):
@@ -77,9 +77,31 @@ Mọi dữ liệu seed là **mô phỏng** (khách sạn, giá, chuyến bay, ch
 | 007_flight_allotments | Quỹ ghế vé deal cho 15% báo giá rẻ nhất | Seed 006, migration 009, 010 | Có (chỉ đổi báo giá chưa có quỹ) |
 | 008_tour_images_and_inclusions | Ảnh tour và mục bao gồm/không bao gồm | Seed 002, 005 | Có (bỏ qua tour đã có ảnh/mục, giữ chỉnh sửa sau này) |
 | 009_simulated_contact_phone | Đổi hotline chi nhánh sang số mô phỏng 0123 456 789 | Seed 003 | Có |
+| 010_vietnam_package_tours | **Dữ liệu mô phỏng**: 60 tour SH-MB/MT/MN-001…020 (3 miền × 20, 4 chi nhánh × 15), dòng Tiết kiệm/Tiêu chuẩn/Cao cấp, 521 lịch 25/11/2026–21/02/2027 có phụ thu Tết Đinh Mùi, lịch trình, bao gồm/không bao gồm, ảnh; 7 địa điểm mới | Migration 015, seed 002 (MySQL 8.0.19+) | Có (bỏ qua tour đã có mã) |
 
 Seed 006 tạo báo giá cho 60 ngày kể từ ngày chạy. Khi demo cách xa ngày seed, chạy lại 006 rồi 007 để có
 báo giá mới.
+
+Seed 010 có ngày khởi hành **cố định** (viết ngày 23/11/2026). Lịch đã qua ngày vẫn nằm trong bảng nhưng không còn
+đặt được. `reserved_seats` của seed này là số chỗ đã bán giả lập, không có đơn đặt chỗ tương ứng, nên danh sách
+hành khách của các lịch đó ít hơn số chỗ đã giữ. Lịch đầu tiên của mỗi ngày khởi hành chỉ còn 1–4 chỗ, để mục
+"Sắp khởi hành" trên trang chủ luôn có thẻ "Còn N chỗ" khi demo (89 lịch, đã mô phỏng cho từng ngày 23/11/2026
+– 20/02/2027 cùng dữ liệu seed 002 và 005).
+
+### Sinh lại seed 010
+
+Không sửa tay file SQL. Dữ liệu tour nằm trong `scripts/seeds/package-tours/data/tours-*.cjs`; giá, mùa, ngày và sức
+chứa nằm trong `config.cjs` và `schedule.cjs`. Sửa ở đó rồi chạy từ thư mục gốc (cần `npm --prefix frontend install`
+trước, vì script đọc `vn-holidays.ts` và `photo-library.ts` bằng TypeScript):
+
+```powershell
+node scripts/seeds/package-tours/generate.cjs
+```
+
+Script **chỉ ghi file** `database/seeds/010_vietnam_package_tours.sql`, không kết nối database. Nó kiểm tra mã tour,
+số ngày lịch trình, số chỗ, rồi mô phỏng mục "Sắp khởi hành" cho từng ngày demo và **dừng với lỗi** nếu có ngày
+không hiện thẻ "Còn N chỗ". Chạy nhiều lần vẫn ra cùng một file. Sau khi sinh lại, database đã có tour
+cũ sẽ không nhận thay đổi (seed bỏ qua mã đã có): chạy trên database mới hoặc xóa tour SH-* cũ trước.
 
 ## Kiểm tra bằng `migration_status.sql`
 

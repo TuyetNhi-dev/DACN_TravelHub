@@ -17,8 +17,9 @@ interface NavItem {
   badge?: boolean;
 }
 
+// Only pages that exist under app/admin are linked, so the menu never leads to a 404. Dashboard, staff and
+// audit logs join this list together with their pages.
 const GROUPS: { title: string; items: NavItem[] }[] = [
-  { title: "Tổng quan", items: [{ href: "/admin", label: "Bảng điều khiển", icon: "briefcase" }] },
   {
     title: "Sản phẩm",
     items: [
@@ -33,13 +34,6 @@ const GROUPS: { title: string; items: NavItem[] }[] = [
   {
     title: "Yêu cầu dịch vụ",
     items: [{ href: "/admin/service-requests", label: "Yêu cầu tư vấn", icon: "mail", badge: true }],
-  },
-  {
-    title: "Hệ thống",
-    items: [
-      { href: "/admin/staff", label: "Nhân viên & phân quyền", icon: "users", allowed: c => c.manageStaff },
-      { href: "/admin/audit-logs", label: "Nhật ký thao tác", icon: "shield", allowed: c => c.viewAudit },
-    ],
   },
 ];
 

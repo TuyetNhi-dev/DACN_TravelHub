@@ -13,6 +13,25 @@ export interface TourSummary {
   upcomingDepartureDates: string[];
 }
 
+/**
+ * Mirrors UpcomingDepartureDto: one bookable departure leaving soon. Seats are counted when the API answers;
+ * daysUntilDeparture is counted by the server from today in Vietnam.
+ */
+export interface UpcomingDeparture {
+  departureId: string;
+  tourId: string;
+  tourCode: string;
+  tourTitle: string;
+  destination: string;
+  departureFrom: string;
+  departureDate: string;
+  durationDays: number;
+  durationNights: number;
+  availableSeats: number;
+  adultPrice: number;
+  daysUntilDeparture: number;
+}
+
 export interface ItineraryDay {
   dayNumber: number;
   title: string;

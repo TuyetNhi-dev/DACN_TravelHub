@@ -1,0 +1,110 @@
+/* Back office frame (app/admin/layout.tsx): sidebar menu, scope picker and the page beside them. */
+.adm-layout { padding-block: 24px 48px; }
+.adm-shell { display: grid; grid-template-columns: 240px minmax(0, 1fr); grid-template-areas: "top top" "side main";
+  gap: 16px 32px; align-items: start; }
+.adm-topbar { grid-area: top; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px;
+  padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.adm-content { grid-area: main; min-width: 0; }
+.adm-page.sh-page { padding-block: 0; }
+
+.adm-scope { margin: 0; color: var(--text-secondary); font-size: max(14px, var(--text-min)); }
+.adm-scope strong { color: var(--ink); }
+.adm-scope.sh-field { display: flex; align-items: center; gap: 8px; }
+.adm-scope select { min-height: 44px; }
+
+.adm-menu-toggle { display: none; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; margin-right: auto;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--panel); color: var(--ink);
+  font-weight: 600; }
+.adm-menu-toggle:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+.adm-sidebar { grid-area: side; position: sticky; top: 96px; display: grid; gap: 18px; padding: 16px;
+  border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--panel); }
+.adm-group { display: grid; gap: 4px; }
+.adm-group-title { margin: 0 0 4px; padding-inline: 10px; color: var(--muted); font-size: max(12px, var(--text-min));
+  font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.adm-sidebar a { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 10px;
+  border-radius: var(--radius-sm); color: var(--text-secondary); font-weight: 600; font-size: max(14px, var(--text-min)); }
+.adm-sidebar a:hover { background: var(--surface); color: var(--blue); }
+.adm-sidebar a[aria-current="page"] { background: var(--blue-soft); color: var(--blue); }
+.adm-sidebar a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.adm-sidebar a .admin-nav-badge { margin-left: auto; }
+
+/* Admin page building blocks: header with an action, bordered panels, button rows, the tour editor columns. */
+.adm-page-head { grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 16px; }
+.adm-panel { display: grid; gap: 16px; padding: clamp(16px, 2.5vw, 24px); border: 1px solid var(--line);
+  border-radius: var(--radius-md); background: var(--panel); }
+.adm-panel h2 { margin: 0; font-size: 18px; color: var(--ink); }
+.adm-panel > p { margin: 0; }
+.adm-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.adm-fieldset { display: grid; gap: 16px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.adm-note { margin: 0; color: var(--text-secondary); font-size: max(14px, var(--text-min)); }
+.adm-editor { display: grid; grid-template-columns: minmax(0, 1fr) 280px; gap: 24px; align-items: start; }
+.adm-editor-main { display: grid; gap: 24px; min-width: 0; }
+.adm-subsection { display: grid; gap: 10px; }
+.adm-subsection h3 { margin: 0; font-size: 16px; color: var(--ink); }
+.adm-panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 8px; }
+.adm-panel-head a, .adm-note a { color: var(--blue); font-weight: 600; }
+.adm-panel h2[tabindex="-1"]:focus { outline: none; }
+.adm-warn { color: var(--blue-dark); font-weight: 600; }
+
+/* Radio and checkbox chips (schedule mode, weekdays): native inputs, 44px touch targets. */
+.adm-choices { display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; border: 0; }
+.adm-choices legend { width: 100%; margin-bottom: 6px; padding: 0; font-size: max(13px, var(--text-min));
+  font-weight: 600; color: var(--text-control); }
+.adm-choices label { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 14px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-pill); background: var(--panel); cursor: pointer;
+  font-size: max(14px, var(--text-min)); }
+.adm-choices label:has(input:checked) { border-color: var(--blue); background: var(--blue-soft); color: var(--blue); }
+.adm-choices label:has(input:focus-visible) { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* Editable list rows (itinerary days, inclusion lines): fields on the left, reorder/remove buttons on the right. */
+.adm-rows { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.adm-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 12px;
+  border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.adm-row-fields { display: grid; gap: 10px; min-width: 0; }
+.adm-row-fields--inline { grid-template-columns: minmax(140px, 180px) minmax(0, 1fr); }
+.adm-row-controls { display: flex; gap: 4px; }
+.adm-icon-button { width: 44px; height: 44px; display: grid; place-items: center; border: 1px solid var(--line);
+  border-radius: var(--radius-sm); background: var(--panel); color: var(--text-secondary); }
+.adm-icon-button:hover:not(:disabled) { border-color: var(--blue); color: var(--blue); }
+.adm-icon-button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.adm-icon-button:disabled { opacity: .4; cursor: not-allowed; }
+.adm-row.is-dragging { opacity: .5; }
+.adm-image-row { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; align-items: start; }
+.adm-thumb { position: relative; width: 120px; aspect-ratio: 3 / 2; margin: 0; overflow: hidden; display: grid;
+  place-items: center; border: 1px dashed var(--line-strong); border-radius: var(--radius-sm); background: var(--panel);
+  color: var(--muted); font-size: max(12px, var(--text-min)); text-align: center; cursor: grab; }
+.adm-thumb img { object-fit: cover; }
+.adm-thumb figcaption { position: absolute; left: 0; right: 0; bottom: 0; padding: 2px 6px;
+  background: var(--image-label-bg); color: #fff; font-size: max(11px, var(--text-min)); font-weight: 700; }
+/* Manifest: key figures and the passenger list inside a table cell. */
+.adm-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin: 0; }
+.adm-stats div { padding: 12px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--surface); }
+.adm-stats dt { color: var(--muted); font-size: max(13px, var(--text-min)); }
+.adm-stats dd { margin: 4px 0 0; color: var(--ink); font-size: 20px; font-weight: 700; }
+.adm-passengers { display: grid; gap: 6px; margin: 0; padding-left: 18px; }
+.adm-passengers small { display: block; }
+.adm-picker { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
+.adm-picker .sh-field { flex: 1 1 280px; }
+.adm-turn-up { display: grid; transform: rotate(-90deg); }
+.adm-turn-down { display: grid; transform: rotate(90deg); }
+
+/* Phones and tablets: the menu opens as a panel under the top bar instead of a fixed column. */
+@media (max-width: 1023px) {
+  .adm-shell { grid-template-columns: minmax(0, 1fr); grid-template-areas: "top" "side" "main"; }
+  .adm-menu-toggle { display: inline-flex; }
+  .adm-sidebar { position: static; display: none; }
+  .adm-sidebar.open { display: grid; }
+  .adm-editor { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 520px) {
+  .adm-topbar { justify-content: space-between; }
+  .adm-scope.sh-field { width: 100%; }
+  .adm-scope select { flex: 1; }
+  .adm-page-head { grid-template-columns: minmax(0, 1fr); }
+  /* Phones: the buttons move under the fields so inputs keep the full width. */
+  .adm-row { grid-template-columns: minmax(0, 1fr); }
+  .adm-row-controls { justify-content: flex-end; }
+  .adm-row-fields--inline { grid-template-columns: minmax(0, 1fr); }
+  .adm-image-row { grid-template-columns: minmax(0, 1fr); }
+}

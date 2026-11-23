@@ -18,7 +18,8 @@
 | VNPAY Part A — VnPayPaymentGateway, chữ ký HMAC-SHA512, 17 tests | ✅ Xong |
 | VNPAY Part B — InitiateVnPayAsync, ConfirmVnPayAsync, VnPayConfirmDecision, 10 tests | ✅ Xong |
 | Migration 011 — gateway_meta, refund_needed | ✅ Viết file (chưa chạy) |
-| Lọc tour phía backend + phân trang | ✅ Xong |
+| Phân trang tour phía backend (offset `page`/`pageSize`) | ✅ Xong |
+| Lọc tour phía backend (8.1): API xong, trang `/tours` chưa chuyển sang | 🔄 Đang làm |
 | Dọn validateStay | ✅ Xong |
 
 ---
@@ -61,7 +62,7 @@
 
 | # | Việc | File chính |
 |---|---|---|
-| 8.1 | Lọc tour phía backend: `destination`, `minDays`, `maxDays`, `from`, `maxPrice` + phân trang cursor | `TourRepository`, `TourEndpoints`, `services/tours.ts` |
+| 8.1 | Lọc tour phía backend: `q`, `destinationId`, `minDays`, `maxDays`, `dateFrom`/`dateTo` (khoảng ngày khởi hành), `maxPrice`, `sort` + phân trang **offset** (đã có; bỏ ý định cursor vì danh mục nhỏ và cần nhảy trang, sắp xếp theo giá). `region` xếp ưu tiên, không lọc bỏ | `TourRepository`, `TourSearchRules`, `TourSearchSql`, `services/tours.ts` |
 | 8.2 | Tìm kiếm nhanh: không dấu, gợi ý khi gõ (`/api/tours/suggest?q=`) | `TourRepository`, `SuggestEndpoint`, `SearchBar.tsx` |
 | 8.3 | Admin: tạo/sửa tour, quản lý lịch khởi hành (departures) | `AdminTourService.cs`, `/admin/tours/` pages |
 | 8.4 | Admin: quản lý ảnh tour (upload URL hoặc gắn link) | `AdminTourService.cs`, `/admin/tours/[id]/images` |
@@ -106,6 +107,9 @@
 | Chạy `dotnet test` và `npm run lint` xanh hoàn toàn |
 | Merge tất cả nhánh vào `main` |
 | Vẽ sơ đồ kiến trúc (endpoint → service → repository → DB) |
+| Chuẩn hóa URL trang khách hàng sang tiếng Việt (vd. `/tours` → `/tour`, `/login` → `/dang-nhap`, `/privacy` → `/chinh-sach-rieng-tu`); giữ `/admin/*` tiếng Anh; thêm redirect 301 từ URL cũ trong `next.config.ts` (`redirects()` với `permanent: true` trả 308, cần `statusCode: 301`); cập nhật link nội bộ, email và URL return/IPN VNPAY |
+| Gom `frontend/src/lib/` theo nhóm (`lib/calendar/`, `lib/admin/`, `lib/booking/`, `lib/flights/`, `lib/hotels/`...), sửa import và `tests/*.test.cjs`, không đổi logic |
+| Ghi quy ước CSS vào `docs/design/theme.md`: khi nào dùng Tailwind, khi nào dùng file trong `src/styles/`, tiền tố class theo trang (vd. `adm-`), thứ tự import trong `globals.css`, chỗ đặt CSS cho điện thoại (`mobile.css`) |
 
 ---
 
@@ -119,6 +123,14 @@
 | Làm slide thuyết trình |
 | Chuẩn bị kịch bản demo — **demo bằng luồng đặt tour trọn vẹn** |
 | Chạy thử demo trên máy không có mạng (thanh toán mô phỏng) |
+
+---
+
+## Hoãn lại (chưa xếp tuần)
+
+| Việc | Lý do hoãn |
+|---|---|
+| Combo trên trang chủ (máy bay + khách sạn, xe + khách sạn) | Chưa có sản phẩm combo: cần bảng mới, API và luồng đặt/thanh toán riêng. Khách sạn và vé chỉ là báo giá chờ xác nhận, nên combo không được ghi "Hot Deal", "giá tốt nhất" hay hứa còn phòng/ghế. Cần thiết kế và duyệt schema trước khi làm |
 
 ---
 

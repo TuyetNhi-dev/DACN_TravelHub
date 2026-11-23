@@ -1,4 +1,5 @@
 import { CtaBand } from "@/components/home/CtaBand";
+import { DepartingSoon } from "@/components/home/DepartingSoon";
 import { DestinationMosaic } from "@/components/home/DestinationMosaic";
 import { FeaturedTours } from "@/components/home/FeaturedTours";
 import { FlightFares } from "@/components/home/FlightFares";
@@ -13,6 +14,7 @@ import { TourNeeds } from "@/components/home/TourNeeds";
 import { QUOTE_LABEL } from "@/components/ui/PriceTag";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeader } from "@/components/ui/SectionHeader";
+import { SOON_DAYS } from "@/services/tours";
 
 export default function Home() {
   return (
@@ -36,10 +38,21 @@ export default function Home() {
 
         <section className="home-section home-section--tint" aria-labelledby="featured-title">
           <Reveal className="container">
-            <SectionHeader id="featured-title" eyebrow="Gợi ý hành trình" title="Tour nổi bật đang mở bán"
-              description="Lịch khởi hành và số chỗ lấy trực tiếp từ hệ thống SàiHành."
+            <SectionHeader id="featured-title" eyebrow="Tour trọn gói" title="Tour trọn gói SàiHành"
+              description="Chọn vùng điểm đến. Lịch khởi hành và giá lấy trực tiếp từ hệ thống SàiHành."
               link={{ href: "/tours", label: "Xem tất cả tour" }} />
             <FeaturedTours />
+          </Reveal>
+        </section>
+
+        <section className="home-section" aria-labelledby="soon-title">
+          <Reveal className="container">
+            <div className="soon-band">
+              <SectionHeader id="soon-title" eyebrow="Sắp khởi hành" title={`Khởi hành trong ${SOON_DAYS} ngày tới`}
+                description="Số chỗ còn lại tính tại lúc tải trang; chỗ chỉ được giữ khi bạn đặt."
+                link={{ href: "/tours", label: "Xem tất cả tour" }} />
+              <DepartingSoon />
+            </div>
           </Reveal>
         </section>
 
