@@ -17,6 +17,11 @@ public static class TourEndpoints
             var (rows, total) = await service.ListPagedAsync(query, page, size, ct);
             return Results.Ok(ListResponse<TourSummaryDto>.Paged(rows, total));
         });
+        group.MapGet("/departure-days", async ([AsParameters] TourSearchQuery query, string? month,
+                TourService service, CancellationToken ct) =>
+            Results.Ok(ListResponse<TourDayCountDto>.From(await service.CountByDepartureDayAsync(query, month, ct))));
+        group.MapGet("/suggest", async (string? q, TourService service, CancellationToken ct) =>
+            Results.Ok(new ItemResponse<TourSuggestionsDto>(await service.SuggestAsync(q, ct))));
         group.MapGet("/destinations", async (TourService service, CancellationToken ct) =>
             Results.Ok(ListResponse<TourDestinationDto>.From(await service.ListDestinationsAsync(ct))));
         group.MapGet("/departures/upcoming", async (int? days, int? limit, TourService service,

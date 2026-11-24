@@ -17,25 +17,31 @@ export function TourMobileBookBar({ price, targetId }: TourMobileBookBarProps) {
   const panelAhead = usePanelAhead(targetId);
   if (!panelAhead) return null;
 
-  function openBooking() {
-    const panel = document.getElementById(targetId);
-    if (!panel) return;
-    panel.scrollIntoView({ block: "start" });
-    // Keyboard and screen-reader users land on the form, not back at the top of the page.
-    panel.focus({ preventScroll: true });
-  }
-
   return (
     <div className="mobile-book-bar">
       <p>
         <small>Giá từ</small>
         <strong>{formatCurrency(price)}</strong>
       </p>
-      <button type="button" className="btn btn-primary" onClick={openBooking} aria-controls={targetId}>
+      <button type="button" className="btn btn-primary" onClick={() => openBookingPanel(targetId)}
+        aria-controls={targetId}>
         Đặt ngay
       </button>
     </div>
   );
+}
+
+/**
+ * Scrolls to the booking panel and moves focus there, so keyboard and screen-reader users land on the form.
+ * With onlyIfHidden, a panel already on screen (the sticky sidebar on wide screens) is left alone.
+ */
+export function openBookingPanel(targetId: string, onlyIfHidden = false) {
+  const panel = document.getElementById(targetId);
+  if (!panel) return;
+  const { top } = panel.getBoundingClientRect();
+  if (onlyIfHidden && top >= 0 && top < window.innerHeight) return;
+  panel.scrollIntoView({ block: "start" });
+  panel.focus({ preventScroll: true });
 }
 
 /** True while the panel is still below the visible area. */

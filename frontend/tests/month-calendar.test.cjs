@@ -11,7 +11,6 @@ const cal = loadTs('src/lib/month-calendar.ts', {
   '@/lib/lunar-calendar': lunar,
   '@/lib/vn-holidays': holidays,
 });
-const departures = loadTs('src/lib/departure-calendar.ts');
 
 const cellOf = (weeks, date) => weeks.flat().find(cell => cell && cell.date === date);
 
@@ -95,28 +94,3 @@ test('range selection counts nights and restarts on an earlier day', () => {
     { start: '2027-01-01', end: null });
 });
 
-const departure = (id, date, overrides = {}) => ({
-  id, departureFrom: 'TP.HCM', departureDate: date, returnDate: date, capacity: 20, availableSeats: 10,
-  adultPrice: 5_000_000, childPrice: null, status: 'open', isBookable: true, ...overrides,
-});
-
-test('departure days pick the cheapest bookable departure and mark sold-out days', () => {
-  const days = departures.departureDays([
-    departure('a', '2026-12-10', { adultPrice: 6_000_000, availableSeats: 4 }),
-    departure('b', '2026-12-10', { adultPrice: 5_500_000, availableSeats: 3, departureFrom: 'Hà Nội' }),
-    departure('c', '2026-12-10', { adultPrice: 4_000_000, availableSeats: 0, isBookable: false }),
-    departure('d', '2026-12-03', { availableSeats: 0, isBookable: false }),
-  ]);
-  assert.deepEqual([...days.keys()], ['2026-12-03', '2026-12-10']);
-  const busy = days.get('2026-12-10');
-  assert.equal(busy.pick.id, 'b');
-  assert.equal(busy.lowestPrice, 5_500_000, 'sold-out departures do not lower the shown price');
-  assert.equal(busy.seats, 7);
-  assert.equal(busy.soldOut, false);
-  const full = days.get('2026-12-03');
-  assert.equal(full.pick, null);
-  assert.equal(full.soldOut, true);
-  assert.equal(departures.initialDepartureMonth(days, null, '2026-11-20'), '2026-12');
-  assert.equal(departures.initialDepartureMonth(days, '2027-01-04', '2026-11-20'), '2027-01');
-  assert.equal(departures.initialDepartureMonth(new Map(), null, '2026-11-20'), '2026-11');
-});

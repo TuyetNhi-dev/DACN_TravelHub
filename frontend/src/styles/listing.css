@@ -144,3 +144,13 @@
   .listing-sort { width: 100%; }
   .listing-sort select { flex: 1; min-width: 0; }
 }
+
+/* "Ngày khởi hành" as a month calendar (TourDateFilter.tsx): one month fits the 280px sidebar and the phone sheet. */
+/* The shared calendar asks 260px per month (.mc-months); the sidebar has less, so one month takes what there is. */
+.tour-date-filter .mc { margin-top: 4px; min-width: 0; }
+.tour-date-filter .mc-months { grid-template-columns: minmax(0, 1fr); }
+.tour-date-filter .mc-nav { gap: 8px; }
+/* One month at a time: the nav bar already names it (and announces it), like the compact calendar. */
+.tour-date-filter .mc-month caption { display: none; }
+.tour-date-filter .tour-date-count { font-size: max(10px, var(--text-min)); white-space: nowrap; }
+.tour-date-hint { margin: 6px 0 0; color: var(--muted); font-size: max(12px, var(--text-min)); }

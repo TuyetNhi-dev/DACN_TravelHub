@@ -4,7 +4,11 @@ const assert = require('node:assert/strict');
 const { loadTs, plain } = require('./load-ts.cjs');
 
 const format = loadTs('src/lib/format.ts');
-const lib = loadTs('src/lib/tour-display.ts', { '@/lib/format': format, '@/lib/media': {} });
+const lunar = loadTs('src/lib/lunar-calendar.ts');
+const holidays = loadTs('src/lib/vn-holidays.ts', { '@/lib/lunar-calendar': lunar });
+const lib = loadTs('src/lib/tour-display.ts', {
+  '@/lib/format': format, '@/lib/media': {}, '@/lib/vn-holidays': holidays,
+});
 const filters = changes => ({ ...lib.EMPTY_TOUR_FILTERS, ...changes });
 const tour = (id, destination, price, days, dates = []) => ({
   id, code: id, title: 'Tour ' + destination, destination, departureFrom: 'TP. Hồ Chí Minh',
@@ -45,4 +49,10 @@ test('filters combine search without accents, duration, price and departure date
   assert.deepEqual(ids({ duration: 'long' }), ['C']);
   assert.deepEqual(ids({ maxPrice: '7000000', sort: 'high' }), ['B', 'A']);
   assert.deepEqual(ids({ date: '2026-12-01' }), ['A']);
+});
+
+test('a departure row names the holidays its trip touches, not every mùng 1 or rằm', () => {
+  assert.deepEqual(plain(lib.tripHolidayNames({ departureDate: '2026-12-31', returnDate: '2027-01-02' })),
+    ['Tết Dương lịch']);
+  assert.deepEqual(plain(lib.tripHolidayNames({ departureDate: '2026-12-08', returnDate: '2026-12-10' })), []);
 });

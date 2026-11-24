@@ -1,10 +1,11 @@
 import { apiGet } from "@/lib/api-client";
 import {
-  bool, invalid, isoDate, isRecord, itemEnvelope, list, listEnvelope, num, optNum, optStr, str, type Row,
+  bool, invalid, isoDate, isRecord, itemEnvelope, list, listEnvelope, num, optNum, optStr, pagedListEnvelope, str,
+  type Row,
 } from "@/lib/decode";
 import type {
   ItineraryDay, TourCollection, TourCollectionDetail, TourDeparture, TourDetail, TourImage, TourInclusions,
-  TourSummary, UpcomingDeparture,
+  TourDayCount, TourDestination, TourSuggestion, TourSuggestions, TourSummary, UpcomingDeparture,
 } from "@/types/tour";
 
 const RESOURCE = "tour";
@@ -75,6 +76,53 @@ export function decodeTourDetail(row: Row): TourDetail {
   };
 }
 
+/** One page of GET /api/tours; params come from tourSearchParams (lib/tour-search). */
+export async function searchTours(params: URLSearchParams, signal?: AbortSignal):
+  Promise<{ items: TourSummary[]; total: number }> {
+  return pagedListEnvelope(await apiGet(`/api/tours?${params}`, signal), decodeTour, RESOURCE);
+}
+
+function decodeDestination(row: Row): TourDestination {
+  return { id: str(row, "id", RESOURCE), name: str(row, "name", RESOURCE), tourCount: num(row, "tourCount", RESOURCE) };
+}
+
+function decodeSuggestion(row: Row): TourSuggestion {
+  return {
+    id: str(row, "id", RESOURCE), code: str(row, "code", RESOURCE), title: str(row, "title", RESOURCE),
+    destination: str(row, "destination", RESOURCE), basePrice: num(row, "basePrice", RESOURCE),
+  };
+}
+
+function decodeSuggestions(row: Row): TourSuggestions {
+  return {
+    destinations: list(row.destinations, decodeDestination, RESOURCE),
+    tours: list(row.tours, decodeSuggestion, RESOURCE),
+  };
+}
+
+function decodeDayCount(row: Row): TourDayCount {
+  return { date: isoDate(row, "date", RESOURCE), tourCount: num(row, "tourCount", RESOURCE) };
+}
+
+/** Tours per departure day of one month under the other /tours filters; params from departureDayParams. */
+export async function getTourDepartureDays(params: URLSearchParams, signal?: AbortSignal):
+  Promise<TourDayCount[]> {
+  return listEnvelope(await apiGet(`/api/tours/departure-days?${params}`, signal), decodeDayCount, RESOURCE);
+}
+
+/** Search box suggestions while the customer types (ROADMAP 8.2). */
+export async function getTourSuggestions(text: string, signal?: AbortSignal): Promise<TourSuggestions> {
+  const value = await apiGet(`/api/tours/suggest?${new URLSearchParams({ q: text })}`, signal);
+  return itemEnvelope(value, decodeSuggestions, RESOURCE);
+}
+
+/** Destinations that have a published tour, by name: the "Điểm đến" filter. */
+export async function getTourDestinations(signal?: AbortSignal): Promise<TourDestination[]> {
+  return listEnvelope(await apiGet("/api/tours/destinations", signal), decodeDestination, RESOURCE);
+}
+
+
+/** Every published tour, unfiltered: home sections, destination and guide pages pick from it. */
 export async function getTours(signal?: AbortSignal): Promise<TourSummary[]> {
   return listEnvelope(await apiGet("/api/tours", signal), decodeTour, RESOURCE);
 }

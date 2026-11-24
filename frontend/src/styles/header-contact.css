@@ -32,3 +32,17 @@ html:root { scroll-padding-top:144px; }
  html:root { scroll-padding-top:184px; }
  .filters,.detail-booking { position:static; }
 }
+
+/* Header search suggestions (HeaderSearch.tsx, ROADMAP 8.2): a listbox under the box, wider than the box itself. */
+.header-search { position:relative; }
+.search-suggest { position:absolute; top:calc(100% + 6px); right:0; z-index:60; width:min(380px, calc(100vw - 32px)); padding:6px; border:1px solid var(--line); border-radius:12px; background:var(--panel); box-shadow:var(--shadow-md); }
+.search-suggest-status { margin:0; padding:0 8px; color:var(--muted); font-size:max(12px, var(--text-min)); }
+.search-suggest-status:not(:empty) { padding-block:6px; }
+.search-suggest ul { margin:0; padding:0; list-style:none; }
+.search-suggest li { display:flex; gap:10px; align-items:center; min-height:44px; padding:6px 8px; border-radius:8px; cursor:pointer; }
+.search-suggest li:hover, .search-suggest li.is-active { background:var(--blue-soft); }
+.search-suggest-icon { display:grid; place-items:center; flex-shrink:0; width:28px; height:28px; border-radius:50%; color:var(--blue); background:var(--surface); }
+.search-suggest-text { display:grid; min-width:0; }
+.search-suggest-text b { overflow:hidden; color:var(--ink); font-size:14px; font-weight:600; text-overflow:ellipsis; white-space:nowrap; }
+.search-suggest-text small { overflow:hidden; color:var(--muted); font-size:max(12px, var(--text-min)); text-overflow:ellipsis; white-space:nowrap; }
+@media(max-width:760px) { .search-suggest { left:0; right:0; width:auto; } }

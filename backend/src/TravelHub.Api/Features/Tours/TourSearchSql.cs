@@ -11,7 +11,7 @@ namespace TravelHub.Api.Features.Tours;
 public static class TourSearchSql
 {
     // utf8mb4_0900_ai_ci ignores case and accents except "đ", which has its own letter weight, so it is replaced first.
-    private const string TextMatch = """
+    internal const string TextMatch = """
         REPLACE(LOWER(CONCAT_WS(' ', t.title, t.code, destination.name)), 'đ', 'd') COLLATE utf8mb4_0900_ai_ci
         LIKE @text
         """;
@@ -31,6 +31,7 @@ public static class TourSearchSql
         SqlFilter.AddIfPresent(sql, command, "t.duration_days >= @minDays", "@minDays", search.MinDays);
         SqlFilter.AddIfPresent(sql, command, "t.duration_days <= @maxDays", "@maxDays", search.MaxDays);
         SqlFilter.AddIfPresent(sql, command, "t.base_price <= @maxPrice", "@maxPrice", search.MaxPrice);
+        if (search.DepartureLocationIds is { } locations) AppendDepartureLocations(sql, command, locations);
         if (search.DateFrom is null && search.DateTo is null) return;
         sql.Append(" AND ").Append(BookableDeparture);
         if (search.DateFrom is { } from) Bind(sql, command, " AND d.departure_date >= @dateFrom", "@dateFrom", from);
@@ -53,6 +54,23 @@ public static class TourSearchSql
              WHERE d.tour_id = t.id AND d.status = 'open' AND d.departure_date > @today AND r.code = @region) DESC,
              t.id
         """;
+
+    /// <summary>
+    /// "Khởi hành từ": the tour has a departure (any status, as the city list on the card shows) leaving from one of
+    /// these locations. One parameter per id; an empty list means no city of the region is used, so nothing matches.
+    /// </summary>
+    private static void AppendDepartureLocations(StringBuilder sql, MySqlCommand command, IReadOnlyList<ulong> ids)
+    {
+        if (ids.Count == 0)
+        {
+            sql.Append(" AND FALSE");
+            return;
+        }
+        var names = ids.Select((_, i) => "@departureLocation" + i).ToList();
+        sql.Append(" AND EXISTS (SELECT 1 FROM tour_departures dl WHERE dl.tour_id = t.id")
+            .Append(" AND dl.departure_location_id IN (").Append(string.Join(", ", names)).Append("))");
+        for (var i = 0; i < ids.Count; i++) command.Parameters.AddWithValue(names[i], ids[i]);
+    }
 
     private static void Bind(StringBuilder sql, MySqlCommand command, string condition, string name, object value)
     {

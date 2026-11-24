@@ -8,4 +8,7 @@ public static class SqlText
 
     /// <summary>A LIKE pattern matching the value anywhere.</summary>
     public static string Contains(string value) => "%" + EscapeLike(value) + "%";
+
+    /// <summary>A LIKE pattern matching values that begin with the value.</summary>
+    public static string StartsWith(string value) => EscapeLike(value) + "%";
 }

@@ -1,5 +1,17 @@
 import { formatCurrency, formatDate, normalizeSearch } from "@/lib/format";
+import { holidaysBetween } from "@/lib/vn-holidays";
 import type { TourDeparture, TourSummary } from "@/types/tour";
+
+/**
+ * Named holidays the trip touches (departure to return day), e.g. "Tết Dương lịch", so a departure row can say
+ * which dates are a holiday trip. Mùng 1 and rằm of every lunar month are left out: they are not holidays.
+ */
+export function tripHolidayNames(departure: Pick<TourDeparture, "departureDate" | "returnDate">): string[] {
+  const names = holidaysBetween(departure.departureDate, departure.returnDate)
+    .filter(holiday => holiday.kind !== "lunar-day")
+    .map(holiday => holiday.name);
+  return [...new Set(names)];
+}
 
 export const tourHref = (id: string) => "/tours/" + encodeURIComponent(id);
 
@@ -66,11 +78,17 @@ export function activeTourFilters(filters: TourFilters): ActiveFilter[] {
 const SHORT_TRIP_MAX_DAYS = 3;
 const MEDIUM_TRIP_MAX_DAYS = 5;
 
+/** Day range of a duration choice; shared by the in-page filter and the minDays/maxDays sent to the API. */
+export function durationRange(filter: DurationFilter): { minDays?: number; maxDays?: number } {
+  if (filter === "short") return { maxDays: SHORT_TRIP_MAX_DAYS };
+  if (filter === "medium") return { minDays: SHORT_TRIP_MAX_DAYS + 1, maxDays: MEDIUM_TRIP_MAX_DAYS };
+  if (filter === "long") return { minDays: MEDIUM_TRIP_MAX_DAYS + 1 };
+  return {};
+}
+
 function matchesDuration(days: number, filter: DurationFilter): boolean {
-  if (filter === "short") return days <= SHORT_TRIP_MAX_DAYS;
-  if (filter === "medium") return days > SHORT_TRIP_MAX_DAYS && days <= MEDIUM_TRIP_MAX_DAYS;
-  if (filter === "long") return days > MEDIUM_TRIP_MAX_DAYS;
-  return true;
+  const { minDays, maxDays } = durationRange(filter);
+  return (minDays === undefined || days >= minDays) && (maxDays === undefined || days <= maxDays);
 }
 
 export function filterTours(tours: TourSummary[], filters: TourFilters): TourSummary[] {

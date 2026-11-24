@@ -34,14 +34,21 @@ test('tour form round-trips a tour and sends trimmed, typed values', () => {
   const tour = {
     id: '7', code: 'SH-MB-001', title: 'Hà Nội một ngày', destinationId: '8', categoryId: null, branchId: '1',
     durationDays: 1, durationNights: 0, basePrice: 590000, description: null, status: 'draft',
+    cancellationPolicy: 'Hủy trước 7 ngày hoàn 100%.', travelNotes: null,
   };
   const form = forms.tourFormFrom(tour);
   assert.equal(form.categoryId, '');
   assert.equal(form.basePrice, '590000');
-  const edited = { ...form, code: ' sh-mb-002 ', basePrice: '1.290.000', description: ' ' };
+  assert.equal(form.cancellationPolicy, 'Hủy trước 7 ngày hoàn 100%.');
+  assert.equal(form.travelNotes, '');
+  const edited = {
+    ...form, code: ' sh-mb-002 ', basePrice: '1.290.000', description: ' ',
+    cancellationPolicy: '  Hủy trước 3 ngày hoàn 50%.  ', travelNotes: ' ',
+  };
   const input = plain(forms.toSaveTourInput(edited));
   assert.deepEqual(input, {
     code: 'SH-MB-002', title: 'Hà Nội một ngày', destinationId: '8', categoryId: null, operatingBranchId: '1',
     durationDays: 1, durationNights: 0, basePrice: 1290000, description: null,
+    cancellationPolicy: 'Hủy trước 3 ngày hoàn 50%.', travelNotes: null,
   });
 });

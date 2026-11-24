@@ -18,6 +18,19 @@ public sealed record TourSummaryDto(
 /// <summary>One option of the /tours destination filter: a place with at least one published tour.</summary>
 public sealed record TourDestinationDto(string Id, string Name, int TourCount);
 
+/// <summary>One day of the /tours date filter: how many tours (matching the other filters) leave that day.</summary>
+public sealed record TourDayCountDto(DateOnly Date, int TourCount);
+
+/// <summary>One tour in the search box suggestions: enough to recognise it and open its page.</summary>
+public sealed record TourSuggestionDto(string Id, string Code, string Title, string Destination, decimal BasePrice);
+
+/// <summary>GET /api/tours/suggest: destinations (open the filtered list) and tours (open the tour page).</summary>
+public sealed record TourSuggestionsDto(IReadOnlyList<TourDestinationDto> Destinations,
+    IReadOnlyList<TourSuggestionDto> Tours)
+{
+    public static readonly TourSuggestionsDto Empty = new([], []);
+}
+
 public sealed record ItineraryDayDto(int DayNumber, string Title, string? Description);
 
 public sealed record TourDepartureDto(

@@ -8,11 +8,10 @@ import type { CartChoice } from "@/types/cart";
 import type { TourDetail as Detail } from "@/types/tour";
 import { DepartureTable } from "./DepartureTable";
 import { TourBookingPanel } from "./TourBookingPanel";
-import { TourDepartureCalendar } from "./TourDepartureCalendar";
 import { TourHeader } from "./TourHeader";
 import { TourHighlights } from "./TourHighlights";
 import { TourInclusions } from "./TourInclusions";
-import { TourMobileBookBar } from "./TourMobileBookBar";
+import { openBookingPanel, TourMobileBookBar } from "./TourMobileBookBar";
 
 const BOOKING_PANEL_ID = "tour-booking";
 
@@ -38,7 +37,7 @@ interface TourDetailContentProps {
 
 function TourDetailContent({ detail, prefill }: TourDetailContentProps) {
   const { tour, itinerary, departures, images, inclusions } = detail;
-  // Shared by the departure calendar and the booking panel's dropdown so both always agree.
+  // Shared by the departure table and the booking panel's dropdown so both always agree.
   // A departure pre-filled from the cart is used only while it can still be booked.
   const [departureId, setDepartureId] = useState<string | null>(() =>
     departures.find(departure => departure.isBookable && departure.id === prefill.departureId)?.id
@@ -66,10 +65,11 @@ function TourDetailContent({ detail, prefill }: TourDetailContentProps) {
           <TourInclusions inclusions={inclusions} />
           <section>
             <h2>Lịch khởi hành</h2>
-            {departures.length > 0 && (
-              <TourDepartureCalendar departures={departures} selectedId={departureId} onSelect={setDepartureId} />
-            )}
-            <DepartureTable departures={departures} />
+            <DepartureTable departures={departures} selectedId={departureId} onSelect={id => {
+              setDepartureId(id);
+              // On phones the panel sits below the table: bring it into view so the choice is visible.
+              openBookingPanel(BOOKING_PANEL_ID, true);
+            }} />
           </section>
           <section>
             <h2>Lưu ý khi đặt tour</h2>
