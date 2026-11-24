@@ -1,0 +1,170 @@
+/* "Kỳ nghỉ thông minh": the /ky-nghi page and its home teaser. Colours come from tokens.css (both themes).
+   Text never sits in --brand or --green on a tinted background: both fall under 4.5:1 in one of the themes. */
+
+.breaks-page { padding: 40px 0 80px; background: var(--surface); }
+.breaks-head { max-width: 760px; }
+.breaks-head h1 { margin: 0 0 10px; font-size: var(--text-h1); line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight); text-wrap: balance; }
+.breaks-head p { margin: 0; color: var(--text-secondary); font-size: var(--text-lead);
+  line-height: var(--leading-body); }
+
+/* ---------- Summary, toolbar, disclaimer ---------- */
+.breaks-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px;
+  margin: 28px 0 0; }
+.breaks-summary > div { display: grid; gap: 6px; padding: 16px 18px; background: var(--panel);
+  border: 1px solid var(--card-border); border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+.breaks-summary dt { color: var(--muted); font-size: var(--text-eyebrow); font-weight: var(--weight-semibold);
+  letter-spacing: .06em; text-transform: uppercase; }
+.breaks-summary dd { display: grid; gap: 2px; margin: 0; font-size: 20px; font-weight: var(--weight-bold);
+  line-height: var(--leading-snug); font-variant-numeric: tabular-nums; }
+.breaks-summary dd a { color: var(--ink); text-decoration: none; }
+.breaks-summary dd a:hover { color: var(--blue); text-decoration: underline; text-underline-offset: 3px; }
+.breaks-summary dd small { color: var(--muted); font-size: var(--text-small); font-weight: var(--weight-medium); }
+
+.breaks-toolbar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 24px;
+  margin-top: 24px; }
+.breaks-region { display: inline-flex; align-items: center; gap: 10px; min-height: var(--tap-min);
+  padding: 0 6px 0 14px;
+  background: var(--panel); border: 1px solid var(--line-strong); border-radius: var(--radius-pill);
+  color: var(--text-secondary); font-size: var(--text-small); font-weight: var(--weight-semibold); }
+.breaks-region svg { color: var(--blue); flex-shrink: 0; }
+.breaks-region select { min-height: 36px; padding: 0 10px; border: 0; border-radius: var(--radius-pill);
+  background: var(--surface); color: var(--ink); font: inherit; font-weight: var(--weight-semibold); cursor: pointer; }
+.breaks-region:focus-within { outline: var(--focus-ring); outline-offset: 2px; }
+.breaks-region select:focus-visible { outline: none; }
+
+.breaks-disclaimer { display: flex; align-items: flex-start; gap: 12px; margin: 20px 0 28px; padding: 14px 18px;
+  border: 1px solid color-mix(in srgb, var(--sun) 45%, transparent); border-left-width: 4px;
+  border-radius: var(--radius-sm); background: var(--sun-soft); color: var(--sun-ink); font-size: var(--text-small);
+  line-height: var(--leading-snug); }
+.breaks-disclaimer svg { flex-shrink: 0; margin-top: 1px; }
+
+/* ---------- Day strip and its legend ---------- */
+.break-legend { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 0; padding: 0; list-style: none;
+  color: var(--text-secondary); font-size: var(--text-caption); }
+.break-legend li { display: inline-flex; align-items: center; gap: 8px; }
+.break-legend-mark { width: 16px; height: 16px; border-radius: var(--radius-xs); }
+
+.break-strip { display: flex; flex-wrap: wrap; gap: 6px; margin: 18px 0 0; padding: 0; list-style: none; }
+.break-day { min-width: 46px; display: grid; justify-items: center; gap: 2px; padding: 7px 6px;
+  border-radius: var(--radius-sm); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.break-day-weekday { color: var(--muted); font-size: var(--text-eyebrow); font-weight: var(--weight-semibold); }
+.break-day-number { color: var(--ink); font-size: 17px; font-weight: var(--weight-bold); }
+
+/* Holiday: solid tinted fill + brand border. Weekend: plain. Leave: dashed sun. Extra weekend: dashed neutral. */
+.break-day.is-holiday, .break-legend-mark.is-holiday {
+  background: color-mix(in srgb, var(--brand) 16%, var(--panel)); border: 1.5px solid var(--brand); }
+.break-day.is-weekend, .break-legend-mark.is-weekend { background: var(--surface);
+  border: 1.5px solid var(--line-strong); }
+.break-day.is-leave, .break-legend-mark.is-leave { background: var(--sun-soft); border: 1.5px dashed var(--sun); }
+.break-day.is-leave .break-day-number { color: var(--sun-ink); }
+.break-day.is-weekend.is-extra { background: transparent; border-style: dashed; }
+
+/* ---------- Break card ---------- */
+.breaks-list { display: grid; gap: 20px; margin: 0; padding: 0; list-style: none; }
+.break-card { padding: clamp(18px, 3vw, 28px); background: var(--panel); border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); scroll-margin-top: 110px;
+  transition: box-shadow var(--duration-base) var(--ease-out); }
+/* Arriving from a home tile (/ky-nghi#ky-nghi-…) rings the break that was picked. */
+.break-card:target { box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 55%, transparent), var(--shadow-md); }
+.break-card-head { display: flex; align-items: flex-start; gap: 16px; }
+.break-card-title { min-width: 0; display: grid; gap: 6px; }
+.break-card-title h2 { margin: 0; font-size: var(--text-h3); line-height: var(--leading-snug); text-wrap: balance; }
+.break-card-range { margin: 0; color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+
+.date-leaf { flex-shrink: 0; width: 64px; overflow: hidden; display: grid; text-align: center;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--panel); }
+.date-leaf-month { padding: 4px 0; background: var(--brand); color: var(--on-brand); font-size: var(--text-eyebrow);
+  font-weight: var(--weight-bold); text-transform: uppercase; letter-spacing: .04em; }
+.date-leaf-day { padding: 6px 0 8px; color: var(--ink); font-size: 26px; font-weight: var(--weight-heavy);
+  line-height: 1; font-variant-numeric: tabular-nums; }
+
+.break-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.break-chip { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border: 1px solid var(--line);
+  border-radius: var(--radius-pill); background: var(--surface); color: var(--text-secondary);
+  font-size: var(--text-caption); font-weight: var(--weight-semibold); white-space: nowrap; }
+.break-chip--days { border-color: transparent; background: var(--blue-soft); color: var(--ink); }
+.break-chip--live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--green);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 25%, transparent); }
+
+.break-notes { display: grid; gap: 8px; margin-top: 16px; }
+.break-note, .break-tip { display: flex; align-items: flex-start; gap: 10px; margin: 0; font-size: var(--text-small);
+  line-height: var(--leading-snug); }
+.break-note { color: var(--text-secondary); }
+.break-tip { padding: 10px 14px; border-radius: var(--radius-sm); background: var(--sun-soft); color: var(--sun-ink); }
+.break-note svg, .break-tip svg { flex-shrink: 0; margin-top: 1px; }
+
+/* ---------- Tours inside a card ---------- */
+.break-tours-section { margin-top: 20px; padding-top: 18px; border-top: 1px dashed var(--line-strong); }
+.break-tours-title { margin: 0 0 12px; font-size: var(--text-h4); }
+.break-tours-title span { color: var(--muted); font-weight: var(--weight-medium); }
+.break-tours { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; margin: 0;
+  padding: 0; list-style: none; }
+.break-tour-link { height: 100%; display: flex; flex-direction: column; gap: 6px; padding: 14px 16px;
+  background: var(--panel); border: 1px solid var(--card-border); border-radius: var(--radius-md); color: inherit;
+  text-decoration: none; transition: transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out); }
+.break-tour-link:hover { transform: translateY(-2px); border-color: var(--blue); box-shadow: var(--shadow-hover); }
+.break-tour-link:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+.break-tour-place { display: inline-flex; align-items: center; gap: 6px; color: var(--blue);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold); }
+.break-tour-title { font-weight: var(--weight-bold); line-height: var(--leading-snug); display: -webkit-box;
+  -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.break-tour-meta { display: flex; align-items: flex-start; gap: 6px; color: var(--text-secondary);
+  font-size: var(--text-caption); font-variant-numeric: tabular-nums; }
+.break-tour-meta svg { flex-shrink: 0; margin-top: 1px; }
+.break-tour-tag { align-self: flex-start; display: inline-flex; align-items: center; gap: 5px; padding: 2px 10px;
+  border-radius: var(--radius-pill); background: var(--sun-soft); color: var(--sun-ink); font-size: var(--text-caption);
+  font-weight: var(--weight-semibold); }
+.break-tour-foot { margin-top: auto; padding-top: 10px; display: flex; align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px; border-top: 1px dashed var(--line); }
+.break-tour-go { width: 34px; height: 34px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%;
+  background: var(--blue-soft); color: var(--blue);
+  transition: background var(--duration-fast), color var(--duration-fast); }
+.break-tour-link:hover .break-tour-go { background: var(--brand); color: var(--on-brand); }
+.break-tour-skeleton { display: grid; gap: 10px; padding: 16px; border: 1px solid var(--card-border);
+  border-radius: var(--radius-md); }
+.break-empty { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 20px; padding: 14px 16px; border: 1px dashed var(--line-strong); border-radius: var(--radius-md);
+  color: var(--text-secondary); font-size: var(--text-small); }
+.break-empty p { margin: 0; }
+.break-status { margin: 14px 0 0; color: var(--muted); font-size: var(--text-small); }
+
+/* ---------- Home teaser ---------- */
+.home-breaks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0;
+  list-style: none; }
+.home-break-link { height: 100%; display: flex; flex-direction: column; gap: 8px; padding: 20px;
+  background: var(--panel); border: 1px solid var(--card-border); border-radius: var(--radius-lg); color: inherit;
+  text-decoration: none; box-shadow: var(--shadow-sm); transition: transform var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out); }
+.home-break-link:hover { transform: translateY(-3px); border-color: var(--blue); box-shadow: var(--shadow-hover); }
+.home-break-link:focus-visible { outline: var(--focus-ring); outline-offset: 3px; }
+.home-break-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  margin-bottom: 4px; }
+.home-break-top .break-chips { justify-content: flex-end; }
+.home-break-name { font-size: var(--text-h4); line-height: var(--leading-snug); }
+.home-break-range { color: var(--text-secondary); font-size: var(--text-small); font-variant-numeric: tabular-nums; }
+.home-break-foot { margin-top: auto; padding-top: 12px; display: flex; align-items: center;
+  justify-content: space-between;
+  gap: 8px; border-top: 1px solid var(--line); color: var(--blue); font-size: var(--text-small);
+  font-weight: var(--weight-semibold); }
+.home-break-foot svg { transition: transform var(--duration-fast) var(--ease-out); }
+.home-break-link:hover .home-break-foot svg { transform: translateX(4px); }
+.home-break-skeleton { min-height: 196px; display: grid; align-content: start; gap: 14px; padding: 20px;
+  border: 1px solid var(--card-border); border-radius: var(--radius-lg); background: var(--panel); }
+
+@media (max-width: 900px) { .home-breaks { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .breaks-page { padding-top: 28px; }
+  .break-card-head { gap: 12px; }
+  .date-leaf { width: 56px; }
+  .date-leaf-day { font-size: 22px; }
+  .break-tours { grid-template-columns: minmax(0, 1fr); }
+  .breaks-region { width: 100%; justify-content: space-between; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .break-card, .break-tour-link, .break-tour-go, .home-break-link, .home-break-foot svg { transition: none; }
+  .break-tour-link:hover, .home-break-link:hover, .home-break-link:hover .home-break-foot svg { transform: none; }
+}

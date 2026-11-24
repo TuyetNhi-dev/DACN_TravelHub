@@ -12,7 +12,7 @@ using A = TravelHub.Api.Features.Admin.Audit.AuditActions;
 namespace TravelHub.Api.Features.Admin.Departures;
 
 public sealed record AdminDepartureQuery(string? Scope, string? TourId, DateOnly? From, DateOnly? To,
-    string? Status, int? Page, int? PageSize);
+    string? Status, int? Page, int? PageSize, string? BranchId = null);
 
 /// <summary>Departure calendar. Changes need a branch manager or admin of the branch running the departure.</summary>
 public sealed class AdminDepartureService(AdminAccessService accessService, AdminDepartureRepository repository,
@@ -28,13 +28,16 @@ public sealed class AdminDepartureService(AdminAccessService accessService, Admi
         var (access, scope) = await accessService.SelectAsync(account, query.Scope, ct);
         var errors = new ValidationErrors();
         errors.AddIf(query.TourId is not null && !ResourceId.TryParse(query.TourId, out _), "tourId", "Mã tour sai.");
+        errors.AddIf(query.BranchId is not null && !ResourceId.TryParse(query.BranchId, out _), "branchId",
+            "Mã chi nhánh sai.");
         errors.AddIf(query.Status is not null && !DepartureStatus.All.Contains(query.Status), "status",
             "Trạng thái lọc không hợp lệ.");
         errors.ThrowIfAny();
         ulong? tourId = query.TourId is null ? null : ResourceId.Parse(query.TourId, "tourId");
         var size = Math.Clamp(query.PageSize ?? DefaultPageSize, 1, 100);
+        ulong? branchId = query.BranchId is null ? null : ResourceId.Parse(query.BranchId, "branchId");
         var (rows, total) = await repository.ListAsync(new AdminDepartureFilter(tourId, query.From, query.To,
-            query.Status), scope, (Math.Max(1, query.Page ?? 1) - 1) * size, size, ct);
+            query.Status, branchId), scope, (Math.Max(1, query.Page ?? 1) - 1) * size, size, ct);
         return (rows.Select(r => r.Departure with { CanEdit = access.Manage.Covers(r.BranchId) }).ToList(), total);
     }
 
@@ -67,6 +70,7 @@ public sealed class AdminDepartureService(AdminAccessService accessService, Admi
             request.OperatingBranchId, request.Capacity, request.MinGuests, request.AdultPrice, request.ChildPrice),
             errors);
         errors.ThrowIfAny();
+        DepartureRules.EnsureCapacityCoversReserved(terms.Capacity, current.ReservedSeats);
         if (Id(current.BranchId) != terms.OperatingBranchId)
             await accessService.RequireManagedBranchAsync(access, terms.OperatingBranchId, ct);
         var audit = await accessService.AuditAsync(access, A.DepartureUpdate, AuditEntities.Departure, current.Id,
@@ -81,15 +85,16 @@ public sealed class AdminDepartureService(AdminAccessService accessService, Admi
         CancellationToken ct)
     {
         var (access, current) = await ManagedAsync(account, rawId, ct);
-        var status = DepartureRules.Status(request.Status);
-        if (current.Status == DepartureStatus.Cancelled)
-            throw ApiException.Conflict("Lịch đã hủy không mở lại được.");
-        if (status == DepartureStatus.Open && current.DepartureDate <= clock.Today)
-            throw ApiException.Conflict("Không mở bán lịch đã khởi hành.");
+        var status = request.Status ?? "";
+        var reason = DepartureRules.CheckTransition(current.Status, request.Status, current.DepartureDate,
+            current.ReturnDate, clock.Today, request.Reason);
+        var summary = $"{DepartureRules.Label(status)}: lịch {current.TourCode} ngày {Day(current.DepartureDate)}"
+            + (reason is null ? "" : $" ({current.ActiveBookings} đơn bị ảnh hưởng). Lý do: {reason}");
         var audit = await accessService.AuditAsync(access, A.DepartureStatus, AuditEntities.Departure, current.Id,
-            Id(current.BranchId), $"{(status == DepartureStatus.Open ? "Mở" : "Đóng")} bán lịch {current.TourCode} "
-            + $"ngày {Day(current.DepartureDate)}", [new AuditChange("status", current.Status, status)], ct);
-        await repository.SetStatusAsync(Id(current.Id), status, audit, ct);
+            Id(current.BranchId), summary, [new AuditChange("status", current.Status, status)], ct);
+        // The UPDATE re-checks the old status so two staff acting at once cannot both move the departure.
+        if (!await repository.SetStatusAsync(Id(current.Id), current.Status, status, reason, audit, ct))
+            throw ApiException.Conflict("Lịch vừa được người khác cập nhật, hãy tải lại.");
         return await GetAsync(access, current.Id, ct);
     }
 

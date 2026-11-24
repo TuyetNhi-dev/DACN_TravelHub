@@ -6,7 +6,7 @@ import "@/styles/flight-deals.css";
 
 export const metadata = {
   title: "Săn vé máy bay giá rẻ | SàiHành",
-  description: "Giá vé tham khảo thấp nhất hiện có theo từng chặng bay nội địa trong 30 ngày tới.",
+  description: "Giá vé deal thấp nhất hiện có theo từng chặng bay nội địa trong 30 ngày tới.",
 };
 
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;

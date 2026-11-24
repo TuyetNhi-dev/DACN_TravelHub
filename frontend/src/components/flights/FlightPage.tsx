@@ -15,7 +15,7 @@ export function FlightPage({ search }: { search: FlightSearch }) {
         <FlightTabs current="search" />
         <span className="kicker">SÀIHÀNH · VÉ MÁY BAY NỘI ĐỊA</span>
         <h1>Chạm mây trời,<br /><em>mở lối hành trình.</em></h1>
-        <p>So sánh giá vé tham khảo từ các đối tác và gửi yêu cầu đặt chỗ trong vài bước.</p>
+        <p>So sánh giá vé hợp đồng với các đối tác và gửi yêu cầu đặt chỗ trong vài bước.</p>
       </div></section>
       <div className="container sf-body">
         <FlightSearchForm initial={search} />
@@ -29,7 +29,7 @@ export function FlightPage({ search }: { search: FlightSearch }) {
             </div>
             <div>
               <b>01 · Tìm chuyến</b><p>Chọn hành trình và ngày bay.</p>
-              <b>02 · So sánh &amp; chọn</b><p>Xem giờ bay, hãng và giá tham khảo.</p>
+              <b>02 · So sánh &amp; chọn</b><p>Xem giờ bay, hãng và giá hợp đồng.</p>
               <b>03 · Gửi yêu cầu</b><p>Nhập hành khách; SàiHành xác nhận với đối tác.</p>
             </div>
           </section>

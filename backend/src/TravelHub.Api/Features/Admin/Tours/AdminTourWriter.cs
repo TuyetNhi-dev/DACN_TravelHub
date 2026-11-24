@@ -10,13 +10,14 @@ namespace TravelHub.Api.Features.Admin.Tours;
 public sealed class AdminTourWriter(MySqlConnectionFactory connections)
 {
     private const string TourColumns = "code, title, destination_id, category_id, operating_branch_id, "
-        + "duration_days, duration_nights, base_price, description";
+        + "duration_days, duration_nights, base_price, description, cancellation_policy, travel_notes";
 
     public Task<ulong> InsertAsync(ValidTour tour, Func<ulong, AuditEntry> audit, CancellationToken ct) =>
         connections.InTransactionAsync(async tx =>
         {
             var id = await tx.InsertAsync($"INSERT INTO tours ({TourColumns}, status) VALUES (@code, @title, "
-                + "@destination, @category, @branch, @days, @nights, @price, @description, 'draft')", ct,
+                + "@destination, @category, @branch, @days, @nights, @price, @description, @cancellation, @notes, "
+                + "'draft')", ct,
                 Values(tour));
             await AuditLogWriter.WriteAsync(tx.Connection, tx.Inner, audit(id), ct);
             return id;
@@ -28,7 +29,8 @@ public sealed class AdminTourWriter(MySqlConnectionFactory connections)
             var rows = await tx.ExecuteAsync("""
                 UPDATE tours SET code = @code, title = @title, destination_id = @destination, category_id = @category,
                     operating_branch_id = @branch, duration_days = @days, duration_nights = @nights,
-                    base_price = @price, description = @description
+                    base_price = @price, description = @description, cancellation_policy = @cancellation,
+                    travel_notes = @notes
                 WHERE id = @id
                 """, ct, [.. Values(tour), ("@id", id)]);
             if (rows > 0) await AuditLogWriter.WriteAsync(tx.Connection, tx.Inner, audit, ct);
@@ -51,7 +53,7 @@ public sealed class AdminTourWriter(MySqlConnectionFactory connections)
             var id = await tx.InsertAsync($"""
                 INSERT INTO tours ({TourColumns}, status)
                 SELECT @code, CONCAT(title, ' (bản sao)'), destination_id, category_id, operating_branch_id,
-                    duration_days, duration_nights, base_price, description, 'draft'
+                    duration_days, duration_nights, base_price, description, cancellation_policy, travel_notes, 'draft'
                 FROM tours WHERE id = @source
                 """, ct, ("@code", code), ("@source", sourceId));
             foreach (var (table, columns) in CopiedChildren)
@@ -106,5 +108,6 @@ public sealed class AdminTourWriter(MySqlConnectionFactory connections)
         ("@code", tour.Code), ("@title", tour.Title), ("@destination", tour.DestinationId),
         ("@category", tour.CategoryId), ("@branch", tour.OperatingBranchId), ("@days", tour.DurationDays),
         ("@nights", tour.DurationNights), ("@price", tour.BasePrice), ("@description", tour.Description),
+        ("@cancellation", tour.CancellationPolicy), ("@notes", tour.TravelNotes),
     ];
 }

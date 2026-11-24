@@ -4,6 +4,9 @@ import Image from "next/image";
 import { useRef, useState } from "react";
 import type { MediaImage } from "@/lib/media";
 
+// The strip is shown only on phones (<=640px); wider screens would fetch the smallest variant for nothing.
+const SLIDE_SIZES = "(min-width: 641px) 1px, 100vw";
+
 interface GallerySwipeProps {
   images: MediaImage[];
   title: string;
@@ -31,7 +34,8 @@ export function GallerySwipe({ images, title, onOpen }: GallerySwipeProps) {
           <li key={image.src} className="ui-swipe-slide">
             <button type="button" onClick={() => onOpen(index)}
               aria-label={`Ảnh ${index + 1} trên ${images.length}: ${image.alt}. Mở toàn màn hình`}>
-              <Image src={image.src} alt="" fill sizes="100vw" />
+              <Image src={image.src} alt="" fill loading={index === 0 ? "eager" : "lazy"}
+                sizes={SLIDE_SIZES} />
             </button>
           </li>
         ))}

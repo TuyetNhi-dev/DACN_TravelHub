@@ -8,7 +8,7 @@ public sealed record StaffAssignmentDto(string Id, string Role, string Scope, st
     string? BranchId, string? BranchName);
 
 public sealed record StaffMemberDto(string UserId, string FullName, string Email,
-    IReadOnlyList<StaffAssignmentDto> Assignments);
+    IReadOnlyList<StaffAssignmentDto> Assignments, string AccountStatus = Auth.AccountStatus.Active);
 
 public sealed record AssignStaffRequest(string? Email, string? Role, string? Scope, string? RegionId,
     string? BranchId);
@@ -18,6 +18,12 @@ public sealed record ValidStaffAssignment(string Email, string Role, string Scop
 /// <summary>Who may be given which role and scope. Pure, unit-tested.</summary>
 public static class StaffRules
 {
+    /// <summary>An admin never removes their own role or locks their own account (no self-lockout).</summary>
+    public static void EnsureNotSelf(ulong actorId, ulong targetUserId, string message)
+    {
+        if (actorId == targetUserId) throw ApiException.Conflict(message);
+    }
+
     public static readonly IReadOnlySet<string> AssignableRoles =
         new HashSet<string> { RoleCodes.Staff, RoleCodes.BranchManager, RoleCodes.Admin };
 

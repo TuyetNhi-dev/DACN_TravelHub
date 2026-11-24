@@ -10,6 +10,12 @@ namespace TravelHub.Api.Features.Admin;
 
 public sealed record ConfirmBookingRequest(string? SupplierConfirmationCode);
 
+/// <param name="From">First Vietnamese day the order was placed on (inclusive).</param>
+/// <param name="To">Last Vietnamese day the order was placed on (inclusive).</param>
+/// <param name="Q">Exact booking code, or part of the customer's name, email or phone.</param>
+public sealed record AdminBookingQuery(string? Status, string? ServiceType, string? Scope, DateOnly? From = null,
+    DateOnly? To = null, string? BranchId = null, string? Q = null);
+
 /// <summary>
 /// Operator back-office for orders. Every operator handles the orders sold by a branch of their scope; orders
 /// without a branch (online hotels and flights) belong to the global scope only. Out-of-scope orders answer 404.
@@ -17,18 +23,41 @@ public sealed record ConfirmBookingRequest(string? SupplierConfirmationCode);
 public sealed class AdminBookingService(BookingRepository repository, AdminAccessService accessService,
     VietnamClock clock, ILogger<AdminBookingService> logger)
 {
-    public async Task<IReadOnlyList<BookingSummaryDto>> ListAsync(Account operatorAccount, string? itemStatus,
-        string? serviceType, string? scope, CancellationToken ct)
+    public const int MaxSearchLength = 100;
+
+    public async Task<IReadOnlyList<BookingSummaryDto>> ListAsync(Account operatorAccount, AdminBookingQuery query,
+        CancellationToken ct)
     {
-        var (_, selected) = await accessService.SelectAsync(operatorAccount, scope, ct);
+        var (_, selected) = await accessService.SelectAsync(operatorAccount, query.Scope, ct);
         var errors = new ValidationErrors();
-        errors.AddIf(itemStatus is not null && !BookingItemStatus.All.Contains(itemStatus), "status",
+        errors.AddIf(query.Status is not null && !BookingItemStatus.All.Contains(query.Status), "status",
             "Trạng thái lọc không hợp lệ.");
-        errors.AddIf(serviceType is not null && !ServiceType.All.Contains(serviceType), "serviceType",
+        errors.AddIf(query.ServiceType is not null && !ServiceType.All.Contains(query.ServiceType), "serviceType",
             "Loại dịch vụ không hợp lệ.");
+        errors.AddIf(query.From > query.To, "to", "Ngày kết thúc phải từ ngày bắt đầu trở đi.");
+        errors.AddIf(query.BranchId is not null && !ResourceId.TryParse(query.BranchId, out _), "branchId",
+            "Mã chi nhánh sai.");
+        errors.AddIf(query.Q?.Length > MaxSearchLength, "q", $"Từ khóa tối đa {MaxSearchLength} ký tự.");
         errors.ThrowIfAny();
-        return await repository.ListForStaffAsync(new StaffBookingFilter(itemStatus, serviceType, selected), ct);
+        var text = string.IsNullOrWhiteSpace(query.Q) ? null : query.Q.Trim();
+        return await repository.ListForStaffAsync(new StaffBookingFilter(query.Status, query.ServiceType, selected,
+            query.From is { } from ? VietnamClock.StartOfDayUtc(from) : null,
+            query.To is { } to ? VietnamClock.StartOfDayUtc(to.AddDays(1)) : null,
+            query.BranchId is null ? null : ResourceId.Parse(query.BranchId, "branchId"), text), ct);
     }
+
+    /// <summary>
+    /// Staff withdraw an order that is not paid yet (held seats go back exactly once). Paid orders need the refund
+    /// process, which this version does not run, so they are refused here.
+    /// </summary>
+    public Task<BookingDetailDto> CancelAsync(Account operatorAccount, string rawId, CancellationToken ct) =>
+        ChangeAsync(operatorAccount, rawId, AuditActions.BookingCancel, "Hủy đơn", async (session, item) =>
+        {
+            if (!BookingItemStatus.Open.Contains(item.Status))
+                throw ApiException.Conflict("Chỉ hủy được đơn chưa thanh toán. Đơn đã thanh toán cần xử lý hoàn tiền.");
+            await BookingLifecycle.CloseAsync(session, item, BookingItemStatus.Cancelled, ct);
+            return BookingItemStatus.Cancelled;
+        }, ct);
 
     public async Task<BookingDetailDto> GetAsync(Account operatorAccount, string rawId, CancellationToken ct)
     {

@@ -58,7 +58,7 @@ export function FlightBookingForm({ offer, passengers: count, submitLabel, onCre
         <h2>Tóm tắt</h2>
         <PriceSummary
           lines={[
-            { label: deal ? "Giá deal / khách" : "Giá tham khảo / khách", value: formatCurrency(offer.referencePrice) },
+            { label: deal ? "Giá deal / khách" : "Giá hợp đồng / khách", value: formatCurrency(offer.referencePrice) },
             { label: "Số hành khách", value: String(count) },
           ]}
           total={flightTotal(offer, count)}

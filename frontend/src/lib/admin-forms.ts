@@ -13,7 +13,7 @@ export type TourForm = Record<keyof SaveTourInput, string>;
 
 export const EMPTY_TOUR_FORM: TourForm = {
   code: "", title: "", destinationId: "", categoryId: "", operatingBranchId: "", durationDays: "3",
-  durationNights: "2", basePrice: "", description: "",
+  durationNights: "2", basePrice: "", description: "", cancellationPolicy: "", travelNotes: "",
 };
 
 export function tourFormFrom(tour: AdminTourDetail): TourForm {
@@ -21,7 +21,8 @@ export function tourFormFrom(tour: AdminTourDetail): TourForm {
     code: tour.code, title: tour.title, destinationId: tour.destinationId, categoryId: tour.categoryId ?? "",
     operatingBranchId: tour.branchId, durationDays: String(tour.durationDays),
     durationNights: String(tour.durationNights), basePrice: String(tour.basePrice),
-    description: tour.description ?? "",
+    description: tour.description ?? "", cancellationPolicy: tour.cancellationPolicy ?? "",
+    travelNotes: tour.travelNotes ?? "",
   };
 }
 
@@ -32,6 +33,7 @@ export function toSaveTourInput(form: TourForm): SaveTourInput {
     categoryId: form.categoryId || null, operatingBranchId: form.operatingBranchId,
     durationDays: toNumber(form.durationDays), durationNights: toNumber(form.durationNights),
     basePrice: toNumber(form.basePrice), description: form.description.trim() || null,
+    cancellationPolicy: form.cancellationPolicy.trim() || null, travelNotes: form.travelNotes.trim() || null,
   };
 }
 

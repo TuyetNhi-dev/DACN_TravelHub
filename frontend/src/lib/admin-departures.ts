@@ -1,7 +1,9 @@
 /** Pure rules of the admin departure screens. Limits mirror DepartureRules; the server checks them again. */
 import { toTerms, type TermsForm } from "@/lib/admin-forms";
 import { formatDate } from "@/lib/format";
-import type { AdminDeparture, AdminTourDetail, BulkResult, DepartureTerms, Manifest } from "@/types/admin";
+import type {
+  AdminDeparture, AdminTourDetail, BulkResult, DepartureStatus, DepartureTerms, Manifest,
+} from "@/types/admin";
 
 /** Mirrors AdminDepartureService.DefaultPageSize. */
 export const DEPARTURE_PAGE_SIZE = 30;
@@ -21,9 +23,22 @@ export const manifestHref = (departureId: string) =>
 const PASSENGER_TYPES: Record<string, string> = { adult: "Người lớn", child: "Trẻ em", infant: "Em bé" };
 export const passengerTypeLabel = (type: string) => PASSENGER_TYPES[type] ?? type;
 
+/** Tour orders are paid once confirmed (ManifestExcel uses the same words). */
+const PAID_STATUSES = new Set(["confirmed", "completed"]);
+const PAYMENT_LABELS: Record<string, string> = {
+  pending: "Chưa thanh toán (đang giữ chỗ)", awaiting_supplier: "Chờ đối tác", awaiting_payment: "Chờ thanh toán",
+  confirmed: "Đã thanh toán", completed: "Đã thanh toán",
+};
+export const paymentStatusLabel = (status: string) => PAYMENT_LABELS[status] ?? status;
+export const isPaid = (status: string) => PAID_STATUSES.has(status);
+
 export interface ManifestSummary {
   guests: number;
+  adults: number;
+  children: number;
   bookings: number;
+  /** Orders already paid (confirmed or completed) against those still holding seats unpaid. */
+  paidBookings: number;
   belowMinimum: boolean;
   /** Seats held without an order on this list (e.g. sold outside the system); shown so the counts add up. */
   heldOutsideList: number;
@@ -33,7 +48,10 @@ export function manifestSummary(manifest: Manifest): ManifestSummary {
   const { departure, bookings, totalGuests } = manifest;
   return {
     guests: totalGuests,
+    adults: bookings.reduce((sum, b) => sum + b.adults, 0),
+    children: bookings.reduce((sum, b) => sum + b.children, 0),
     bookings: bookings.length,
+    paidBookings: bookings.filter(b => PAID_STATUSES.has(b.status)).length,
     belowMinimum: departure.reservedSeats < departure.minGuests,
     heldOutsideList: Math.max(0, departure.reservedSeats - totalGuests),
   };
@@ -65,16 +83,92 @@ export function toUpdateTerms(form: TermsForm): Omit<DepartureTerms, "departureL
   };
 }
 
-export interface StatusToggle {
-  status: "open" | "closed";
+export interface StatusAction {
+  status: DepartureStatus;
   label: string;
+  /** Cancelling asks for a reason and shows how many orders it affects. */
+  needsReason: boolean;
 }
 
-/** Same rules as AdminDepartureService.SetStatusAsync: cancelled never reopens, a past departure never reopens. */
-export function statusToggleFor(departure: AdminDeparture, today: string): StatusToggle | null {
-  if (departure.status === "open") return { status: "closed", label: "Đóng bán" };
-  if (departure.status === "closed" && departure.departureDate > today) return { status: "open", label: "Mở bán" };
-  return null;
+/** DepartureStatus.Next on the server; completed and cancelled are final. */
+const NEXT: Record<DepartureStatus, DepartureStatus[]> = {
+  open: ["closed", "guaranteed", "cancelled"],
+  closed: ["open", "guaranteed", "cancelled"],
+  guaranteed: ["in_progress", "cancelled"],
+  in_progress: ["completed"],
+  completed: [],
+  cancelled: [],
+};
+
+const ACTION_LABELS: Record<DepartureStatus, string> = {
+  open: "Mở bán", closed: "Tạm đóng bán", guaranteed: "Chốt đoàn", in_progress: "Bắt đầu chuyến",
+  completed: "Hoàn thành", cancelled: "Hủy chuyến",
+};
+
+/** Same checks as DepartureRules.CheckTransition: dates decide whether a sale reopens or a trip starts/ends. */
+export function departureActions(departure: AdminDeparture, today: string): StatusAction[] {
+  return NEXT[departure.status].filter(next => {
+    if (next === "open") return departure.departureDate > today;
+    if (next === "in_progress") return departure.departureDate <= today;
+    if (next === "completed") return departure.returnDate <= today;
+    return true;
+  }).map(status => ({ status, label: ACTION_LABELS[status], needsReason: status === "cancelled" }));
+}
+
+export type StatusToggle = StatusAction;
+
+export const statusToggleFor = departureActions;
+
+/** Filters of /admin/departures as they appear in the URL. */
+export const DEPARTURE_FILTER_DEFAULTS = {
+  view: "calendar", month: "", tourId: "", branchId: "", status: "", from: "", to: "", page: 1,
+};
+
+/** Default surcharge suggested on public holidays; staff can change or remove it before saving. */
+export const HOLIDAY_SURCHARGE_PERCENT = 20;
+const PRICE_ROUNDING = 10_000;
+const MS_PER_DAY = 86_400_000;
+
+export interface BulkPreviewRow {
+  date: string;
+  /** Official holidays the trip touches (departure to return day). */
+  holidays: string[];
+  adultPrice: number;
+  childPrice: number | null;
+}
+
+/** Adds a percentage and rounds to the nearest 10.000 đ, as prices are shown to customers. */
+export function withSurcharge(price: number, percent: number): number {
+  return Math.round((price * (100 + percent)) / 100 / PRICE_ROUNDING) * PRICE_ROUNDING;
+}
+
+/**
+ * The dates a weekly rule will create, each with the price it will get: trips touching an official holiday get
+ * the surcharge (when percent > 0), the others keep the base price.
+ */
+export function bulkPreview(dates: string[], durationDays: number, terms: DepartureTerms, percent: number,
+  holidaysOf: (from: string, to: string) => string[]): BulkPreviewRow[] {
+  return dates.map(date => {
+    const holidays = holidaysOf(date, addDaysIso(date, Math.max(1, durationDays) - 1));
+    const surcharged = holidays.length > 0 && percent > 0;
+    return {
+      date, holidays,
+      adultPrice: surcharged ? withSurcharge(terms.adultPrice, percent) : terms.adultPrice,
+      childPrice: surcharged && terms.childPrice !== null ? withSurcharge(terms.childPrice, percent) : terms.childPrice,
+    };
+  });
+}
+
+/**
+ * Holiday dates are created one by one first, with their surcharged price; the weekly request that follows skips
+ * dates that already have a departure (server rule), so it only fills the ordinary dates at the base price.
+ */
+export function surchargedDates(rows: BulkPreviewRow[], terms: DepartureTerms): BulkPreviewRow[] {
+  return rows.filter(row => row.adultPrice !== terms.adultPrice || row.childPrice !== terms.childPrice);
+}
+
+function addDaysIso(date: string, days: number): string {
+  return new Date(Date.parse(date + "T00:00:00Z") + days * MS_PER_DAY).toISOString().slice(0, 10);
 }
 
 /** "Còn 5 / 30 chỗ" style line, flagged when the group is still below its minimum size. */

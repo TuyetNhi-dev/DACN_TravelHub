@@ -10,6 +10,21 @@ export const TOUR_NEW_HREF = "/admin/tours/new";
 
 export const pageCountOf = (total: number) => Math.max(1, Math.ceil(total / TOUR_PAGE_SIZE));
 
+/** Same keys as AdminTourSort on the server; it refuses anything else. */
+export const TOUR_SORTS = [
+  { value: "newest", label: "Mới tạo trước" },
+  { value: "code", label: "Mã tour A–Z" },
+  { value: "title", label: "Tên tour A–Z" },
+  { value: "price", label: "Giá thấp → cao" },
+  { value: "price_desc", label: "Giá cao → thấp" },
+  { value: "departures", label: "Nhiều lịch sắp tới" },
+] as const;
+
+/** Filters of /admin/tours as they appear in the URL (empty string = no filter). */
+export const TOUR_FILTER_DEFAULTS = {
+  query: "", status: "", regionId: "", branchId: "", categoryId: "", sort: "newest", page: 1,
+};
+
 export interface StatusAction {
   status: TourStatus;
   label: string;

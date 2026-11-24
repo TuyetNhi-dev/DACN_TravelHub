@@ -4,7 +4,8 @@ export type IconName =
   | "arrow" | "star" | "clock" | "shield" | "headphones" | "wallet" | "check"
   | "menu" | "close" | "minus" | "plus" | "chevron" | "heart" | "bus" | "eye" | "eyeOff"
   | "wifi" | "bed" | "bath" | "utensils" | "bell" | "waves" | "car" | "briefcase" | "accessibility" | "leaf"
-  | "passport" | "cart" | "code" | "mail";
+  | "passport" | "cart" | "code" | "mail" | "compass" | "alert" | "lock" | "book" | "quote" | "sun"
+  | "grid" | "logout" | "list" | "printer" | "download" | "panel" | "history" | "camera" | "scan" | "chat";
 
 export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   const paths: Record<IconName, ReactNode> = {
@@ -24,6 +25,15 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
     headphones: <><path d="M4 14v-2a8 8 0 0 1 16 0v2" /><path d="M18 19c0 1.1-.9 2-2 2h-1v-7h5v5ZM6 21H5c-1.1 0-2-.9-2-2v-5h5v7Z" /></>,
     wallet: <><path d="M3 6h15a2 2 0 0 1 2 2v11H5a2 2 0 0 1-2-2V6Z" /><path d="M3 7V5a2 2 0 0 1 2-2h12M15 12h7v4h-7a2 2 0 0 1 0-4Z" /></>,
     check: <path d="m5 12 4 4L19 6" />,
+    chat: <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12ZM8.5 12h.01M12 12h.01M15.5 12h.01" />,
+    camera: <>
+      <path d="M3 8a2 2 0 0 1 2-2h2.5L9 4h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+      <circle cx="12" cy="13" r="3.5" />
+    </>,
+    scan: <>
+      <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3" />
+      <path d="M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10" />
+    </>,
     code: <path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" />,
     mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>,
     cart: <><path d="M3 4h2.2l2.3 11h10.8l2-8H6.4" /><circle cx="9.5" cy="19" r="1.5" /><circle cx="17" cy="19" r="1.5" /></>,
@@ -45,7 +55,28 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
     accessibility: <><circle cx="12" cy="4.5" r="1.8" /><path d="m5 8.5 7 1.5 7-1.5M12 10v5l-3 6M12 15l3 6" /></>,
     leaf: <path d="M5 21c0-9 5-15 15-16-1 10-7 15-15 16Zm0 0 8-8" />,
     bus: <><rect x="4" y="3" width="16" height="16" rx="2" /><path d="M4 11h16M8 19v2M16 19v2M8 7h8" /></>,
-    passport: <><rect x="5" y="2" width="14" height="20" rx="2" /><circle cx="12" cy="10" r="3.5" /><path d="M8.5 10h7M12 6.5c-1.2 1-1.2 6 0 7M12 6.5c1.2 1 1.2 6 0 7M9 17h6" /></>,  };
+    passport: <><rect x="5" y="2" width="14" height="20" rx="2" /><circle cx="12" cy="10" r="3.5" /><path d="M8.5 10h7M12 6.5c-1.2 1-1.2 6 0 7M12 6.5c1.2 1 1.2 6 0 7M9 17h6" /></>,
+    compass: <><circle cx="12" cy="12" r="9" /><path d="m15.5 8.5-2 5-5 2 2-5Z" /></>,
+    alert: <>
+      <path d="M10.3 3.9 2.4 18a2 2 0 0 0 1.7 3h15.8a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z" />
+      <path d="M12 9v4M12 17h.01" />
+    </>,
+    lock: <><rect x="4" y="11" width="16" height="10" rx="2" /><path d="M8 11V7a4 4 0 0 1 8 0v4" /></>,
+    book: <><path d="M4 19.5V5a2 2 0 0 1 2-2h14v16H6.5A2.5 2.5 0 0 0 4 21.5Z" /><path d="M8 7h8M8 11h6" /></>,
+    quote: <path d="M7 7H4v6h3l-2 4M17 7h-3v6h3l-2 4" />,
+    sun: <>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+    </>,
+    grid: <><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></>,
+    logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5M21 12H9" /></>,
+    list: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
+    printer: <><path d="M6 9V2h12v7" /><rect x="3" y="9" width="18" height="8" rx="2" /><path d="M6 14h12v8H6Z" /></>,
+    download: <path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16" />,
+    panel: <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></>,
+    history: <><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5M12 7v5l3 2" /></>,
+  };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
 

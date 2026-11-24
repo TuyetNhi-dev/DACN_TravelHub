@@ -1,5 +1,5 @@
 -- migration_status.sql
--- READ-ONLY. Reports whether migrations 002–015 have been applied to the CURRENT database (USE <db> first).
+-- READ-ONLY. Reports whether migrations 002–017 have been applied to the CURRENT database (USE <db> first).
 -- Only SELECTs on information_schema: no table data is read, nothing is written.
 --
 -- Each migration is detected by the tables/columns/ENUM values it creates:
@@ -106,6 +106,20 @@ FROM (
         AND COLUMN_NAME IN ('operating_branch_id', 'min_guests'))
     + (SELECT COUNT(*) FROM information_schema.TABLES
       WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'audit_logs')
+
+  UNION ALL
+  SELECT '016_departure_lifecycle_and_booking_notes', 16, 4,
+    (SELECT COUNT(*) FROM information_schema.COLUMNS
+      WHERE TABLE_SCHEMA = DATABASE()
+        AND (TABLE_NAME, COLUMN_NAME) IN (('tour_departures', 'cancel_reason'),
+                                          ('tours', 'cancellation_policy'), ('tours', 'travel_notes')))
+    + (SELECT COUNT(*) FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'booking_notes')
+
+  UNION ALL
+  SELECT '017_tour_tickets_and_check_in', 17, 2,
+    (SELECT COUNT(*) FROM information_schema.TABLES
+      WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME IN ('tour_tickets', 'passenger_check_ins'))
 ) AS checks
 ORDER BY sort_order;
 

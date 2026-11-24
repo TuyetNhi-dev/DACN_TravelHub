@@ -7,7 +7,11 @@ class ApiError extends Error {}
 const decode = loadTs('src/lib/decode.ts', { '@/lib/api-client': { ApiError } });
 const service = get => loadTs('src/services/tours.ts', { '@/lib/api-client': { apiGet: get }, '@/lib/decode': decode });
 const format = loadTs('src/lib/format.ts');
-const display = loadTs('src/lib/tour-display.ts', { '@/lib/format': format, '@/lib/media': {} });
+const lunar = loadTs('src/lib/lunar-calendar.ts');
+const holidays = loadTs('src/lib/vn-holidays.ts', { '@/lib/lunar-calendar': lunar });
+const display = loadTs('src/lib/tour-display.ts', {
+  '@/lib/format': format, '@/lib/media': {}, '@/lib/vn-holidays': holidays,
+});
 
 const departure = {
   departureId: '11', tourId: '5', tourCode: 'T-005', tourTitle: 'Hạ Long 2N1Đ', destination: 'Hạ Long',

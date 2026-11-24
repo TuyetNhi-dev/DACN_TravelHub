@@ -1,4 +1,31 @@
 /** Mirrors TravelHub.Api.Features.Tours DTOs. Dates are Vietnamese calendar days "yyyy-mm-dd". */
+/** GET /api/tours/destinations: destinations with at least one published tour. */
+export interface TourDestination {
+  id: string;
+  name: string;
+  tourCount: number;
+}
+
+/** One day of the /tours date filter (GET /api/tours/departure-days). */
+export interface TourDayCount {
+  date: string;
+  tourCount: number;
+}
+
+/** One tour among the search box suggestions (GET /api/tours/suggest). */
+export interface TourSuggestion {
+  id: string;
+  code: string;
+  title: string;
+  destination: string;
+  basePrice: number;
+}
+
+export interface TourSuggestions {
+  destinations: TourDestination[];
+  tours: TourSuggestion[];
+}
+
 export interface TourSummary {
   id: string;
   code: string;

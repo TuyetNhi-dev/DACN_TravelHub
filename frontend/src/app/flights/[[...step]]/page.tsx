@@ -8,7 +8,7 @@ import "@/styles/flight-prices.css";
 
 export const metadata = {
   title: "Vé máy bay nội địa | SàiHành",
-  description: "So sánh giá vé tham khảo các chặng bay nội địa và gửi yêu cầu đặt vé cùng SàiHành.",
+  description: "So sánh giá vé hợp đồng các chặng bay nội địa và gửi yêu cầu đặt vé cùng SàiHành.",
 };
 
 const BOOKING_STEP = "booking";

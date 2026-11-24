@@ -1,4 +1,5 @@
 using TravelHub.Api.Common.Http;
+using TravelHub.Api.Features.Admin.Bookings;
 using TravelHub.Api.Features.Auth;
 using TravelHub.Api.Features.Bookings;
 
@@ -11,10 +12,10 @@ public static class AdminEndpoints
         var group = app.MapGroup("/api/admin/bookings").WithTags("Admin")
             .RequireAuthorization().AddEndpointFilter<AntiforgeryFilter>();
 
-        group.MapGet("/", async (string? status, string? serviceType, string? scope, HttpContext http,
+        group.MapGet("/", async ([AsParameters] AdminBookingQuery query, HttpContext http,
             AdminBookingService service, CancellationToken ct) =>
             Results.Ok(ListResponse<BookingSummaryDto>.From(
-                await service.ListAsync(http.GetRequiredAccount(), status, serviceType, scope, ct))));
+                await service.ListAsync(http.GetRequiredAccount(), query, ct))));
         group.MapGet("/{id}", async (string id, HttpContext http, AdminBookingService service,
             CancellationToken ct) => Item(await service.GetAsync(http.GetRequiredAccount(), id, ct)));
         group.MapPost("/{id}/confirm", async (string id, ConfirmBookingRequest request, HttpContext http,
@@ -24,6 +25,14 @@ public static class AdminEndpoints
             CancellationToken ct) => Item(await service.RejectAsync(http.GetRequiredAccount(), id, ct)));
         group.MapPost("/{id}/complete", async (string id, HttpContext http, AdminBookingService service,
             CancellationToken ct) => Item(await service.CompleteAsync(http.GetRequiredAccount(), id, ct)));
+        group.MapPost("/{id}/cancel", async (string id, HttpContext http, AdminBookingService service,
+            CancellationToken ct) => Item(await service.CancelAsync(http.GetRequiredAccount(), id, ct)));
+        group.MapGet("/{id}/activity", async (string id, HttpContext http, BookingActivityService service,
+            CancellationToken ct) => Results.Ok(new ItemResponse<BookingActivityDto>(
+                await service.GetAsync(http.GetRequiredAccount(), id, ct))));
+        group.MapPost("/{id}/notes", async (string id, BookingNoteRequest request, HttpContext http,
+            BookingActivityService service, CancellationToken ct) => Results.Ok(new ItemResponse<BookingActivityDto>(
+                await service.AddNoteAsync(http.GetRequiredAccount(), id, request, ct))));
     }
 
     private static IResult Item(BookingDetailDto booking) => Results.Ok(new ItemResponse<BookingDetailDto>(booking));

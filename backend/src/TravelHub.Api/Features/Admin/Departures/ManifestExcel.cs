@@ -9,20 +9,23 @@ public static class ManifestExcel
     public const string ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
     public const string SheetName = "Danh sách đoàn";
     public const int HeaderRow = 5;
+    /// <summary>Widest a column may grow after AdjustToContents, so long emails do not make the sheet unreadable.</summary>
+    public const double MaxColumnWidth = 40;
 
     public static readonly string[] Columns =
         ["STT", "Mã đơn", "Họ tên hành khách", "Loại khách", "Ngày sinh", "Người liên hệ", "Điện thoại", "Email",
-            "Trạng thái"];
+            "Trạng thái thanh toán"];
 
     private static readonly IReadOnlyDictionary<string, string> PassengerTypes = new Dictionary<string, string>
     {
         ["adult"] = "Người lớn", ["child"] = "Trẻ em", ["infant"] = "Em bé",
     };
 
+    // Tour orders are paid when confirmed; pending means seats are held but not paid yet.
     private static readonly IReadOnlyDictionary<string, string> Statuses = new Dictionary<string, string>
     {
-        ["pending"] = "Đang giữ chỗ", ["awaiting_supplier"] = "Chờ đối tác", ["awaiting_payment"] = "Chờ thanh toán",
-        ["confirmed"] = "Đã xác nhận", ["completed"] = "Hoàn tất",
+        ["pending"] = "Chưa thanh toán (đang giữ chỗ)", ["awaiting_supplier"] = "Chờ đối tác",
+        ["awaiting_payment"] = "Chờ thanh toán", ["confirmed"] = "Đã thanh toán", ["completed"] = "Đã thanh toán",
     };
 
     public static byte[] Build(ManifestDto manifest)
@@ -38,14 +41,16 @@ public static class ManifestExcel
         sheet.Row(HeaderRow).Style.Font.Bold = true;
         var row = HeaderRow;
         foreach (var line in Lines(manifest)) WriteRow(sheet, ++row, row - HeaderRow, line);
+        sheet.SheetView.FreezeRows(HeaderRow);
         sheet.Columns().AdjustToContents();
+        foreach (var column in sheet.ColumnsUsed().Where(c => c.Width > MaxColumnWidth)) column.Width = MaxColumnWidth;
         using var stream = new MemoryStream();
         workbook.SaveAs(stream);
         return stream.ToArray();
     }
 
     public static string FileName(AdminDepartureDto departure) =>
-        $"doan-{departure.TourCode}-{departure.DepartureDate:yyyy-MM-dd}.xlsx";
+        $"SH-{departure.TourCode}-{departure.DepartureDate:yyyy-MM-dd}.xlsx";
 
     /// <summary>One line per named passenger; an order without names still gets a line with its head count.</summary>
     private static IEnumerable<(ManifestBookingDto Booking, string Name, string Type, DateOnly? Birth)> Lines(

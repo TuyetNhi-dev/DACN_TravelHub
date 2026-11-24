@@ -45,7 +45,7 @@ test('prices are compact and the lowest ignores days without quotes', () => {
 
 test('the lowest-quote wording never claims the cheapest market fare', () => {
   assert.doesNotMatch(cal.LOWEST_QUOTE_NOTE, /rẻ nhất thị trường/i);
-  assert.match(cal.LOWEST_QUOTE_NOTE, /tham khảo/);
+  assert.match(cal.LOWEST_QUOTE_NOTE, /hợp đồng/);
 });
 
 test('flexible fares decode outbound days, return days and round-trip totals', async () => {

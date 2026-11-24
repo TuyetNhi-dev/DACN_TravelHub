@@ -70,9 +70,9 @@ export const FAQ_GROUPS: FaqGroup[] = [
         + "người lớn. Tổng tiền luôn do hệ thống tính lại khi tạo đơn.",
     ] },
     { id: "khach-san-ve", question: "Đặt khách sạn, vé máy bay có giữ chỗ ngay không?", answer: [
-      "Không. Giá khách sạn và vé máy bay là giá tham khảo của đối tác. Nhân viên xác nhận với đối tác "
-        + "trước, sau đó bạn "
-        + "mới thanh toán. Riêng vé deal có ghi \"Xác nhận ngay\" được giữ ghế 10 phút như tour.",
+      "Không. Giá khách sạn và vé máy bay là giá hợp đồng với đối tác, nhưng còn phòng, còn ghế hay không "
+        + "thì nhân viên phải xác nhận với đối tác trước, sau đó bạn mới thanh toán. "
+        + "Riêng vé deal có ghi \"Xác nhận ngay\" được giữ ghế 10 phút như tour.",
     ] },
   ] },
   { id: "thanh-toan", title: "Thanh toán", items: [

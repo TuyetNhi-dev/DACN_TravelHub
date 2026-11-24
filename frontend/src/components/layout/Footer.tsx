@@ -16,6 +16,7 @@ const LINK_COLUMNS = [
     { label: "Cẩm nang du lịch", href: "/cam-nang" },
     { label: "Trợ giúp", href: "/tro-giup" },
     { label: "Lịch âm dương", href: "/lich" },
+    { label: "Kỳ nghỉ lễ", href: "/ky-nghi" },
   ] },
   { title: "Điều kiện & điều khoản", links: [
     { label: "Chính sách riêng tư", href: "/privacy" },

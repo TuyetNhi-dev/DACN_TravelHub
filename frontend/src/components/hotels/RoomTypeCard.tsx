@@ -26,7 +26,7 @@ export function RoomTypeCard({ room, stay, onSelect }: RoomTypeCardProps) {
         )}
       </div>
       <div className="sh-hotel-room-price">
-        <small>Giá tham khảo / đêm</small>
+        <small>Giá hợp đồng / đêm</small>
         <strong>{formatCurrency(room.referencePricePerNight)}</strong>
         {estimate !== null && <p>{formatCurrency(estimate)} cho {nights} đêm × {stay.rooms} phòng</p>}
         {room.referencePricePerNight === null ? (

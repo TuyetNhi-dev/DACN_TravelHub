@@ -25,6 +25,20 @@ dotnet user-secrets set "<Khóa>" "<giá trị>"
 | `Email:*` | [email.md](email.md) |
 | `Google:ClientId` | [google-sign-in.md](google-sign-in.md) |
 | `Vnpay:*` | [vnpay.md](vnpay.md) |
+| `Ai:GeminiApiKey` | [ai-assistant.md](ai-assistant.md) |
+| `Ticket:SigningKey` | Khóa ký mã QR vé điện tử (HMAC-SHA256), tối thiểu 32 ký tự ngẫu nhiên, xem bên dưới |
+
+Tạo `Ticket:SigningKey` một lần cho mỗi môi trường (PowerShell) rồi đặt bằng user-secrets:
+
+```powershell
+$bytes = New-Object byte[] 48
+[Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($bytes)
+$key = [Convert]::ToBase64String($bytes)
+dotnet user-secrets set "Ticket:SigningKey" $key
+```
+
+Thiếu khóa thì backend vẫn chạy: trang vé của khách trả 503 và màn check-in tắt quét QR (vẫn check-in theo danh
+sách được). **Đổi khóa làm mọi mã QR đã phát mất hiệu lực**, khách chỉ cần mở lại trang vé để có mã mới.
 
 Khóa không bí mật, có giá trị mặc định (chỉ đặt khi cần đổi):
 

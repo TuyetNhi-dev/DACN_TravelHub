@@ -13,8 +13,8 @@ const WEEKDAY_NAMES = [
 export const FLEXIBLE_DAYS = 3;
 /** Matches FlightPriceCalendar.MaxMonthsAhead on the server. */
 export const MAX_MONTHS_AHEAD = 11;
-/** Mandatory wording: quotes are partner references, never "the cheapest on the market". */
-export const LOWEST_QUOTE_NOTE = "Giá tham khảo thấp nhất hiện có từ đối tác, chờ xác nhận.";
+/** Mandatory wording: the lowest contract price on file, never "the cheapest on the market". */
+export const LOWEST_QUOTE_NOTE = "Giá hợp đồng thấp nhất hiện có, chờ xác nhận chỗ.";
 
 function toUtc(iso: string): number {
   const [year, month, day] = iso.split("-").map(Number);

@@ -1,8 +1,11 @@
 # Đặc tả admin lõi (nhiều chi nhánh)
 
-Trạng thái: **chờ duyệt**. Khi được duyệt, tài liệu này thay thế phần phân quyền của
-[quyết định 002](decisions/002-three-roles.md) và câu "không thêm vai trò hay phạm vi chi nhánh/khu vực" trong
-`AGENTS.md` (sẽ cập nhật cả hai).
+Trạng thái: **đã duyệt** (24/11/2026, [quyết định 003](decisions/003-branch-scopes.md)). Thay phần phân quyền của
+[quyết định 002](decisions/002-three-roles.md); `AGENTS.md` đã cập nhật. Q1 chọn ClosedXML.
+
+Bổ sung khi duyệt (migration 016): vòng đời chuyến mở bán → chốt đoàn → đang đi → hoàn thành / hủy (hủy cần lý do),
+tab "Chính sách" của tour, ghi chú nội bộ và lịch sử trạng thái của đơn, nhân viên hủy đơn chưa thanh toán, khóa/mở
+tài khoản nhân viên, dashboard doanh thu 6 tháng và tỉ lệ lấp đầy 30 ngày.
 
 ## 1. Hiện trạng dùng lại được
 

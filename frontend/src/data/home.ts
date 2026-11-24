@@ -27,8 +27,8 @@ export const featuredDestinations = [
 export const promises: { icon: IconName; title: string; text: string }[] = [
   { icon: "ticket", title: "Giữ chỗ tour ngay khi đặt",
     text: "Số chỗ của lịch khởi hành được trừ ngay trong hệ thống, không bán quá sức chứa." },
-  { icon: "wallet", title: "Giá tham khảo ghi rõ",
-    text: "Khách sạn và vé máy bay là báo giá đối tác, luôn gắn nhãn chờ xác nhận." },
+  { icon: "wallet", title: "Giá hợp đồng ghi rõ",
+    text: "Khách sạn và vé máy bay dùng giá hợp đồng với đối tác, giữ nguyên trên đơn." },
   { icon: "shield", title: "Không thu tiền khi chưa xác nhận",
     text: "Đơn khách sạn, vé máy bay chỉ được xác nhận khi đối tác báo còn phòng hoặc còn chỗ." },
   { icon: "clock", title: "Theo dõi đơn trong tài khoản",

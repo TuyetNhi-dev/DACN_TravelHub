@@ -2,10 +2,8 @@
 .page-main { min-height:70vh; background:var(--surface); color:var(--ink); }
 .detail-breadcrumb { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:max(12px, var(--text-min)); margin-bottom:20px; }
 .detail-breadcrumb a { color:var(--blue); }
-.listing-layout { padding:72px 0 75px; display:grid; grid-template-columns:245px minmax(0,1fr); gap:28px; align-items:start; }
 .filters { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:20px; position:sticky; top:110px; }
 .filters > .tour-api-note { font-size:max(11px, var(--text-min)); margin-top:16px; }
-.listing-results { min-width:0; }
 .detail-page { padding:30px 0 75px; }
 .detail-title { display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:24px; }
 .detail-title > div:first-child { min-width:0; }
@@ -31,13 +29,11 @@
 .detail-booking > label { display:flex; flex-direction:column; gap:8px; font-size:max(12px, var(--text-min)); font-weight:600; }
 .detail-booking select { width:100%; min-width:0; border:1px solid var(--line); border-radius:8px; padding:10px; background:var(--panel); font-size:max(12px, var(--text-min)); }
 @media(max-width:1000px) {
- .listing-layout { grid-template-columns:210px minmax(0,1fr); gap:18px; }
  .detail-layout { grid-template-columns:minmax(0,1fr) 290px; gap:18px; }
  .overview-strip { grid-template-columns:1fr; }
  .overview-strip > span { border:0; }
 }
 @media(max-width:700px) {
- .listing-layout { padding-top:54px; grid-template-columns:minmax(0,1fr); }
  .filters { position:static; }
  .detail-layout { grid-template-columns:minmax(0,1fr); }
  .detail-booking { position:static; }

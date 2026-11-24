@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { useResource } from "@/hooks/useResource";
 import { ApiError } from "@/lib/api-client";
-import { safeReturnPath } from "@/lib/auth";
+import { postLoginPath } from "@/lib/auth";
 import { loadGoogleIdentity, readCredential, type GoogleButtonText } from "@/lib/google-identity";
 import { getGoogleClientId, signInWithGoogle } from "@/services/auth";
 
@@ -26,9 +26,9 @@ export function useGoogleSignIn(text: GoogleButtonText) {
     setBusy(true);
     setError("");
     try {
-      await signInWithGoogle(credential);
+      const session = await signInWithGoogle(credential);
       await refresh();
-      router.replace(safeReturnPath(new URLSearchParams(window.location.search).get("next")));
+      router.replace(postLoginPath(new URLSearchParams(window.location.search).get("next"), session.user));
     } catch (failure) {
       setError(failure instanceof ApiError ? failure.message : "Không thể đăng nhập bằng Google.");
       setBusy(false);

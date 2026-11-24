@@ -13,6 +13,11 @@
 .departure-table { width:100%; border-collapse:collapse; font-size:max(12px, var(--text-min)); text-align:left; }
 .departure-table caption { text-align:left; color:var(--muted); margin-bottom:10px; }
 .departure-table th,.departure-table td { padding:12px 8px; border-bottom:1px solid var(--line); }
+/* "Chọn" fills the booking panel; the chosen row stays marked so the table and the dropdown visibly agree. */
+.departure-table tr.is-selected td { background:var(--blue-soft); }
+.departure-holiday { display:block; margin-top:4px; font-size:max(12px, var(--text-min)); font-weight:600; color:var(--accent-warm); }
+.departure-pick { min-height:44px; padding:0 18px; white-space:nowrap; }
+@media (max-width:767px) { .departure-pick { width:100%; } }
 .detail-booking > p { font-size:max(12px, var(--text-min)); line-height:1.7; }
 .detail-content section > p { font-size:max(13px, var(--text-min)); }
 @media(max-width:600px) {

@@ -1,0 +1,171 @@
+/* Admin group check-in (/admin/departures/[id]/check-in). Colours come from the admin tokens (admin-shell.css).
+   Small text never sits in --blue or --green: both are under 4.5:1 on white there; they colour icons and fills. */
+
+/* ---------- Summary ---------- */
+.checkin-summary { gap: 18px; }
+.checkin-summary-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+  gap: 12px; }
+.checkin-summary-head h2 { margin: 2px 0 6px; font-size: var(--text-h3); line-height: var(--leading-snug); }
+.checkin-tour-code { margin: 0; color: var(--muted); font-size: var(--text-eyebrow); font-weight: var(--weight-bold);
+  letter-spacing: .08em; text-transform: uppercase; }
+.checkin-window { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill); background: var(--surface); color: var(--text-secondary);
+  font-size: var(--text-caption); font-weight: var(--weight-semibold); white-space: nowrap; }
+.checkin-window.is-open { border-color: color-mix(in srgb, var(--green) 45%, transparent);
+  background: var(--success-bg);
+  color: var(--ink); }
+.checkin-window.is-open svg { color: var(--green); }
+
+.checkin-progress { display: grid; gap: 8px; }
+.checkin-progress-label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+  color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.checkin-progress-label strong { color: var(--ink); font-size: 24px; }
+.checkin-progress-label > span:last-child { color: var(--ink); font-weight: var(--weight-bold); }
+.checkin-progress-track { height: 10px; overflow: hidden; border-radius: var(--radius-pill); background: var(--surface);
+  box-shadow: inset 0 0 0 1px var(--line); }
+/* Scaled, not resized: transform animates without layout work. */
+.checkin-progress-track span { display: block; height: 100%; border-radius: inherit; background: var(--green);
+  transform-origin: left center; transition: transform var(--duration-base) var(--ease-out); }
+.checkin-callout { margin: 0; padding: 10px 14px; border-left: 4px solid var(--sun); border-radius: var(--radius-sm);
+  background: var(--sun-soft); color: var(--sun-ink); font-size: var(--text-small);
+  font-weight: var(--weight-semibold); }
+
+/* ---------- Layout ---------- */
+.checkin-layout { display: grid; grid-template-columns: minmax(280px, 360px) minmax(0, 1fr); gap: 16px;
+  align-items: start; margin-top: 16px; }
+.checkin-tools { display: grid; gap: 16px; position: sticky; top: 16px; }
+.checkin-main { display: grid; gap: 16px; min-width: 0; }
+
+/* ---------- Scanner ---------- */
+.checkin-scanner h2 { display: inline-flex; align-items: center; gap: 8px; margin: 0; font-size: var(--text-h4); }
+.checkin-scanner h2 svg { color: var(--blue); }
+.checkin-viewfinder { position: relative; overflow: hidden; aspect-ratio: 4 / 3;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: var(--radius-md); background: var(--surface); }
+.checkin-viewfinder video { display: none; width: 100%; height: 100%; object-fit: cover; }
+.checkin-viewfinder.is-live { border-style: solid; border-color: var(--ink); background: var(--ink); }
+.checkin-viewfinder.is-live video { display: block; }
+.checkin-start { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 10px;
+  border: 0; background: transparent; color: var(--ink); font: inherit; font-weight: var(--weight-semibold);
+  cursor: pointer; transition: background var(--duration-fast); }
+.checkin-start svg { box-sizing: content-box; padding: 14px; border-radius: 50%; background: var(--blue-soft);
+  color: var(--blue); }
+.checkin-start:hover:not(:disabled) { background: var(--blue-soft); }
+.checkin-start:focus-visible { outline: var(--focus-ring); outline-offset: -4px; }
+.checkin-start:disabled { color: var(--muted); cursor: not-allowed; }
+.checkin-start:disabled svg { background: var(--line-subtle); color: var(--muted); }
+/* Corner brackets of the aiming frame, plus a slow sweep while the camera is reading. */
+.checkin-reticle { position: absolute; inset: 16% 22%; pointer-events: none; --c: var(--on-brand);
+  --bar: linear-gradient(var(--c), var(--c));
+  background: var(--bar) top left / 28px 3px, var(--bar) top left / 3px 28px,
+    var(--bar) top right / 28px 3px, var(--bar) top right / 3px 28px,
+    var(--bar) bottom left / 28px 3px, var(--bar) bottom left / 3px 28px,
+    var(--bar) bottom right / 28px 3px, var(--bar) bottom right / 3px 28px;
+  background-repeat: no-repeat; }
+/* The sweep layer is as tall as the frame, so translateY(100%) travels exactly the frame's height. */
+.checkin-reticle::after { content: ""; position: absolute; inset: 0 6px;
+  background: linear-gradient(var(--adm-teal), var(--adm-teal)) top / 100% 2px no-repeat;
+  animation: checkin-sweep 2.2s ease-in-out infinite alternate; }
+@keyframes checkin-sweep { from { transform: translateY(0); } to { transform: translateY(calc(100% - 2px)); } }
+.checkin-scanner .adm-note { min-height: 2.6em; }
+.checkin-scan-problem { color: var(--ink); font-weight: var(--weight-semibold); }
+
+/* ---------- Feedback ---------- */
+.checkin-feedback { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid;
+  border-radius: var(--radius-sm); color: var(--ink); }
+.checkin-feedback p { margin: 0; font-weight: var(--weight-semibold); }
+.checkin-feedback svg { flex-shrink: 0; margin-top: 1px; }
+.checkin-feedback .btn { margin-top: 6px; }
+.checkin-feedback.is-success { border-color: color-mix(in srgb, var(--green) 40%, transparent);
+  background: var(--success-bg); }
+.checkin-feedback.is-success svg { color: var(--green); }
+.checkin-feedback.is-error { border-color: color-mix(in srgb, var(--blue-dark) 35%, transparent);
+  background: var(--danger-bg); }
+.checkin-feedback.is-error svg { color: var(--blue-dark); }
+
+/* ---------- Search and filter ---------- */
+.checkin-search { gap: 12px; }
+.checkin-search label { font-weight: var(--weight-semibold); }
+.checkin-search-row { display: flex; gap: 8px; }
+.checkin-search-field { position: relative; flex: 1; display: flex; }
+.checkin-search-field svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--muted);
+  pointer-events: none; }
+.checkin-search-field input { flex: 1; min-width: 0; min-height: var(--tap-min); padding: 0 14px 0 42px;
+  border: 1px solid var(--line-strong); border-radius: var(--radius-sm); background: var(--panel); color: var(--ink);
+  font: inherit; }
+.checkin-search-field input:focus-visible { outline: var(--focus-ring); outline-offset: 1px; border-color: var(--blue);
+  }
+.checkin-search-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.checkin-filter { display: inline-flex; gap: 2px; padding: 3px; border: 1px solid var(--line-strong);
+  border-radius: var(--radius-pill); background: var(--surface); }
+.checkin-filter button { min-height: 40px; padding: 0 16px; border: 0; border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary); font: inherit; font-size: var(--text-small); font-weight: var(--weight-semibold);
+  cursor: pointer;
+  transition: background var(--duration-fast), color var(--duration-fast); }
+.checkin-filter button:hover { color: var(--ink); }
+.checkin-filter button[aria-pressed="true"] { background: var(--ink); color: var(--panel); }
+.checkin-filter button:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+.checkin-count-note { color: var(--muted); font-size: var(--text-small); font-variant-numeric: tabular-nums; }
+
+/* ---------- Orders ---------- */
+.checkin-list { display: grid; gap: 14px; }
+.checkin-scanned { display: grid; gap: 8px; }
+.checkin-scanned-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.checkin-scanned-head span { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+  border-radius: var(--radius-pill); background: var(--blue-soft); color: var(--ink); font-size: var(--text-caption);
+  font-weight: var(--weight-bold); }
+.checkin-scanned-head svg { color: var(--blue); }
+.checkin-booking { display: grid; gap: 12px; padding: 16px 18px; background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md); box-shadow: var(--shadow-sm); }
+.checkin-booking.is-scanned { border-color: var(--blue);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--blue) 22%, transparent), var(--shadow-sm); }
+.checkin-booking-head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+  gap: 8px 12px; }
+.checkin-booking-head h3 { margin: 0; font-size: var(--text-h4); letter-spacing: .02em;
+  font-variant-numeric: tabular-nums; }
+.checkin-booking-head h3 a { color: var(--ink); text-decoration: none; }
+.checkin-booking-head h3 a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.checkin-contact { margin: 4px 0 0; color: var(--text-secondary); font-size: var(--text-small); }
+.checkin-contact a { color: var(--ink); font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; }
+.checkin-count { display: inline-flex; align-items: center; gap: 5px; padding: 4px 12px; border: 1px solid var(--line);
+  border-radius: var(--radius-pill); background: var(--surface); color: var(--text-secondary);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.checkin-count.is-done { border-color: color-mix(in srgb, var(--green) 40%, transparent); background: var(--success-bg);
+  color: var(--ink); }
+.checkin-count.is-done svg { color: var(--green); }
+
+.checkin-passengers { display: grid; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.checkin-passengers li { display: flex; align-items: center; gap: 12px; min-height: 52px; padding: 4px 12px;
+  border: 1px solid transparent; border-radius: var(--radius-sm); background: var(--surface);
+  transition: background var(--duration-fast), border-color var(--duration-fast); }
+.checkin-passengers li.is-picked { border-color: var(--blue); background: var(--blue-soft); }
+.checkin-passengers li.is-boarded { border: 1px dashed var(--line-strong); background: transparent; }
+.checkin-pick { flex: 1; display: flex; align-items: center; gap: 12px; min-height: var(--tap-min); cursor: pointer; }
+.checkin-pick input { width: 20px; height: 20px; flex-shrink: 0; accent-color: var(--blue); cursor: pointer; }
+.checkin-pick input:disabled { cursor: not-allowed; }
+.checkin-pick input:focus-visible { outline: var(--focus-ring); outline-offset: 2px; }
+.checkin-name { min-width: 0; display: grid; gap: 1px; font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
+.checkin-name small { color: var(--muted); font-size: var(--text-caption); font-weight: var(--weight-regular); }
+.checkin-boarded-mark { width: 24px; height: 24px; flex-shrink: 0; display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--success-bg); color: var(--green); }
+.checkin-passengers li .btn { margin-left: auto; flex-shrink: 0; }
+.checkin-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+@media (max-width: 900px) {
+  .checkin-layout { grid-template-columns: minmax(0, 1fr); }
+  .checkin-tools { position: static; }
+}
+@media (max-width: 640px) {
+  .checkin-actions .btn { flex: 1 1 100%; }
+  .checkin-filter { width: 100%; }
+  .checkin-filter button { flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .checkin-reticle::after { animation: none; }
+  .checkin-progress-track span, .checkin-start, .checkin-filter button, .checkin-passengers li { transition: none; }
+}

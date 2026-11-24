@@ -1,9 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { Breadcrumb } from "@/components/ui/Breadcrumb";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useResource } from "@/hooks/useResource";
 import { DEPARTURES_HREF, manifestSummary } from "@/lib/admin-departures";
+import { checkInHref } from "@/lib/check-in";
 import { formatDate } from "@/lib/format";
 import { getManifest, manifestExcelHref } from "@/services/admin-catalog";
 import type { Manifest } from "@/types/admin";
@@ -35,7 +37,10 @@ function ManifestView({ manifest }: { manifest: Manifest }) {
       <section className="adm-panel" aria-labelledby="manifest-departure">
         <div className="adm-panel-head">
           <h2 id="manifest-departure">{departure.tourCode} · {departure.tourTitle}</h2>
-          <a className="btn btn-outline btn-small" href={manifestExcelHref(departure.id)} download>Tải file Excel</a>
+          <span className="adm-actions">
+            <Link className="btn btn-primary btn-small" href={checkInHref(departure.id)}>Check-in đoàn</Link>
+            <a className="btn btn-outline btn-small" href={manifestExcelHref(departure.id)} download>Tải file Excel</a>
+          </span>
         </div>
         <p className="adm-note">
           Khởi hành {formatDate(departure.departureDate)} từ {departure.departureFrom},

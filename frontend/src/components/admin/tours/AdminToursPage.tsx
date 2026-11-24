@@ -7,15 +7,17 @@ import { Pagination } from "@/components/ui/Pagination";
 import { EmptyState, ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useResource } from "@/hooks/useResource";
 import { TOUR_STATUS } from "@/lib/admin-labels";
-import { pageCountOf, TOUR_NEW_HREF, tourEditHref } from "@/lib/admin-tours";
+import { pageCountOf, TOUR_NEW_HREF, TOUR_SORTS, tourEditHref } from "@/lib/admin-tours";
 import { formatCurrency } from "@/lib/format";
 import { tourDuration } from "@/lib/tour-display";
-import { getAdminTours, type TourFilter } from "@/services/admin-catalog";
-import type { AdminTourSummary, TourStatus } from "@/types/admin";
+import { getAdminLookups, getAdminTours, type TourFilter } from "@/services/admin-catalog";
+import type { AdminLookups, AdminTourSummary, TourStatus } from "@/types/admin";
 import { useAdmin } from "../shell/AdminProvider";
 import { TourStatusBadge } from "./TourStatusBadge";
 
-const FIRST_PAGE: TourFilter = { status: "", query: "", page: 1 };
+const FIRST_PAGE: TourFilter = {
+  status: "", query: "", page: 1, regionId: "", branchId: "", categoryId: "", sort: "",
+};
 const STATUS_FILTERS = Object.entries(TOUR_STATUS) as [TourStatus, { label: string }][];
 
 export function AdminToursPage() {
@@ -38,6 +40,7 @@ export function AdminToursPage() {
 function TourQueue() {
   const { scope } = useAdmin();
   const [filter, setFilter] = useState<TourFilter>(FIRST_PAGE);
+  const lookups = useResource("admin:lookups", getAdminLookups);
   const { state, retry } = useResource(`admin-tours:${scope}:${JSON.stringify(filter)}`,
     signal => getAdminTours(filter, scope, signal));
 
@@ -46,23 +49,10 @@ function TourQueue() {
     setFilter({ ...filter, query: String(new FormData(event.currentTarget).get("q") ?? ""), page: 1 });
   }
 
-  return (
-    <>
-      <form className="sh-toolbar" role="search" aria-label="Lọc tour" onSubmit={search}>
-        <label className="sh-field">
-          Mã hoặc tên tour
-          <input name="q" type="search" defaultValue={filter.query} maxLength={100} />
-        </label>
-        <label className="sh-field">
-          Trạng thái
-          <select value={filter.status}
-            onChange={event => setFilter({ ...filter, status: event.target.value as TourStatus | "", page: 1 })}>
-            <option value="">Tất cả</option>
-            {STATUS_FILTERS.map(([value, meta]) => <option key={value} value={value}>{meta.label}</option>)}
-          </select>
-        </label>
-        <button className="btn btn-outline" type="submit">Tìm</button>
-      </form>
+  const change = (patch: Partial<TourFilter>) => setFilter(current => ({ ...current, ...patch, page: 1 }));
+  return <>
+      <TourFilters filter={filter} lookups={lookups.state.status === "ready" ? lookups.state.data : null}
+        onChange={change} onSearch={search} />
       {state.status === "loading" && <LoadingState label="Đang tải tour…" />}
       {state.status === "error" && <ErrorState error={state.error} onRetry={retry} />}
       {state.status === "ready" && state.data.items.length === 0 && <EmptyState title="Không có tour phù hợp" />}
@@ -73,8 +63,52 @@ function TourQueue() {
             onChange={page => setFilter({ ...filter, page })} />
         </>
       )}
-    </>
-  );
+    </>;
+}
+
+function TourFilters({ filter, lookups, onChange, onSearch }: {
+  filter: TourFilter; lookups: AdminLookups | null; onChange: (patch: Partial<TourFilter>) => void;
+  onSearch: (event: FormEvent<HTMLFormElement>) => void;
+}) {
+  return <form className="sh-toolbar" role="search" aria-label="Lọc tour" onSubmit={onSearch}>
+    <label className="sh-field">Mã hoặc tên tour
+      <input name="q" type="search" defaultValue={filter.query} maxLength={100} />
+    </label>
+    {lookups && <TourLookupFilters filter={filter} lookups={lookups} onChange={onChange} />}
+    <label className="sh-field">Sắp xếp<select value={filter.sort}
+      onChange={event => onChange({ sort: event.target.value })}>
+      {TOUR_SORTS.map(sort => <option key={sort.value} value={sort.value}>{sort.label}</option>)}
+    </select></label>
+    <label className="sh-field">Trạng thái<select value={filter.status}
+      onChange={event => onChange({ status: event.target.value as TourStatus | "" })}>
+      <option value="">Tất cả</option>{STATUS_FILTERS.map(([value, meta]) =>
+        <option key={value} value={value}>{meta.label}</option>)}
+    </select></label>
+    <button className="btn btn-outline" type="submit">Tìm</button>
+  </form>;
+}
+
+function TourLookupFilters({ filter, lookups, onChange }: {
+  filter: TourFilter; lookups: AdminLookups; onChange: (patch: Partial<TourFilter>) => void;
+}) {
+  return <>
+    <label className="sh-field">Khu vực<select value={filter.regionId}
+      onChange={event => onChange({ regionId: event.target.value, branchId: "" })}>
+      <option value="">Tất cả khu vực</option>{lookups.regions.map(region =>
+        <option key={region.id} value={region.id}>{region.name}</option>)}
+    </select></label>
+    <label className="sh-field">Chi nhánh<select value={filter.branchId}
+      onChange={event => onChange({ branchId: event.target.value })}>
+      <option value="">Tất cả chi nhánh</option>{lookups.branches
+        .filter(branch => !filter.regionId || branch.regionId === filter.regionId)
+        .map(branch => <option key={branch.id} value={branch.id}>{branch.name}</option>)}
+    </select></label>
+    <label className="sh-field">Danh mục<select value={filter.categoryId}
+      onChange={event => onChange({ categoryId: event.target.value })}>
+      <option value="">Tất cả danh mục</option>{lookups.categories.map(category =>
+        <option key={category.id} value={category.id}>{category.name}</option>)}
+    </select></label>
+  </>;
 }
 
 // Header cells and the phone card labels (td[data-label]) share these names.

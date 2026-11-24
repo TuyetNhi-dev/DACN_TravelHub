@@ -8,7 +8,7 @@ export function Logo({ footer = false }: { footer?: boolean }) {
     <Link href="/" className={footer ? "logo brand-logo footer-logo" : "logo brand-logo"}
       aria-label="SàiHành — về trang chủ">
       <Image src={horizontalLogo} alt="SàiHành — Đi để cảm nhiều hơn" className="brand-logo-image"
-        priority={!footer} sizes={footer ? "180px" : "(max-width: 600px) 136px, 190px"} />
+        loading={footer ? "lazy" : "eager"} sizes={footer ? "180px" : "(max-width: 600px) 136px, 190px"} />
     </Link>
   );
 }

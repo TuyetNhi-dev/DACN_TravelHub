@@ -68,6 +68,33 @@ public sealed class TourRepository(MySqlConnectionFactory connections)
         return Convert.ToInt32(await command.ExecuteScalarAsync(ct));
     }
 
+    /// <summary>
+    /// Per day of [from, until): how many tours have a bookable departure that day and match the other filters. The
+    /// departure conditions are those of the list's date filter (TourSearchSql), so the number on a day is exactly
+    /// the total the list shows once that day is chosen.
+    /// </summary>
+    public async Task<IReadOnlyList<TourDayCountDto>> CountByDepartureDayAsync(DateOnly today, TourSearch search,
+        DateOnly from, DateOnly until, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand { Connection = connection };
+        var sql = new StringBuilder("""
+            SELECT d.departure_date, COUNT(DISTINCT t.id) AS tour_count
+            FROM tours t JOIN locations destination ON destination.id = t.destination_id
+            JOIN tour_departures d ON d.tour_id = t.id
+            WHERE t.status = 'published' AND d.status = 'open' AND d.departure_date > @today
+              AND d.reserved_seats < d.capacity AND d.departure_date >= @from AND d.departure_date < @until
+            """);
+        TourSearchSql.AppendFilters(sql, command, search);
+        sql.Append(" GROUP BY d.departure_date ORDER BY d.departure_date");
+        command.Parameters.AddWithValue("@today", today);
+        command.Parameters.AddWithValue("@from", from);
+        command.Parameters.AddWithValue("@until", until);
+        command.CommandText = sql.ToString();
+        return await command.ReadAllAsync(reader => new TourDayCountDto(reader.GetDateOnly("departure_date"),
+            reader.GetInt32("tour_count")), ct);
+    }
+
     /// <summary>Destinations with at least one published tour, for the destination filter of /tours.</summary>
     public async Task<IReadOnlyList<TourDestinationDto>> ListDestinationsAsync(CancellationToken ct)
     {
@@ -81,6 +108,61 @@ public sealed class TourRepository(MySqlConnectionFactory connections)
             """, connection);
         return await command.ReadAllAsync(reader => new TourDestinationDto(
             reader.GetId("id"), reader.GetString("name"), reader.GetInt32("tour_count")), ct);
+    }
+
+    /// <summary>Destinations with a published tour whose name contains the text (accent-free, đ = d).</summary>
+    public async Task<IReadOnlyList<TourDestinationDto>> SuggestDestinationsAsync(string text, int limit,
+        CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand("""
+            SELECT l.id, l.name, COUNT(*) AS tour_count
+            FROM tours t JOIN locations l ON l.id = t.destination_id
+            WHERE t.status = 'published'
+              AND REPLACE(LOWER(l.name), 'đ', 'd') COLLATE utf8mb4_0900_ai_ci LIKE @text
+            GROUP BY l.id, l.name
+            ORDER BY REPLACE(LOWER(l.name), 'đ', 'd') COLLATE utf8mb4_0900_ai_ci LIKE @prefix DESC, l.name
+            LIMIT @limit
+            """, connection);
+        command.Parameters.AddWithValue("@text", SqlText.Contains(text));
+        command.Parameters.AddWithValue("@prefix", SqlText.StartsWith(text));
+        command.Parameters.AddWithValue("@limit", limit);
+        return await command.ReadAllAsync(reader => new TourDestinationDto(
+            reader.GetId("id"), reader.GetString("name"), reader.GetInt32("tour_count")), ct);
+    }
+
+    /// <summary>
+    /// Published tours matching the text like the list search (title, code, destination); titles that start with
+    /// the text come first, so "ha" offers "Hà Giang…" before "Vịnh Hạ Long".
+    /// </summary>
+    public async Task<IReadOnlyList<TourSuggestionDto>> SuggestToursAsync(string text, int limit,
+        CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand($"""
+            SELECT t.id, t.code, t.title, destination.name AS destination, t.base_price
+            FROM tours t JOIN locations destination ON destination.id = t.destination_id
+            WHERE t.status = 'published' AND {TourSearchSql.TextMatch}
+            ORDER BY REPLACE(LOWER(t.title), 'đ', 'd') COLLATE utf8mb4_0900_ai_ci LIKE @prefix DESC, t.id
+            LIMIT @limit
+            """, connection);
+        command.Parameters.AddWithValue("@text", SqlText.Contains(text));
+        command.Parameters.AddWithValue("@prefix", SqlText.StartsWith(text));
+        command.Parameters.AddWithValue("@limit", limit);
+        return await command.ReadAllAsync(reader => new TourSuggestionDto(reader.GetId("id"),
+            reader.GetString("code"), reader.GetString("title"), reader.GetString("destination"),
+            reader.GetDecimal("base_price")), ct);
+    }
+
+    /// <summary>Every location some departure leaves from (a few dozen rows), for the "Khởi hành từ" filter.</summary>
+    public async Task<IReadOnlyList<(ulong Id, string Name)>> ListDepartureLocationsAsync(CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand("""
+            SELECT DISTINCT l.id, l.name
+            FROM tour_departures d JOIN locations l ON l.id = d.departure_location_id
+            """, connection);
+        return await command.ReadAllAsync(reader => (reader.GetUInt64("id"), reader.GetString("name")), ct);
     }
 
     /// <summary>Published tours of one collection, in the collection's own order.</summary>

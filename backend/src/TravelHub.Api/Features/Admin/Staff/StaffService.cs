@@ -47,12 +47,36 @@ public sealed class StaffService(AdminAccessService accessService, StaffReposito
         var row = await repository.FindAsync(ResourceId.Parse(rawId, "id"), ct);
         if (row is null || !row.IsActive || !StaffRules.AssignableRoles.Contains(row.Role))
             throw ApiException.NotFound("Không tìm thấy phân quyền.");
+        StaffRules.EnsureNotSelf(access.UserId, row.UserId, "Không thể tự gỡ quyền của chính mình.");
         var audit = await accessService.AuditAsync(access, AuditActions.StaffRevoke, AuditEntities.StaffAssignment,
             ResourceId.Format(row.Id), row.BranchId, $"Gỡ vai trò {row.Role} ({row.Scope}) của {row.Email}", null, ct);
         var result = await repository.RevokeAsync(row, audit, ct);
         if (result == RevokeResult.LastAdmin)
             throw ApiException.Conflict("Không thể gỡ quản trị viên toàn quốc cuối cùng.");
         if (result == RevokeResult.NotFound) throw ApiException.NotFound("Không tìm thấy phân quyền.");
+        return await repository.ListAsync(ct);
+    }
+
+    /// <summary>Locks or unlocks the sign-in of an account that holds a back-office role.</summary>
+    public async Task<IReadOnlyList<StaffMemberDto>> SetLockedAsync(Account account, string rawUserId, bool locked,
+        CancellationToken ct)
+    {
+        var access = await accessService.RequireAdminAsync(account, ct);
+        var userId = ResourceId.Parse(rawUserId, "userId");
+        StaffRules.EnsureNotSelf(access.UserId, userId, "Không thể tự khóa tài khoản của chính mình.");
+        var user = await repository.FindUserAsync(userId, ct)
+            ?? throw ApiException.NotFound("Không tìm thấy tài khoản.");
+        var (from, to) = locked
+            ? (AccountStatus.Active, AccountStatus.Disabled)
+            : (AccountStatus.Disabled, AccountStatus.Active);
+        var audit = await accessService.AuditAsync(access, locked ? AuditActions.UserLock : AuditActions.UserUnlock,
+            AuditEntities.User, ResourceId.Format(userId), null,
+            $"{(locked ? "Khóa" : "Mở khóa")} tài khoản {user.Email}", [new AuditChange("status", from, to)], ct);
+        var result = await repository.SetAccountStatusAsync(userId, locked, audit, ct);
+        if (result == LockResult.LastAdmin)
+            throw ApiException.Conflict("Không thể khóa quản trị viên toàn quốc cuối cùng còn đăng nhập được.");
+        if (result == LockResult.NotFound)
+            throw ApiException.Conflict(locked ? "Tài khoản không ở trạng thái hoạt động." : "Tài khoản không bị khóa.");
         return await repository.ListAsync(ct);
     }
 
