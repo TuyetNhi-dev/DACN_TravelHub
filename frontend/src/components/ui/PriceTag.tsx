@@ -1,6 +1,6 @@
 import { formatCurrency } from "@/lib/format";
 
-export const QUOTE_LABEL = "Giá tham khảo, chờ xác nhận";
+export const QUOTE_LABEL = "Giá hợp đồng, chờ xác nhận chỗ";
 
 interface PriceTagProps {
   amount: number | null;

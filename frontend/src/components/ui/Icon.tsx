@@ -4,7 +4,8 @@ export type IconName =
   | "arrow" | "star" | "clock" | "shield" | "headphones" | "wallet" | "check"
   | "menu" | "close" | "minus" | "plus" | "chevron" | "heart" | "bus" | "eye" | "eyeOff"
   | "wifi" | "bed" | "bath" | "utensils" | "bell" | "waves" | "car" | "briefcase" | "accessibility" | "leaf"
-  | "passport" | "cart" | "code" | "mail" | "compass" | "alert" | "lock" | "book" | "quote" | "sun";
+  | "passport" | "cart" | "code" | "mail" | "compass" | "alert" | "lock" | "book" | "quote" | "sun"
+  | "grid" | "logout" | "list" | "printer" | "download" | "panel" | "history";
 
 export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   const paths: Record<IconName, ReactNode> = {
@@ -58,6 +59,14 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
       <circle cx="12" cy="12" r="4" />
       <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
     </>,
+    grid: <><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" />
+      <rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></>,
+    logout: <><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><path d="m16 17 5-5-5-5M21 12H9" /></>,
+    list: <path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" />,
+    printer: <><path d="M6 9V2h12v7" /><rect x="3" y="9" width="18" height="8" rx="2" /><path d="M6 14h12v8H6Z" /></>,
+    download: <path d="M12 3v12m0 0-5-5m5 5 5-5M4 21h16" />,
+    panel: <><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M9 3v18" /></>,
+    history: <><path d="M3 12a9 9 0 1 0 3-6.7L3 8" /><path d="M3 3v5h5M12 7v5l3 2" /></>,
   };
   return <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }

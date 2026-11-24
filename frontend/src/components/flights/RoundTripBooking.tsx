@@ -87,7 +87,7 @@ function ReturnLegStep({ outboundBooking, inbound, passengers }: ReturnLegStepPr
       <aside className="sh-panel sh-sticky" aria-label="Tóm tắt chiều về">
         <h2>Chiều về</h2>
         <PriceSummary total={flightTotal(inbound, passengers.length)} lines={[{
-          label: isDeal(inbound) ? "Giá deal / khách" : "Giá tham khảo / khách",
+          label: isDeal(inbound) ? "Giá deal / khách" : "Giá hợp đồng / khách",
           value: formatCurrency(inbound.referencePrice),
         }]} />
         {isDeal(inbound) ? <DealNotice /> : <QuoteNotice service="flight" />}

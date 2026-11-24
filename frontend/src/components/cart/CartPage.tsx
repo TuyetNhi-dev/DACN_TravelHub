@@ -2,6 +2,7 @@
 
 import { useCallback } from "react";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
+import { Steps } from "@/components/ui/Steps";
 import { Toast } from "@/components/ui/Toast";
 import { useCartView } from "@/hooks/useCartView";
 import { CartEmpty } from "./CartEmpty";
@@ -18,6 +19,7 @@ export function CartPage() {
         <h1>Giỏ hàng của bạn</h1>
         <p>Các tour bạn đã lưu. Giá và số chỗ dưới đây là thông tin hiện tại của từng lịch khởi hành.</p>
       </header>
+      <Steps current={0} />
       <MergeNotice />
       {state.status === "loading" && <LoadingState label="Đang tải giỏ hàng…" />}
       {state.status === "error" && <ErrorState error={state.error} onRetry={retry} />}

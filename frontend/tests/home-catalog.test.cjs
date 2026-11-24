@@ -27,11 +27,12 @@ const flight = (offerId, from, to, price) => ({
   offerId, originCode: from, destinationCode: to, referencePrice: price,
 });
 
-test('home hotels keep only priced partner quotes, at most four', async () => {
-  const all = [hotel('1', null), ...['2', '3', '4', '5', '6'].map(id => hotel(id, 900000))];
+test('home hotels keep only priced partner quotes, at most eight', async () => {
+  const priced = ['2', '3', '4', '5', '6', '7', '8', '9', '10'];
+  const all = [hotel('1', null), ...priced.map(id => hotel(id, 900000))];
   const { getHomeHotels } = catalog({ hotels: async () => ({ items: all, total: all.length }) });
   const items = await getHomeHotels();
-  assert.deepEqual(items.map(item => item.id), ['2', '3', '4', '5']);
+  assert.deepEqual(items.map(item => item.id), priced.slice(0, 8));
   assert.equal(items.some(item => 'availability' in item), false);
 });
 

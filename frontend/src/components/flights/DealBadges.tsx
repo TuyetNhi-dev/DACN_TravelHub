@@ -16,7 +16,7 @@ export function ConfirmationBadges({ remainingSeats }: { remainingSeats: number 
   );
 }
 
-/** Replaces the "giá tham khảo, chờ xác nhận" notice for deals, which are confirmed on payment. */
+/** Replaces the "giá hợp đồng, chờ xác nhận chỗ" notice for deals, which are confirmed on payment. */
 export function DealNotice() {
   return (
     <div className="sh-notice fd-notice" role="note">

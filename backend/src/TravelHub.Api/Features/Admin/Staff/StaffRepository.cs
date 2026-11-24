@@ -11,6 +11,12 @@ public sealed record StaffAssignmentRow(ulong Id, ulong UserId, string Email, st
 
 public enum RevokeResult { Revoked, NotFound, LastAdmin }
 
+public enum LockResult { Changed, NotFound, LastAdmin }
+
+public sealed record StaffUserRow(string FullName, string Email);
+
+internal sealed record AdminCounts(int Target, int Others);
+
 public sealed class StaffRepository(MySqlConnectionFactory connections)
 {
     private const string OperatorRoles = "('STAFF', 'BRANCH_MANAGER', 'ADMIN')";
@@ -19,7 +25,8 @@ public sealed class StaffRepository(MySqlConnectionFactory connections)
     {
         await using var connection = await connections.OpenAsync(ct);
         await using var command = new MySqlCommand($"""
-            SELECT u.id AS user_id, u.full_name, u.email, a.id, r.code AS role, a.scope, a.region_id,
+            SELECT u.id AS user_id, u.full_name, u.email, u.status AS account_status, a.id, r.code AS role, a.scope,
+                a.region_id,
                 rg.name AS region_name, a.branch_id, b.name AS branch_name
             FROM user_role_assignments a
             JOIN roles r ON r.id = a.role_id
@@ -30,11 +37,11 @@ public sealed class StaffRepository(MySqlConnectionFactory connections)
             ORDER BY u.full_name, u.id, a.id
             """, connection);
         var rows = await command.ReadAllAsync(r => (User: (Id: r.GetId("user_id"), Name: r.GetString("full_name"),
-            Email: r.GetString("email")), Assignment: new StaffAssignmentDto(r.GetId("id"), r.GetString("role"),
+            Email: r.GetString("email"), Status: r.GetString("account_status")), Assignment: new StaffAssignmentDto(r.GetId("id"), r.GetString("role"),
             r.GetString("scope"), r.GetNullableId("region_id"), r.GetNullableString("region_name"),
             r.GetNullableId("branch_id"), r.GetNullableString("branch_name"))), ct);
         return rows.GroupBy(row => row.User).Select(g => new StaffMemberDto(g.Key.Id, g.Key.Name, g.Key.Email,
-            g.Select(row => row.Assignment).ToList())).ToList();
+            g.Select(row => row.Assignment).ToList(), g.Key.Status)).ToList();
     }
 
     /// <summary>Only active accounts can be given a back-office role.</summary>
@@ -86,6 +93,49 @@ public sealed class StaffRepository(MySqlConnectionFactory connections)
             await AuditLogWriter.WriteAsync(tx.Connection, tx.Inner, audit(id), ct);
             return id;
         }, ct);
+
+    /// <summary>
+    /// Locks (active → disabled) or unlocks (disabled → active) a back-office account. Locking the last usable
+    /// global ADMIN is refused in the same transaction, so the back office always keeps one admin who can sign in.
+    /// </summary>
+    public Task<LockResult> SetAccountStatusAsync(ulong userId, bool locked, AuditEntry audit, CancellationToken ct) =>
+        connections.InTransactionAsync(async tx =>
+        {
+            if (locked && await IsLastUsableAdminAsync(tx, userId, ct)) return LockResult.LastAdmin;
+            var rows = await tx.ExecuteAsync($"""
+                UPDATE users SET status = @to WHERE id = @id AND status = @from AND EXISTS (
+                    SELECT 1 FROM user_role_assignments a JOIN roles r ON r.id = a.role_id
+                    WHERE a.user_id = users.id AND a.is_active = 1 AND r.code IN {OperatorRoles})
+                """, ct, ("@to", locked ? AccountStatus.Disabled : AccountStatus.Active), ("@id", userId),
+                ("@from", locked ? AccountStatus.Active : AccountStatus.Disabled));
+            if (rows == 0) return LockResult.NotFound;
+            await AuditLogWriter.WriteAsync(tx.Connection, tx.Inner, audit, ct);
+            return LockResult.Changed;
+        }, ct);
+
+    public async Task<StaffUserRow?> FindUserAsync(ulong userId, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand("SELECT full_name, email FROM users WHERE id = @id", connection);
+        command.Parameters.AddWithValue("@id", userId);
+        return await command.ReadSingleAsync(r => new StaffUserRow(r.GetString("full_name"), r.GetString("email")),
+            ct);
+    }
+
+    /// <summary>True when the account is a usable global ADMIN and no other usable global ADMIN exists.</summary>
+    private static async Task<bool> IsLastUsableAdminAsync(Transaction tx, ulong userId, CancellationToken ct)
+    {
+        await using var command = tx.Command($"""
+            SELECT COALESCE(SUM(x.user_id = @id), 0) AS target_admin, COALESCE(SUM(x.user_id <> @id), 0) AS others
+            FROM user_role_assignments x JOIN roles r ON r.id = x.role_id JOIN users u ON u.id = x.user_id
+            WHERE r.code = '{RoleCodes.Admin}' AND x.scope = 'global' AND x.is_active = 1
+                AND u.status = '{AccountStatus.Active}'
+            FOR UPDATE
+            """, ("@id", userId));
+        var counts = await command.ReadSingleAsync(r => new AdminCounts(Convert.ToInt32(r["target_admin"]),
+            Convert.ToInt32(r["others"])), ct);
+        return counts is { Target: > 0, Others: 0 };
+    }
 
     /// <summary>Refuses to remove the last active global ADMIN, so the back office is never left without one.</summary>
     public Task<RevokeResult> RevokeAsync(StaffAssignmentRow row, AuditEntry audit, CancellationToken ct) =>

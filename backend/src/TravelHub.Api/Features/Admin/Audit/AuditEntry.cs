@@ -16,9 +16,10 @@ public static class AuditEntities
     public const string Booking = "booking";
     public const string ServiceRequest = "service_request";
     public const string StaffAssignment = "staff_assignment";
+    public const string User = "user";
 
     public static readonly IReadOnlySet<string> All =
-        new HashSet<string> { Tour, Departure, Booking, ServiceRequest, StaffAssignment };
+        new HashSet<string> { Tour, Departure, Booking, ServiceRequest, StaffAssignment, User };
 }
 
 public static class AuditActions
@@ -37,11 +38,23 @@ public static class AuditActions
     public const string BookingConfirm = "booking.confirm";
     public const string BookingReject = "booking.reject";
     public const string BookingComplete = "booking.complete";
+    public const string BookingCancel = "booking.cancel";
+    public const string BookingNote = "booking.note";
     public const string RequestStatus = "service_request.status";
     public const string RequestNote = "service_request.note";
     public const string RequestAssign = "service_request.assign";
     public const string StaffAssign = "staff.assign";
     public const string StaffRevoke = "staff.revoke";
+    public const string UserLock = "user.lock";
+    public const string UserUnlock = "user.unlock";
+
+    public static readonly IReadOnlySet<string> All = new HashSet<string>
+    {
+        TourCreate, TourUpdate, TourStatus, TourClone, TourImages, TourItinerary, TourInclusions, DepartureCreate,
+        DepartureBulkCreate, DepartureUpdate, DepartureStatus, BookingConfirm, BookingReject, BookingComplete,
+        BookingCancel, BookingNote, RequestStatus, RequestNote, RequestAssign, StaffAssign, StaffRevoke, UserLock,
+        UserUnlock,
+    };
 }
 
 /// <summary>Builds the "what changed" part of an entry from two snapshots of the same fields.</summary>

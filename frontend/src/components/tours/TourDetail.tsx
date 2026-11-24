@@ -1,10 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Icon } from "@/components/ui/Icon";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useResource } from "@/hooks/useResource";
-import { tourDuration } from "@/lib/tour-display";
 import { getTour } from "@/services/tours";
 import type { CartChoice } from "@/types/cart";
 import type { TourDetail as Detail } from "@/types/tour";
@@ -12,6 +10,7 @@ import { DepartureTable } from "./DepartureTable";
 import { TourBookingPanel } from "./TourBookingPanel";
 import { TourDepartureCalendar } from "./TourDepartureCalendar";
 import { TourHeader } from "./TourHeader";
+import { TourHighlights } from "./TourHighlights";
 import { TourInclusions } from "./TourInclusions";
 import { TourMobileBookBar } from "./TourMobileBookBar";
 
@@ -49,16 +48,12 @@ function TourDetailContent({ detail, prefill }: TourDetailContentProps) {
       <TourHeader tour={tour} images={images} />
       <div className="container detail-layout">
         <article className="detail-content">
-          <div className="overview-strip">
-            <span><Icon name="clock" /><small>Thời lượng</small><b>{tourDuration(tour)}</b></span>
-            <span><Icon name="map" /><small>Khởi hành từ</small><b>{tour.departureFrom ?? "Đang cập nhật"}</b></span>
-            <span><Icon name="bus" /><small>Phương tiện</small><b>{tour.transport ?? "Đang cập nhật"}</b></span>
-          </div>
-          {tour.description && <section><h2>Điểm nổi bật</h2><p>{tour.description}</p></section>}
+          <TourHighlights tour={tour} departures={departures} />
+          {tour.description && <section><h2>Giới thiệu hành trình</h2><p>{tour.description}</p></section>}
           <section>
             <h2>Lịch trình</h2>
             {itinerary.length ? (
-              <ol className="sh-timeline">
+              <ol className="sh-timeline tour-timeline">
                 {itinerary.map(day => (
                   <li key={day.dayNumber}>
                     <b>Ngày {day.dayNumber}</b>

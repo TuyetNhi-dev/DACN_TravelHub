@@ -9,7 +9,9 @@ public sealed record BookingDetailRow(BookingSummaryDto Summary, decimal Subtota
     ulong CustomerId, ulong? SellingBranchId, string? ConfirmationCode, DateTime? PaidAt,
     BookingSnapshot? Snapshot, IReadOnlyList<PassengerDto> Passengers);
 
-public sealed record StaffBookingFilter(string? ItemStatus, string? ServiceType, ScopeSet Scope);
+/// <param name="Query">Exact booking code, or part of the customer's name, email or phone.</param>
+public sealed record StaffBookingFilter(string? ItemStatus, string? ServiceType, ScopeSet Scope,
+    DateTime? FromUtc = null, DateTime? ToUtc = null, ulong? BranchId = null, string? Query = null);
 
 public sealed class BookingRepository(MySqlConnectionFactory connections)
 {
@@ -69,6 +71,16 @@ public sealed class BookingRepository(MySqlConnectionFactory connections)
         {
             sql.Append(" AND i.service_type = @serviceType");
             command.Parameters.AddWithValue("@serviceType", filter.ServiceType);
+        }
+        SqlFilter.AddIfPresent(sql, command, "b.created_at >= @from", "@from", filter.FromUtc);
+        SqlFilter.AddIfPresent(sql, command, "b.created_at < @to", "@to", filter.ToUtc);
+        SqlFilter.AddIfPresent(sql, command, "b.selling_branch_id = @branchId", "@branchId", filter.BranchId);
+        if (filter.Query is not null)
+        {
+            sql.Append(" AND (b.booking_code = @code OR u.full_name LIKE @like OR u.email LIKE @like"
+                + " OR u.phone LIKE @like)");
+            command.Parameters.AddWithValue("@code", filter.Query.ToUpperInvariant());
+            command.Parameters.AddWithValue("@like", SqlText.Contains(filter.Query));
         }
         sql.Append(" ORDER BY b.created_at DESC, b.id DESC LIMIT ").Append(BookingLimits.MaxStaffListSize);
         command.CommandText = sql.ToString();

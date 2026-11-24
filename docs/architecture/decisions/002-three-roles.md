@@ -1,6 +1,7 @@
 # Quyết định 002: Ba vai trò và băm mật khẩu PBKDF2
 
-Trạng thái: **đã áp dụng** (17/11/2026, migration 007).
+Trạng thái: **đã áp dụng** (17/11/2026, migration 007). Phần phân quyền được thay bằng
+[quyết định 003](003-branch-scopes.md) (24/11/2026); phần băm mật khẩu vẫn giữ nguyên.
 
 ## Bối cảnh
 

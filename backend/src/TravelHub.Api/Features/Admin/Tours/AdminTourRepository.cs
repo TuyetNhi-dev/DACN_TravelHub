@@ -15,10 +15,14 @@ public sealed class AdminTourRepository(MySqlConnectionFactory connections)
             t.duration_days, t.duration_nights, t.base_price,
             (SELECT COUNT(*) FROM tour_departures d WHERE d.tour_id = t.id AND d.status = 'open'
                 AND d.departure_date > @today) AS upcoming,
-            (SELECT COUNT(*) FROM tour_images i WHERE i.tour_id = t.id) AS image_count
+            (SELECT COUNT(*) FROM tour_images i WHERE i.tour_id = t.id) AS image_count,
+            (SELECT i.image_url FROM tour_images i WHERE i.tour_id = t.id ORDER BY i.sort_order, i.id LIMIT 1)
+                AS thumbnail_url,
+            c.name AS category_name
         FROM tours t
         JOIN locations l ON l.id = t.destination_id
         JOIN branches b ON b.id = t.operating_branch_id
+        LEFT JOIN tour_categories c ON c.id = t.category_id
         """;
 
     public async Task<(IReadOnlyList<AdminTourRow> Rows, int Total)> ListAsync(AdminTourFilter filter, ScopeSet scope,
@@ -30,7 +34,7 @@ public sealed class AdminTourRepository(MySqlConnectionFactory connections)
         var total = Convert.ToInt32(await count.ExecuteScalarAsync(ct));
         await using var command = new MySqlCommand { Connection = connection };
         command.CommandText = SummarySelect + Where(filter, scope, command)
-            + " ORDER BY t.id DESC LIMIT @limit OFFSET @offset";
+            + " ORDER BY " + AdminTourSort.Sql(filter.Sort) + " LIMIT @limit OFFSET @offset";
         command.Parameters.AddWithValue("@today", today);
         command.Parameters.AddWithValue("@limit", limit);
         command.Parameters.AddWithValue("@offset", offset);
@@ -51,7 +55,7 @@ public sealed class AdminTourRepository(MySqlConnectionFactory connections)
         await using var connection = await connections.OpenAsync(ct);
         await using var command = new MySqlCommand("""
             SELECT id, code, title, destination_id, category_id, operating_branch_id, duration_days, duration_nights,
-                base_price, description, status
+                base_price, description, status, cancellation_policy, travel_notes
             FROM tours WHERE id = @id
             """, connection);
         command.Parameters.AddWithValue("@id", id);
@@ -59,7 +63,7 @@ public sealed class AdminTourRepository(MySqlConnectionFactory connections)
             r.GetString("title"), r.GetId("destination_id"), r.GetNullableId("category_id"),
             r.GetId("operating_branch_id"), r.GetInt32("duration_days"), r.GetInt32("duration_nights"),
             r.GetDecimal("base_price"), r.GetNullableString("description"), r.GetString("status"), [], [], [],
-            false), ct);
+            false, r.GetNullableString("cancellation_policy"), r.GetNullableString("travel_notes")), ct);
         if (tour is null) return null;
         return tour with
         {
@@ -108,6 +112,11 @@ public sealed class AdminTourRepository(MySqlConnectionFactory connections)
             command.Parameters.AddWithValue("@code", filter.Query.ToUpperInvariant());
             command.Parameters.AddWithValue("@like", SqlText.Contains(filter.Query));
         }
+        SqlFilter.AddIfPresent(sql, command, "t.operating_branch_id = @branchId", "@branchId", filter.BranchId);
+        SqlFilter.AddIfPresent(sql, command, "t.category_id = @categoryId", "@categoryId", filter.CategoryId);
+        SqlFilter.AddIfPresent(sql, command,
+            "t.operating_branch_id IN (SELECT id FROM branches WHERE region_id = @regionId)", "@regionId",
+            filter.RegionId);
         return sql.ToString();
     }
 
@@ -115,5 +124,6 @@ public sealed class AdminTourRepository(MySqlConnectionFactory connections)
         r.GetString("code"), r.GetString("title"), r.GetString("destination"), r.GetId("operating_branch_id"),
         r.GetString("branch_name"), r.GetString("status"), r.GetInt32("duration_days"),
         r.GetInt32("duration_nights"), r.GetDecimal("base_price"), r.GetInt32("upcoming"),
-        r.GetInt32("image_count"), false), r.GetUInt64("operating_branch_id"));
+        r.GetInt32("image_count"), false, r.GetNullableString("category_name"), r.GetNullableString("thumbnail_url")),
+        r.GetUInt64("operating_branch_id"));
 }

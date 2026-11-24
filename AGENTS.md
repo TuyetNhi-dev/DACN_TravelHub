@@ -5,7 +5,7 @@
 - frontend/: Next.js + TypeScript + Tailwind. backend/: ASP.NET Core minimal API + MySqlConnector, SQL viết tay trong repository. database/: tài liệu, schema, migration, seed. docs/: tài liệu.
 - Nghiệp vụ cốt lõi: tour có tồn chỗ thật (tour_departures.capacity và reserved_seats). Khách sạn và chuyến bay là BÁO GIÁ của đối tác (hotel_offers, flight_offers), không phải tồn kho. Đơn của chúng ở trạng thái chờ xác nhận (awaiting_supplier), tuyệt đối không hứa còn phòng hay còn ghế.
 - Ngoại lệ duy nhất: vé deal là báo giá chuyến bay có quỹ ghế (flight_offers.allotment_seats, sold_seats) theo hợp đồng của SàiHành. Chỉ vé deal được ghi "Xác nhận ngay" và "Còn N ghế"; đặt vé deal giữ ghế như tour (Booking:DealHoldMinutes, mặc định 10 phút, trừ ghế bằng UPDATE có điều kiện, hết ghế trả 409), thanh toán trong hạn là confirmed, quá hạn thì tác vụ nền trả ghế đúng một lần. Không ghi "rẻ nhất thị trường".
-- Phân quyền 3 vai trò: CUSTOMER (scope self), STAFF và ADMIN (scope global). Không thêm vai trò hay phạm vi chi nhánh/khu vực khi chưa được duyệt.
+- Phân quyền theo docs/architecture/decisions/003-branch-scopes.md: CUSTOMER (self); STAFF và BRANCH_MANAGER (chi nhánh, khu vực hoặc toàn quốc); ADMIN (toàn quốc). Backend kiểm tra quyền và phạm vi mỗi request; mọi thao tác ghi trong admin ghi audit_logs. Không thêm vai trò hay loại phạm vi mới khi chưa có quyết định mới.
 - Thanh toán mô phỏng là mặc định. VNPAY sandbox đã có gateway và chữ ký HMAC-SHA512 (phần A, B), chưa có endpoint IPN/return và giao diện (phần C, D; xem docs/setup/vnpay.md). Tour: tạo đơn giữ chỗ trong Booking:TourHoldMinutes phút (mặc định 10, giờ do server tính, lưu bookings.hold_expires_at); thanh toán trong hạn thì đơn sang confirmed; quá hạn thì tác vụ nền hủy đơn và trả chỗ đúng một lần, và hạn được kiểm tra lại khi thanh toán. Khách sạn và vé: nhân viên xác nhận với đối tác trước (awaiting_payment), sau đó khách mới thanh toán.
 
 ## Cách làm việc
@@ -44,4 +44,4 @@
 
 ## Giao diện
 - Responsive, có trạng thái đang tải, rỗng và lỗi. Hỗ trợ truy cập (nhãn, độ tương phản, bàn phím). Tiền VND, ngày giờ theo giờ Việt Nam.
-- Khách sạn và chuyến bay hiển thị "giá tham khảo, chờ xác nhận".
+- Khách sạn và chuyến bay hiển thị "giá hợp đồng, chờ xác nhận chỗ": giá giữ nguyên trên đơn, nhưng không hứa còn phòng hay còn ghế.

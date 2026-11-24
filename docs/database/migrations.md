@@ -9,7 +9,7 @@ database. Chọn đúng database trước khi chạy (`USE <tên_db>;`), vì cá
 Chạy **tất cả migration theo số tăng dần, rồi tất cả seed theo số tăng dần**:
 
 ```
-migrations/001 → 002 → … → 015
+migrations/001 → 002 → … → 016
 seeds/001 → 002 → … → 010
 ```
 
@@ -51,6 +51,7 @@ còn thiếu, theo đúng thứ tự số.
 | 013_cart_items | Bảng `cart_items` (cần MySQL 8.0.19+) | 012 | Không |
 | 014_terms_consent_and_password_reset | `users.terms_accepted_at`; `email_verification_tokens.purpose` | 013 | Không |
 | 015_branch_operations_and_audit | `tour_departures.operating_branch_id`, `min_guests`; bảng `audit_logs`; index đơn theo chi nhánh ([đặc tả admin](../architecture/admin-spec.md)) | 014 | Không |
+| 016_departure_lifecycle_and_booking_notes | Trạng thái chuyến `guaranteed`/`in_progress`/`completed`, `tour_departures.cancel_reason`, `cancelled_at`; `tours.cancellation_policy`, `travel_notes`; bảng `booking_notes` | 015 | Không |
 
 Mỗi migration ghi "Run AFTER" migration liền trước, nên luôn chạy đúng thứ tự số.
 
@@ -60,6 +61,9 @@ Mỗi migration ghi "Run AFTER" migration liền trước, nên luôn chạy đ�
 **Thứ tự cho database đang chạy:** migration 015 → chạy lại seed 001 (thêm `BRANCH_MANAGER`) → khởi động lại
 backend. Backend mới đọc `tour_departures.operating_branch_id` nên phải chạy 015 **trước** khi dùng bản backend
 này, kể cả trang tour công khai.
+
+Sau đó chạy **016** trước khi dùng trang quản trị mới: màn hình tour, lịch khởi hành và chi tiết đơn trong admin đọc
+`cancel_reason`, `cancellation_policy`, `travel_notes` và bảng `booking_notes`. Trang khách không cần 016.
 
 ## Seed (dữ liệu DEMO)
 
@@ -121,7 +125,7 @@ Hoặc mở file trong Workbench, chọn database rồi chạy. Kết quả mỗ
 | `một phần (x/y)` | Migration dừng giữa chừng. Kiểm tra kỹ trước khi chạy lại |
 | `không xác định` | Riêng 007: chỉ đổi dữ liệu, xem truy vấn tùy chọn cuối file (`SELECT code FROM roles`) |
 
-Script kiểm tra 002–015 (001 là nền, có thì mới chạy được các migration sau). Dấu hiệu dùng cho từng migration:
+Script kiểm tra 002–016 (001 là nền, có thì mới chạy được các migration sau). Dấu hiệu dùng cho từng migration:
 
 | Migration | Đối tượng được kiểm tra |
 |---|---|
@@ -139,6 +143,7 @@ Script kiểm tra 002–015 (001 là nền, có thì mới chạy được các 
 | 013 | Bảng `cart_items` |
 | 014 | Cột `users.terms_accepted_at`, `email_verification_tokens.purpose` |
 | 015 | Cột `tour_departures.operating_branch_id`, `min_guests`; bảng `audit_logs` |
+| 016 | Cột `tour_departures.cancel_reason`, `tours.cancellation_policy`, `tours.travel_notes`; bảng `booking_notes` |
 
 Kiểm tra seed: `SELECT COUNT(*) FROM tours;` (seed 002 và 005 cho 70 tour) và
 `SELECT code FROM roles ORDER BY code;` (seed 001 cho `ADMIN`, `CUSTOMER`, `STAFF`).

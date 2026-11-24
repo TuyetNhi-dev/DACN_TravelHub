@@ -3,11 +3,9 @@ import { Be_Vietnam_Pro } from "next/font/google";
 import type { ReactNode } from "react";
 import { NewRequestCountProvider } from "@/components/admin/NewRequestCountProvider";
 import { AuthProvider } from "@/components/auth/AuthProvider";
-import { TermsGate } from "@/components/auth/TermsGate";
 import { CartProvider } from "@/components/cart/CartProvider";
 import { DepartureProvider } from "@/components/departure/DepartureProvider";
-import { Footer } from "@/components/layout/Footer";
-import { Header } from "@/components/layout/Header";
+import { SiteChrome } from "@/components/layout/SiteChrome";
 import { themeInitScript } from "@/lib/theme";
 import "./globals.css";
 import "../styles/coastal.css";
@@ -44,10 +42,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           <NewRequestCountProvider>
             <CartProvider>
               <DepartureProvider>
-                <a className="skip-link" href="#main-content">Đến nội dung chính</a>
-                <Header />
-                <TermsGate>{children}</TermsGate>
-                <Footer />
+                <SiteChrome>{children}</SiteChrome>
               </DepartureProvider>
             </CartProvider>
           </NewRequestCountProvider>

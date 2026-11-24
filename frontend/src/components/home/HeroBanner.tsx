@@ -54,7 +54,7 @@ export function HeroBanner() {
         <div className="hero-side">
           <div className="hero-glass">
             <span className="deal-icon"><Icon name="ticket" /></span>
-            <span><b>Giữ chỗ tour tức thì</b><small>Khách sạn, vé máy bay ghi rõ giá tham khảo</small></span>
+            <span><b>Giữ chỗ tour tức thì</b><small>Khách sạn, vé máy bay ghi rõ giá hợp đồng</small></span>
           </div>
           <HeroDeck index={index} onSelect={setIndex} />
         </div>

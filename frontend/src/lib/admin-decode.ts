@@ -4,8 +4,8 @@ import {
 } from "@/lib/decode";
 import type {
   AdminContext, AdminDeparture, AdminLookups, AdminTourDetail, AdminTourSummary, AuditLog, BranchLookup,
-  Dashboard, DepartureStatus, InclusionType, Lookup, Manifest, ManifestBooking, ScopeOption, StaffMember,
-  TourStatus,
+  Dashboard, DepartureStatus, InclusionType, Lookup, Manifest, ManifestBooking, RegionRevenue, ScopeOption,
+  StaffMember, TourStatus,
 } from "@/types/admin";
 
 const R = "quản trị";
@@ -43,20 +43,42 @@ export function decodeLookups(row: Row): AdminLookups {
   };
 }
 
+const regionRevenue = (r: Row): RegionRevenue => ({
+  code: str(r, "code", R), name: str(r, "name", R), revenue: num(r, "revenue", R),
+});
+
 export function decodeDashboard(row: Row): Dashboard {
+  const todo = isRecord(row.todo) ? row.todo : null;
+  const revenueByRegion = list(row.revenueByRegion, regionRevenue, R);
+  const revenueSeries = Array.isArray(row.revenueSeries)
+    ? list(row.revenueSeries, month => ({
+      month: str(month, "month", R), regions: list(month.regions, regionRevenue, R),
+    }), R)
+    : [{ month: currentMonthKey(), regions: revenueByRegion }];
   return {
     ordersToday: num(row, "ordersToday", R), revenueThisMonth: num(row, "revenueThisMonth", R),
-    pendingItems: num(row, "pendingItems", R),
+    revenueLastMonth: typeof row.revenueLastMonth === "number" ? row.revenueLastMonth : null,
+    revenueChangePercent: optNum(row, "revenueChangePercent", R),
+    pendingItems: num(row, "pendingItems", R), occupancyPercent: optNum(row, "occupancyPercent", R),
     upcoming: list(row.upcoming, u => ({
       departureId: str(u, "departureId", R), tourId: str(u, "tourId", R), tourCode: str(u, "tourCode", R),
       tourTitle: str(u, "tourTitle", R), departureDate: isoDate(u, "departureDate", R),
       branchName: str(u, "branchName", R), reservedSeats: num(u, "reservedSeats", R),
       minGuests: num(u, "minGuests", R), capacity: num(u, "capacity", R), belowMinimum: bool(u, "belowMinimum", R),
     }), R),
-    revenueByRegion: list(row.revenueByRegion, r => ({
-      code: str(r, "code", R), name: str(r, "name", R), revenue: num(r, "revenue", R),
-    }), R),
+    revenueByRegion, revenueSeries,
+    todo: todo ? {
+      overduePendingItems: num(todo, "overduePendingItems", R),
+      newServiceRequests: num(todo, "newServiceRequests", R),
+      departuresBelowMinimum: num(todo, "departuresBelowMinimum", R),
+    } : null,
   };
+}
+
+function currentMonthKey(): string {
+  const parts = new Intl.DateTimeFormat("en", { timeZone: "Asia/Ho_Chi_Minh", year: "numeric", month: "2-digit" })
+    .formatToParts(new Date());
+  return `${parts.find(part => part.type === "year")?.value}-${parts.find(part => part.type === "month")?.value}`;
 }
 
 export function decodeTourSummary(r: Row): AdminTourSummary {
@@ -66,6 +88,7 @@ export function decodeTourSummary(r: Row): AdminTourSummary {
     durationDays: num(r, "durationDays", R), durationNights: num(r, "durationNights", R),
     basePrice: num(r, "basePrice", R), upcomingDepartures: num(r, "upcomingDepartures", R),
     imageCount: num(r, "imageCount", R), canEdit: bool(r, "canEdit", R),
+    categoryName: optStr(r, "categoryName", R), thumbnailUrl: optStr(r, "thumbnailUrl", R),
   };
 }
 
@@ -84,7 +107,8 @@ export function decodeTourDetail(r: Row): AdminTourDetail {
       serviceType: str(i, "serviceType", R) as InclusionType, description: str(i, "description", R),
       isIncluded: bool(i, "isIncluded", R),
     }), R),
-    canEdit: bool(r, "canEdit", R),
+    canEdit: bool(r, "canEdit", R), cancellationPolicy: optStr(r, "cancellationPolicy", R),
+    travelNotes: optStr(r, "travelNotes", R),
   };
 }
 
@@ -97,6 +121,8 @@ export function decodeDeparture(r: Row): AdminDeparture {
     capacity: num(r, "capacity", R), reservedSeats: num(r, "reservedSeats", R), minGuests: num(r, "minGuests", R),
     adultPrice: num(r, "adultPrice", R), childPrice: optNum(r, "childPrice", R),
     status: str(r, "status", R) as DepartureStatus, canEdit: bool(r, "canEdit", R),
+    activeBookings: typeof r.activeBookings === "number" ? r.activeBookings : 0,
+    cancelReason: optStr(r, "cancelReason", R),
   };
 }
 
@@ -123,6 +149,7 @@ export function decodeAuditLog(r: Row): AuditLog {
     branchName: optStr(r, "branchName", R), summary: str(r, "summary", R),
     changes: list(r.changes, c => ({ field: str(c, "field", R), old: optStr(c, "old", R), new: optStr(c, "new", R) }),
       R),
+    actorId: typeof r.actorId === "string" ? r.actorId : "",
   };
 }
 
@@ -134,5 +161,6 @@ export function decodeStaffMember(r: Row): StaffMember {
       regionName: optStr(a, "regionName", R), branchId: optStr(a, "branchId", R),
       branchName: optStr(a, "branchName", R),
     }), R),
+    accountStatus: (optStr(r, "accountStatus", R) ?? "active") as StaffMember["accountStatus"],
   };
 }

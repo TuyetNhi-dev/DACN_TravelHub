@@ -10,6 +10,8 @@ public static partial class AdminTourValidator
     public const int MaxDays = 60;
     public const decimal MaxPrice = 1_000_000_000m;
     public const int MaxDescription = 5000;
+    /// <summary>Cancellation policy and travel notes (migration 016, tours.cancellation_policy / travel_notes).</summary>
+    public const int MaxPolicy = 4000;
     public const int MaxImages = 20;
     public const int MaxInclusions = 40;
 
@@ -32,8 +34,13 @@ public static partial class AdminTourValidator
         errors.AddIf(price is < 0 or > MaxPrice, "basePrice", "Giá cơ bản không hợp lệ.");
         var description = Optional(request.Description);
         errors.AddIf(description?.Length > MaxDescription, "description", $"Mô tả tối đa {MaxDescription} ký tự.");
+        var cancellation = Optional(request.CancellationPolicy);
+        errors.AddIf(cancellation?.Length > MaxPolicy, "cancellationPolicy", $"Chính sách tối đa {MaxPolicy} ký tự.");
+        var notes = Optional(request.TravelNotes);
+        errors.AddIf(notes?.Length > MaxPolicy, "travelNotes", $"Lưu ý tối đa {MaxPolicy} ký tự.");
         errors.ThrowIfAny();
-        return new ValidTour(code, title, destination, category, branch, days, nights, price, description);
+        return new ValidTour(code, title, destination, category, branch, days, nights, price, description,
+            cancellation, notes);
     }
 
     public static string Status(string? raw) => raw is not null && AdminTourStatus.Settable.Contains(raw)

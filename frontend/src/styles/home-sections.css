@@ -46,16 +46,13 @@
 .soon-band .ui-section-head p { color: var(--text-on-promo); }
 .soon-band .ui-view-all { color: #fff; }
 .soon-band .sh-state { background: var(--panel); }
+/* The band sets white text for its heading; cards inside are light panels and need the normal ink back. */
+.soon-band .ui-card { color: var(--ink); }
 .soon-seats { font-weight: 600; }
 .soon-seats.is-few { color: var(--deal); }
 :root[data-theme="dark"] .soon-seats.is-few { color: #ff9b8f; }
-.tour-grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
-.tour-grid-3 > * { animation: home-fade-up var(--duration-slow) var(--ease-out) both; }
-.tour-grid-3 > :nth-child(2) { animation-delay: 60ms; }
-.tour-grid-3 > :nth-child(3) { animation-delay: 120ms; }
 
 /* ---------- Hotel tile ---------- */
-.hotel-tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; }
 .hotel-tile-body { flex: 1; display: flex; flex-direction: column; gap: 8px; padding: 16px 18px 20px; }
 .hotel-tile h3 { margin: 0; font-size: 17px; line-height: 1.4; }
 .hotel-tile-city { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: max(13px, var(--text-min)); }
@@ -105,17 +102,12 @@
 
 /* Footer: see footer.css. */
 
-@keyframes home-fade-up { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
-
 /* ---------- Responsive ---------- */
 @media (max-width: 1080px) {
-  .hotel-tiles, .promise-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .tour-grid-3, .fare-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .promise-grid, .fare-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 @media (max-width: 640px) {
-  .tour-grid-3, .fare-grid, .promise-grid { grid-template-columns: minmax(0, 1fr); }
-  .hotel-tiles { gap: 14px; }
-  .hotel-tile .ui-media--portrait { aspect-ratio: 1; }
+  .fare-grid, .promise-grid { grid-template-columns: minmax(0, 1fr); }
   .cta-band { border-radius: var(--radius-lg); min-height: 0; }
   /* Thin side padding on phones so the cards inside the band keep most of the screen width. */
   .soon-band { padding: 24px 12px; border-radius: var(--radius-lg); }
@@ -124,5 +116,4 @@
 @media (prefers-reduced-motion: reduce) {
   .tour-tile-go, .tour-tile:hover .tour-tile-go, .fare-line svg, .fare-card:hover .fare-line svg {
     transition: none; transform: none; }
-  .tour-grid-3 > * { animation: none; }
 }

@@ -9,9 +9,13 @@ export const TOUR_STATUS: Record<TourStatus, { label: string; tone: BadgeTone }>
   archived: { label: "Lưu trữ", tone: "neutral" },
 };
 
+/** Same words as DepartureRules.StatusLabels on the server. */
 export const DEPARTURE_STATUS: Record<DepartureStatus, { label: string; tone: BadgeTone }> = {
   open: { label: "Mở bán", tone: "success" },
-  closed: { label: "Đóng bán", tone: "warning" },
+  closed: { label: "Tạm đóng bán", tone: "warning" },
+  guaranteed: { label: "Chốt đoàn", tone: "info" },
+  in_progress: { label: "Đang đi", tone: "brand" },
+  completed: { label: "Hoàn thành", tone: "neutral" },
   cancelled: { label: "Đã hủy", tone: "danger" },
 };
 
@@ -43,8 +47,29 @@ export const STAFF_SCOPES = [
 export const AUDIT_ENTITIES: { value: string; label: string }[] = [
   { value: "tour", label: "Tour" }, { value: "departure", label: "Lịch khởi hành" },
   { value: "booking", label: "Đơn đặt chỗ" }, { value: "service_request", label: "Yêu cầu dịch vụ" },
-  { value: "staff_assignment", label: "Phân quyền" },
+  { value: "staff_assignment", label: "Phân quyền" }, { value: "user", label: "Tài khoản" },
 ];
+
+/** AuditActions on the server, grouped the way the filter shows them. */
+export const AUDIT_ACTIONS: { value: string; label: string }[] = [
+  { value: "tour.create", label: "Tạo tour" }, { value: "tour.update", label: "Sửa tour" },
+  { value: "tour.status", label: "Đổi trạng thái tour" }, { value: "tour.clone", label: "Nhân bản tour" },
+  { value: "tour.images", label: "Sửa ảnh tour" }, { value: "tour.itinerary", label: "Sửa lịch trình" },
+  { value: "tour.inclusions", label: "Sửa giá bao gồm" }, { value: "departure.create", label: "Tạo lịch" },
+  { value: "departure.bulk_create", label: "Tạo lịch hàng loạt" }, { value: "departure.update", label: "Sửa lịch" },
+  { value: "departure.status", label: "Đổi trạng thái lịch" }, { value: "booking.confirm", label: "Xác nhận đơn" },
+  { value: "booking.reject", label: "Từ chối đơn" }, { value: "booking.complete", label: "Hoàn tất đơn" },
+  { value: "booking.cancel", label: "Hủy đơn" }, { value: "booking.note", label: "Ghi chú đơn" },
+  { value: "service_request.status", label: "Đổi trạng thái yêu cầu" },
+  { value: "service_request.note", label: "Ghi chú yêu cầu" },
+  { value: "service_request.assign", label: "Nhận/trả yêu cầu" }, { value: "staff.assign", label: "Gán vai trò" },
+  { value: "staff.revoke", label: "Gỡ vai trò" }, { value: "user.lock", label: "Khóa tài khoản" },
+  { value: "user.unlock", label: "Mở khóa tài khoản" },
+];
+
+export function actionLabel(code: string): string {
+  return AUDIT_ACTIONS.find(action => action.value === code)?.label ?? (code === "booking.created" ? "Tạo đơn" : code);
+}
 
 export function staffRoleLabel(code: string): string {
   return STAFF_ROLES.find(role => role.value === code)?.label ?? code;

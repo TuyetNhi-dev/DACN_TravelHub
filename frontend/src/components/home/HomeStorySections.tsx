@@ -8,7 +8,7 @@ import { HomeTestimonials } from "./HomeTestimonials";
 export function HomeStorySections() {
   return (
     <>
-      <section className="home-section home-section--tint" aria-labelledby="promise-title">
+      <section className="home-section home-section--deep" aria-labelledby="promise-title">
         <Reveal className="container">
           <SectionHeader id="promise-title" eyebrow="Vì sao chọn SàiHành" title="Đặt chỗ rõ ràng, không hứa suông"
             description="Những điều hệ thống đặt chỗ của SàiHành thực sự đảm bảo." />

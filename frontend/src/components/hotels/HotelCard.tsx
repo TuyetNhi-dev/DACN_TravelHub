@@ -8,7 +8,7 @@ import { getHotelImages } from "@/lib/media";
 import type { HotelSummary, Stay } from "@/types/hotel";
 
 const VISIBLE_AMENITIES = 4;
-const CARD_SIZES = "(max-width: 760px) 100vw, 320px";
+const CARD_SIZES = "(max-width: 760px) 100vw, 220px";
 
 export function HotelCard({ hotel, stay }: { hotel: HotelSummary; stay: Stay }) {
   const image = getHotelImages(hotel)[0];
@@ -29,7 +29,7 @@ export function HotelCard({ hotel, stay }: { hotel: HotelSummary; stay: Stay }) 
         </div>
         <div className="sh-hotel-card-bottom">
           <div>
-            <small>Giá tham khảo từ / đêm</small>
+            <small>Giá hợp đồng từ / đêm</small>
             <strong>{formatCurrency(hotel.referencePricePerNight)}</strong>
           </div>
           <Link className="btn btn-outline" href={href}>Xem phòng <Icon name="arrow" size={16} /></Link>

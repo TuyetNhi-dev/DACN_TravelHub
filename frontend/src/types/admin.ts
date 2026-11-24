@@ -59,12 +59,31 @@ export interface RegionRevenue {
   revenue: number;
 }
 
+/** One month of the revenue chart; month is "yyyy-mm" in Vietnamese time. */
+export interface MonthRevenue {
+  month: string;
+  regions: RegionRevenue[];
+}
+
+export interface DashboardTodo {
+  overduePendingItems: number;
+  newServiceRequests: number;
+  departuresBelowMinimum: number;
+}
+
 export interface Dashboard {
   ordersToday: number;
   revenueThisMonth: number;
+  revenueLastMonth: number | null;
+  /** Null when last month had no revenue to compare with. */
+  revenueChangePercent: number | null;
   pendingItems: number;
+  /** Seats sold / offered on departures of the next 30 days; null when nothing is on sale. */
+  occupancyPercent: number | null;
   upcoming: UpcomingDeparture[];
   revenueByRegion: RegionRevenue[];
+  revenueSeries: MonthRevenue[];
+  todo: DashboardTodo | null;
 }
 
 export type TourStatus = "draft" | "published" | "paused" | "archived";
@@ -83,6 +102,8 @@ export interface AdminTourSummary {
   upcomingDepartures: number;
   imageCount: number;
   canEdit: boolean;
+  categoryName: string | null;
+  thumbnailUrl: string | null;
 }
 
 export interface TourImageInput {
@@ -120,6 +141,8 @@ export interface AdminTourDetail {
   itinerary: ItineraryDay[];
   inclusions: Inclusion[];
   canEdit: boolean;
+  cancellationPolicy: string | null;
+  travelNotes: string | null;
 }
 
 export interface SaveTourInput {
@@ -132,9 +155,12 @@ export interface SaveTourInput {
   durationNights: number;
   basePrice: number;
   description: string | null;
+  cancellationPolicy: string | null;
+  travelNotes: string | null;
 }
 
-export type DepartureStatus = "open" | "closed" | "cancelled";
+/** Life of a departure (migration 016); only "open" is bookable on the customer site. */
+export type DepartureStatus = "open" | "closed" | "guaranteed" | "in_progress" | "completed" | "cancelled";
 
 export interface AdminDeparture {
   id: string;
@@ -154,6 +180,9 @@ export interface AdminDeparture {
   childPrice: number | null;
   status: DepartureStatus;
   canEdit: boolean;
+  /** Orders still holding seats; shown before a cancellation. */
+  activeBookings: number;
+  cancelReason: string | null;
 }
 
 export interface DepartureTerms {
@@ -210,6 +239,7 @@ export interface AuditLog {
   branchName: string | null;
   summary: string;
   changes: AuditChange[];
+  actorId: string;
 }
 
 export interface StaffAssignment {
@@ -227,6 +257,7 @@ export interface StaffMember {
   fullName: string;
   email: string;
   assignments: StaffAssignment[];
+  accountStatus: "active" | "disabled" | "pending";
 }
 
 export interface AssignStaffInput {

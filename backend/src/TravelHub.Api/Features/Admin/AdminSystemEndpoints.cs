@@ -20,6 +20,10 @@ public static class AdminSystemEndpoints
             return Results.Ok(ListResponse<AuditLogDto>.Paged(rows, total));
         });
 
+        admin.MapGet("/audit-logs/actors", async (string? scope, HttpContext http, AuditLogService service,
+            CancellationToken ct) => Results.Ok(ListResponse<AuditActorDto>.From(
+                await service.ActorsAsync(http.GetRequiredAccount(), scope, ct))));
+
         admin.MapGet("/staff", async (HttpContext http, StaffService service, CancellationToken ct) =>
             Results.Ok(ListResponse<StaffMemberDto>.From(await service.ListAsync(http.GetRequiredAccount(), ct))));
         admin.MapPost("/staff/assignments", async (AssignStaffRequest request, HttpContext http,
@@ -30,5 +34,11 @@ public static class AdminSystemEndpoints
             StaffService service, CancellationToken ct) =>
             Results.Ok(ListResponse<StaffMemberDto>.From(
                 await service.RevokeAsync(http.GetRequiredAccount(), id, ct))));
+        admin.MapPost("/staff/users/{userId}/lock", async (string userId, HttpContext http, StaffService service,
+            CancellationToken ct) => Results.Ok(ListResponse<StaffMemberDto>.From(
+                await service.SetLockedAsync(http.GetRequiredAccount(), userId, locked: true, ct))));
+        admin.MapPost("/staff/users/{userId}/unlock", async (string userId, HttpContext http, StaffService service,
+            CancellationToken ct) => Results.Ok(ListResponse<StaffMemberDto>.From(
+                await service.SetLockedAsync(http.GetRequiredAccount(), userId, locked: false, ct))));
     }
 }

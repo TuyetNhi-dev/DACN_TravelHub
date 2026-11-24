@@ -8,6 +8,7 @@ using TravelHub.Api.Data;
 using TravelHub.Api.Features.Admin;
 using TravelHub.Api.Features.Admin.Access;
 using TravelHub.Api.Features.Admin.Audit;
+using TravelHub.Api.Features.Admin.Bookings;
 using TravelHub.Api.Features.Admin.Context;
 using TravelHub.Api.Features.Admin.Dashboard;
 using TravelHub.Api.Features.Admin.Departures;
@@ -74,13 +75,16 @@ public static class ServiceRegistration
     /// <summary>Multi-branch back office (docs/architecture/admin-spec.md).</summary>
     private static void AddAdmin(IServiceCollection services)
     {
-        services.AddScoped<OrganizationRepository>().AddScoped<AdminAccessService>();
+        services.AddScoped<OrganizationRepository>()
+            .AddScoped<IBranchDirectory>(provider => provider.GetRequiredService<OrganizationRepository>())
+            .AddScoped<AdminAccessService>();
         services.AddScoped<AuditLogRepository>().AddScoped<AuditLogService>();
         services.AddScoped<AdminContextService>().AddScoped<DashboardRepository>().AddScoped<DashboardService>();
         services.AddScoped<AdminTourRepository>().AddScoped<AdminTourWriter>().AddScoped<AdminTourService>();
         services.AddScoped<AdminDepartureRepository>().AddScoped<AdminDepartureService>();
         services.AddScoped<ManifestRepository>().AddScoped<ManifestService>();
         services.AddScoped<StaffRepository>().AddScoped<StaffService>();
+        services.AddScoped<BookingActivityRepository>().AddScoped<BookingActivityService>();
     }
 
     public static void MapTravelHubEndpoints(this IEndpointRouteBuilder app)

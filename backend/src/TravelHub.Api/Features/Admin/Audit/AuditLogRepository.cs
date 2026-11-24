@@ -7,10 +7,12 @@ using TravelHub.Api.Features.Admin.Access;
 namespace TravelHub.Api.Features.Admin.Audit;
 
 public sealed record AuditLogDto(string Id, DateTime CreatedAt, string ActorName, string Action, string EntityType,
-    string EntityId, string? BranchName, string Summary, IReadOnlyList<AuditChange> Changes);
+    string EntityId, string? BranchName, string Summary, IReadOnlyList<AuditChange> Changes, string ActorId = "");
+
+public sealed record AuditActorDto(string Id, string FullName);
 
 public sealed record AuditLogFilter(ScopeSet Scope, string? EntityType, ulong? ActorId, DateTime? FromUtc,
-    DateTime? ToUtc);
+    DateTime? ToUtc, string? Action = null, string? EntityId = null);
 
 public sealed class AuditLogRepository(MySqlConnectionFactory connections)
 {
@@ -24,13 +26,23 @@ public sealed class AuditLogRepository(MySqlConnectionFactory connections)
 
         await using var command = new MySqlCommand { Connection = connection };
         command.CommandText = """
-            SELECT a.id, a.created_at, u.full_name AS actor_name, a.action, a.entity_type, a.entity_id,
+            SELECT a.id, a.created_at, a.actor_user_id, u.full_name AS actor_name, a.action, a.entity_type,
+                a.entity_id,
                 b.name AS branch_name, a.summary, a.changes
             FROM audit_logs a JOIN users u ON u.id = a.actor_user_id LEFT JOIN branches b ON b.id = a.branch_id
             """ + Where(filter, command) + " ORDER BY a.created_at DESC, a.id DESC LIMIT @limit OFFSET @offset";
         command.Parameters.AddWithValue("@limit", limit);
         command.Parameters.AddWithValue("@offset", offset);
         return (await command.ReadAllAsync(Read, ct), total);
+    }
+
+    public async Task<IReadOnlyList<AuditActorDto>> ListActorsAsync(ScopeSet scope, CancellationToken ct)
+    {
+        await using var connection = await connections.OpenAsync(ct);
+        await using var command = new MySqlCommand { Connection = connection };
+        command.CommandText = "SELECT DISTINCT u.id, u.full_name "
+            + "FROM audit_logs a JOIN users u ON u.id = a.actor_user_id" + Where(new AuditLogFilter(scope, null, null, null, null), command) + " ORDER BY u.full_name";
+        return await command.ReadAllAsync(r => new AuditActorDto(r.GetId("id"), r.GetString("full_name")), ct);
     }
 
     private static string Where(AuditLogFilter filter, MySqlCommand command)
@@ -41,12 +53,15 @@ public sealed class AuditLogRepository(MySqlConnectionFactory connections)
         SqlFilter.AddIfPresent(sql, command, "a.actor_user_id = @actor", "@actor", filter.ActorId);
         SqlFilter.AddIfPresent(sql, command, "a.created_at >= @from", "@from", filter.FromUtc);
         SqlFilter.AddIfPresent(sql, command, "a.created_at < @to", "@to", filter.ToUtc);
+        SqlFilter.AddIfPresent(sql, command, "a.action = @action", "@action", filter.Action);
+        SqlFilter.AddIfPresent(sql, command, "a.entity_id = @entityId", "@entityId", filter.EntityId);
         return sql.ToString();
     }
 
     private static AuditLogDto Read(MySqlDataReader r) => new(r.GetId("id"), r.GetUtcDateTime("created_at"),
         r.GetString("actor_name"), r.GetString("action"), r.GetString("entity_type"), r.GetString("entity_id"),
-        r.GetNullableString("branch_name"), r.GetString("summary"), ParseChanges(r.GetNullableString("changes")));
+        r.GetNullableString("branch_name"), r.GetString("summary"), ParseChanges(r.GetNullableString("changes")),
+        r.GetId("actor_user_id"));
 
     public static IReadOnlyList<AuditChange> ParseChanges(string? json)
     {

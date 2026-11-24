@@ -61,6 +61,13 @@ Quy tắc dùng màu nắng:
 - Dùng `--sun-soft` làm nền cho nhãn gấp như "Còn N ghế", hộp an tâm khi đặt và ghi chú dữ liệu mô phỏng.
 - Không dùng gradient tím, không dùng emoji làm icon. Icon lấy từ `components/ui/Icon.tsx`.
 
+Nền trang chủ (cập nhật 24/11/2026, chỉ giao diện sáng):
+- Nền trang giữ màu trắng. Section `--tint` trong `.home` dùng `--blue-soft` để tách nhịp rõ hơn.
+- Liên kết nằm trực tiếp trên nền section dùng `--link-on-canvas` (xanh đậm hơn `--blue`), vì `--blue` chỉ đạt
+  khoảng 4.43:1 trên `--blue-soft`.
+- Nửa dưới trang có một dải đậm `home-section--deep` (nền `--footer-bg`, quầng hồng và nắng) để ngắt chuỗi section sáng.
+- Chế độ tối giữ nguyên token tối.
+
 ### Chữ
 
 | Token | Giá trị | Dùng cho |
@@ -104,7 +111,7 @@ Tiêu đề dùng `text-wrap: balance`, đoạn văn dùng `text-wrap: pretty`. 
 | `Button`, `ButtonLink` | Có các biến thể `primary`, `outline`, `ghost`, `glass`, `white` và cỡ `sm`/`md`/`lg`; có trạng thái loading và disabled |
 | `Card`, `MediaFrame` | Thẻ bo `--radius-lg`. Ảnh có tỉ lệ cố định và nhãn "Ảnh minh họa" khi cần |
 | `Badge` | Các tone `info`, `success`, `warning`, `danger`, `neutral`, `brand`, `image`, `sun` (gấp/ấm) |
-| `PriceTag` | Giá VND. `quote` thêm nhãn "Giá tham khảo, chờ xác nhận" cho khách sạn và vé |
+| `PriceTag` | Giá VND. `quote` thêm nhãn "Giá hợp đồng, chờ xác nhận chỗ" cho khách sạn và vé |
 | `StarRating`, `ReviewScore` | Hạng sao khách sạn; điểm đánh giá (chỉ dùng cho dữ liệu mô phỏng có ghi rõ) |
 | `SectionHeader` | Eyebrow, tiêu đề, mô tả, liên kết "Xem tất cả" |
 | `EmptyState`, `ErrorState`, `LoadingState` | Có icon tròn, nội dung căn giữa, nút "Thử lại" |

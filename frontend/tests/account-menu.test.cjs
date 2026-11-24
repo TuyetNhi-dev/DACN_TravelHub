@@ -28,3 +28,21 @@ test('staff and admins also get the back-office queues, with the new-request cou
     assert.deepEqual(links.filter(link => link.showsNewRequests).map(link => link.href), ['/admin/service-requests']);
   }
 });
+
+test('after sign-in, staff and admins start in the back office unless they came from a specific page', () => {
+  for (const role of ['STAFF', 'ADMIN']) {
+    const operator = user('CUSTOMER', role);
+    assert.equal(auth.postLoginPath(null, operator), '/admin/bookings');
+    assert.equal(auth.postLoginPath('/', operator), '/admin/bookings');
+    assert.equal(auth.postLoginPath('//evil.example', operator), '/admin/bookings');
+    assert.equal(auth.postLoginPath('/tours/3', operator), '/tours/3');
+  }
+});
+
+test('after sign-in, customers keep the usual destination', () => {
+  const customer = user('CUSTOMER');
+  assert.equal(auth.postLoginPath(null, customer), '/account');
+  assert.equal(auth.postLoginPath('/', customer), '/');
+  assert.equal(auth.postLoginPath('/gio-hang', customer), '/gio-hang');
+  assert.equal(auth.postLoginPath('https://evil.example', customer), '/account');
+});

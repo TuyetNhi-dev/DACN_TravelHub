@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { OTP_LENGTH } from "@/components/auth/OtpInput";
 import { ApiError } from "@/lib/api-client";
-import { safeReturnPath } from "@/lib/auth";
+import { postLoginPath } from "@/lib/auth";
 import { verifyEmail } from "@/services/auth";
 
 /** Verifies the emailed code; success signs the user in and continues to the page they came from. */
@@ -21,9 +21,9 @@ export function useOtpVerification(email: string) {
     setBusy(true);
     setError("");
     try {
-      await verifyEmail(email, value);
+      const session = await verifyEmail(email, value);
       await refresh();
-      router.replace(safeReturnPath(new URLSearchParams(window.location.search).get("next")));
+      router.replace(postLoginPath(new URLSearchParams(window.location.search).get("next"), session.user));
     } catch (failure) {
       setError(failure instanceof ApiError ? failure.message : "Không thể kết nối. Vui lòng thử lại.");
       setCode("");

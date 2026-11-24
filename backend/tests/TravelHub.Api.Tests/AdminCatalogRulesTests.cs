@@ -2,12 +2,14 @@ using ClosedXML.Excel;
 using TravelHub.Api.Common.Errors;
 using TravelHub.Api.Features.Admin.Access;
 using TravelHub.Api.Features.Admin.Audit;
+using TravelHub.Api.Features.Admin.Bookings;
 using TravelHub.Api.Features.Admin.Dashboard;
 using TravelHub.Api.Features.Admin.Departures;
 using TravelHub.Api.Features.Admin.Staff;
 using TravelHub.Api.Features.Admin.Tours;
 using TravelHub.Api.Features.Auth;
 using TravelHub.Api.Features.Tours;
+using DepartureStatus = TravelHub.Api.Features.Admin.Departures.DepartureStatus;
 
 namespace TravelHub.Api.Tests;
 
@@ -138,11 +140,70 @@ public sealed class DepartureRulesTests
         Assert.Equal(30, terms.Capacity);
     }
 
+    private static readonly DateOnly Leave = new(2026, 12, 5);
+    private static readonly DateOnly Back = new(2026, 12, 7);
+
+    private static string? Move(string from, string to, DateOnly today, string? reason = null) =>
+        DepartureRules.CheckTransition(from, to, Leave, Back, today, reason);
+
     [Fact]
-    public void Status_is_open_or_closed_only()
+    public void Life_cycle_moves_forward_and_sale_reopens_only_before_departure()
     {
-        Assert.Equal("closed", DepartureRules.Status("closed"));
-        Assert.Throws<ApiValidationException>(() => DepartureRules.Status("cancelled"));
+        Assert.Null(Move(DepartureStatus.Open, DepartureStatus.Closed, Today));
+        Assert.Null(Move(DepartureStatus.Closed, DepartureStatus.Open, Today));
+        Assert.Null(Move(DepartureStatus.Open, DepartureStatus.Guaranteed, Today));
+        Assert.Null(Move(DepartureStatus.Guaranteed, DepartureStatus.InProgress, Leave));
+        Assert.Null(Move(DepartureStatus.InProgress, DepartureStatus.Completed, Back));
+        Assert.Equal(409, Assert.Throws<ApiException>(
+            () => Move(DepartureStatus.Closed, DepartureStatus.Open, Leave)).StatusCode);
+        Assert.Equal(409, Assert.Throws<ApiException>(
+            () => Move(DepartureStatus.Guaranteed, DepartureStatus.Open, Today)).StatusCode);
+    }
+
+    [Fact]
+    public void Trips_cannot_start_or_finish_early_and_final_states_stay_final()
+    {
+        Assert.Equal(409, Assert.Throws<ApiException>(
+            () => Move(DepartureStatus.Guaranteed, DepartureStatus.InProgress, Today)).StatusCode);
+        Assert.Equal(409, Assert.Throws<ApiException>(
+            () => Move(DepartureStatus.InProgress, DepartureStatus.Completed, Leave)).StatusCode);
+        foreach (var final in new[] { DepartureStatus.Completed, DepartureStatus.Cancelled })
+            Assert.Throws<ApiException>(() => Move(final, DepartureStatus.Open, Today, "Lý do bất kỳ"));
+        Assert.Throws<ApiValidationException>(() => Move(DepartureStatus.Open, "deleted", Today));
+    }
+
+    [Fact]
+    public void Cancelling_needs_a_reason_which_is_trimmed()
+    {
+        var error = Assert.Throws<ApiValidationException>(
+            () => Move(DepartureStatus.Open, DepartureStatus.Cancelled, Today, "  ab "));
+        Assert.Equal(["reason"], error.Errors.Keys);
+        Assert.Equal("Không đủ khách tối thiểu",
+            Move(DepartureStatus.Guaranteed, DepartureStatus.Cancelled, Today, "  Không đủ khách tối thiểu "));
+        Assert.Throws<ApiException>(
+            () => Move(DepartureStatus.InProgress, DepartureStatus.Cancelled, Leave, "Đã khởi hành"));
+    }
+
+    [Fact]
+    public void Capacity_cannot_drop_below_seats_already_sold()
+    {
+        DepartureRules.EnsureCapacityCoversReserved(capacity: 12, reservedSeats: 12);
+        var error = Assert.Throws<ApiException>(() => DepartureRules.EnsureCapacityCoversReserved(11, 12));
+        Assert.Equal(409, error.StatusCode);
+        Assert.Contains("12 chỗ", error.Message);
+    }
+
+    [Fact]
+    public void Bulk_creation_covers_the_range_on_each_chosen_weekday_only()
+    {
+        var errors = new ValidationErrors();
+        // Saturdays (6) and Sundays (0) from Mon 23/11 to Sun 20/12/2026: four weekends.
+        var dates = DepartureRules.WeeklyDates(Weekly(new(2026, 11, 23), new(2026, 12, 20), 0, 6), Today, errors);
+        Assert.False(errors.HasErrors);
+        Assert.Equal(8, dates.Count);
+        Assert.All(dates, d => Assert.Contains(d.DayOfWeek, new[] { DayOfWeek.Saturday, DayOfWeek.Sunday }));
+        Assert.Equal(new DateOnly(2026, 11, 28), dates[0]);
+        Assert.Equal(new DateOnly(2026, 12, 20), dates[^1]);
     }
 }
 
@@ -208,6 +269,51 @@ public sealed class AdminAuditAndSystemTests
     }
 
     [Fact]
+    public void Dashboard_compares_with_last_month_and_reports_occupancy()
+    {
+        Assert.Equal(25.0m, DashboardRules.ChangePercent(125m, 100m));
+        Assert.Equal(-50.0m, DashboardRules.ChangePercent(50m, 100m));
+        Assert.Null(DashboardRules.ChangePercent(80m, 0m));
+        Assert.Equal(33.3m, DashboardRules.OccupancyPercent(new SeatTotals(10, 30)));
+        Assert.Null(DashboardRules.OccupancyPercent(new SeatTotals(0, 0)));
+        var months = DashboardRules.LastMonths(new DateOnly(2026, 2, 14), 6);
+        Assert.Equal(["2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02"],
+            months.Select(DashboardRules.MonthKey));
+    }
+
+    [Fact]
+    public void Tour_sort_keys_map_to_fixed_sql_and_unknown_keys_are_refused()
+    {
+        Assert.Equal("t.base_price DESC, t.id", AdminTourSort.Sql("price_desc"));
+        Assert.Equal("t.id DESC", AdminTourSort.Sql(null));
+        Assert.True(AdminTourSort.IsKnown(null));
+        Assert.False(AdminTourSort.IsKnown("t.id; DROP TABLE tours"));
+    }
+
+    [Fact]
+    public void Booking_notes_are_trimmed_and_history_starts_with_the_order()
+    {
+        Assert.Equal("Gọi lại lúc 9h", BookingNoteRules.Validate(new BookingNoteRequest("  Gọi lại lúc 9h ")));
+        Assert.Throws<ApiValidationException>(() => BookingNoteRules.Validate(new BookingNoteRequest("   ")));
+        Assert.Throws<ApiValidationException>(() =>
+            BookingNoteRules.Validate(new BookingNoteRequest(new string('x', BookingNoteRules.MaxLength + 1))));
+        var created = new DateTime(2026, 11, 20, 1, 0, 0, DateTimeKind.Utc);
+        var history = BookingNoteRules.History(created, "Khách A", [
+            new BookingHistoryDto(created.AddHours(5), "NV", "booking.confirm", "Xác nhận"),
+            new BookingHistoryDto(created.AddHours(1), "NV", "booking.reject", "Từ chối"),
+        ]);
+        Assert.Equal([BookingNoteRules.CreatedAction, "booking.reject", "booking.confirm"],
+            history.Select(h => h.Action));
+    }
+
+    [Fact]
+    public void Admins_never_remove_their_own_role_or_lock_themselves()
+    {
+        StaffRules.EnsureNotSelf(1, 2, "x");
+        Assert.Equal(409, Assert.Throws<ApiException>(() => StaffRules.EnsureNotSelf(7, 7, "x")).StatusCode);
+    }
+
+    [Fact]
     public void Public_tour_list_accepts_only_known_region_codes()
     {
         Assert.Null(TourService.ValidRegion(null));
@@ -239,7 +345,26 @@ public sealed class ManifestExcelTests
         Assert.Equal("02/01/1990", sheet.Cell(ManifestExcel.HeaderRow + 1, 5).GetString());
         Assert.Equal("Trẻ em", sheet.Cell(ManifestExcel.HeaderRow + 2, 4).GetString());
         Assert.StartsWith("(chưa có tên", sheet.Cell(ManifestExcel.HeaderRow + 3, 3).GetString());
-        Assert.Equal("Đang giữ chỗ", sheet.Cell(ManifestExcel.HeaderRow + 3, 9).GetString());
-        Assert.Equal("doan-TOUR001-2026-12-05.xlsx", ManifestExcel.FileName(Departure));
+        Assert.Equal("Chưa thanh toán (đang giữ chỗ)", sheet.Cell(ManifestExcel.HeaderRow + 3, 9).GetString());
+        Assert.Equal("Đã thanh toán", sheet.Cell(ManifestExcel.HeaderRow + 1, 9).GetString());
+        Assert.Equal("SH-TOUR001-2026-12-05.xlsx", ManifestExcel.FileName(Departure));
+    }
+
+    [Fact]
+    public void Workbook_has_exactly_one_row_per_passenger_a_bold_frozen_header_and_bounded_widths()
+    {
+        var passengers = Enumerable.Range(1, 7).Select(i => new ManifestPassengerDto($"Khách {i}", "adult", null))
+            .ToList();
+        var manifest = new ManifestDto(Departure, [
+            new("1", "SH1", "confirmed", "Lê Văn Một Người Có Tên Rất Dài Để Thử Độ Rộng Cột Tối Đa", "0900000000",
+                "mot-dia-chi-email-rat-dai-de-thu-do-rong-cot@example.com", 7, 0, passengers),
+        ], 7);
+        using var stream = new MemoryStream(ManifestExcel.Build(manifest));
+        using var workbook = new XLWorkbook(stream);
+        var sheet = workbook.Worksheet(ManifestExcel.SheetName);
+        Assert.Equal(ManifestExcel.HeaderRow + passengers.Count, sheet.LastRowUsed()!.RowNumber());
+        Assert.True(sheet.Cell(ManifestExcel.HeaderRow, 1).Style.Font.Bold);
+        Assert.Equal(ManifestExcel.HeaderRow, sheet.SheetView.SplitRow);
+        Assert.All(sheet.ColumnsUsed(), column => Assert.True(column.Width <= ManifestExcel.MaxColumnWidth));
     }
 }

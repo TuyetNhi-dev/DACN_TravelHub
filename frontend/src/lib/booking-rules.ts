@@ -1,5 +1,5 @@
 import type {
-  BookingItemStatus, BookingSummary, PassengerInput, PassengerType, ServiceType,
+  BookingDetail, BookingItemStatus, BookingSummary, PassengerInput, PassengerType, ServiceType,
 } from "@/types/booking";
 
 export const MAX_TOUR_TRAVELERS = 20;
@@ -24,7 +24,7 @@ export const ITEM_STATUS: Record<BookingItemStatus, { label: string; tone: Statu
   },
   awaiting_supplier: {
     label: "Chờ đối tác xác nhận", tone: "warning",
-    hint: "Giá tham khảo, chưa phải xác nhận. Đơn chỉ có hiệu lực khi đối tác xác nhận còn chỗ.",
+    hint: "Giá hợp đồng đã ghi trên đơn. Đơn chỉ có hiệu lực khi đối tác xác nhận còn chỗ.",
   },
   awaiting_payment: {
     label: "Chờ thanh toán", tone: "info",
@@ -49,6 +49,18 @@ export function itemStatusMeta(status: string) {
  */
 export function holdsSeats(booking: Pick<BookingSummary, "serviceType" | "holdExpiresAt">): boolean {
   return booking.serviceType === "tour" || booking.holdExpiresAt !== null;
+}
+
+/**
+ * Index into the tour checkout steps (0 chọn tour … 3 hoàn tất); null when the step bar does not apply.
+ * Flight deals also hold seats, but the step labels and trust notes speak of tours, so only tours get them.
+ */
+export function tourCheckoutStep(
+  booking: Pick<BookingDetail, "serviceType" | "status" | "paidAt" | "canPay">,
+): number | null {
+  if (booking.serviceType !== "tour" || booking.status === "cancelled") return null;
+  if (booking.paidAt !== null || booking.status === "confirmed" || booking.status === "completed") return 3;
+  return booking.canPay ? 2 : 1;
 }
 
 export function emptyPassengers(adults: number, children: number): PassengerInput[] {

@@ -57,10 +57,53 @@ public static class DepartureRules
         return dates;
     }
 
-    public static string Status(string? raw) => raw is not null && DepartureStatus.Settable.Contains(raw)
-        ? raw
-        : throw new ApiValidationException(
-            new Dictionary<string, string[]> { ["status"] = ["Trạng thái không hợp lệ."] });
+    /// <summary>
+    /// Early, friendly refusal when the new capacity is below the seats already sold. The UPDATE re-checks
+    /// <c>reserved_seats &lt;= @capacity</c> in SQL, which stays the real guard when two people act at once.
+    /// </summary>
+    public static void EnsureCapacityCoversReserved(int capacity, int reservedSeats)
+    {
+        if (capacity < reservedSeats)
+            throw ApiException.Conflict($"Đã có {reservedSeats} chỗ được đặt, số chỗ không thể thấp hơn.");
+    }
+
+    public const int MinReasonLength = 5;
+    public const int MaxReasonLength = 500;
+
+    public static readonly IReadOnlyDictionary<string, string> StatusLabels = new Dictionary<string, string>
+    {
+        [DepartureStatus.Open] = "Mở bán", [DepartureStatus.Closed] = "Tạm đóng bán",
+        [DepartureStatus.Guaranteed] = "Chốt đoàn", [DepartureStatus.InProgress] = "Đang đi",
+        [DepartureStatus.Completed] = "Hoàn thành", [DepartureStatus.Cancelled] = "Đã hủy",
+    };
+
+    /// <summary>
+    /// Checks a status change against the life cycle and the calendar. Returns the trimmed cancel reason when the
+    /// new status is cancelled (required there), otherwise null.
+    /// </summary>
+    public static string? CheckTransition(string from, string? to, DateOnly departure, DateOnly returnDate,
+        DateOnly today, string? reason)
+    {
+        if (to is null || !DepartureStatus.All.Contains(to)) throw Invalid("status", "Trạng thái không hợp lệ.");
+        if (!DepartureStatus.Next.TryGetValue(from, out var next) || !next.Contains(to))
+            throw ApiException.Conflict($"Không chuyển được từ \"{Label(from)}\" sang \"{Label(to)}\".");
+        if (to == DepartureStatus.Open && departure <= today)
+            throw ApiException.Conflict("Không mở bán lịch đã khởi hành.");
+        if (to == DepartureStatus.InProgress && today < departure)
+            throw ApiException.Conflict("Chưa tới ngày khởi hành, chưa chuyển sang đang đi được.");
+        if (to == DepartureStatus.Completed && today < returnDate)
+            throw ApiException.Conflict("Chuyến chưa tới ngày về, chưa hoàn thành được.");
+        if (to != DepartureStatus.Cancelled) return null;
+        var text = reason?.Trim() ?? "";
+        if (text.Length is < MinReasonLength or > MaxReasonLength)
+            throw Invalid("reason", $"Lý do hủy từ {MinReasonLength} đến {MaxReasonLength} ký tự.");
+        return text;
+    }
+
+    public static string Label(string status) => StatusLabels.GetValueOrDefault(status, status);
+
+    private static ApiValidationException Invalid(string field, string message) =>
+        new(new Dictionary<string, string[]> { [field] = [message] });
 
     private static void AddPrice(decimal? price, bool required, string field, ValidationErrors errors) =>
         errors.AddIf((required && price is null) || price is < 0 or > MaxPrice, field, "Giá không hợp lệ.");

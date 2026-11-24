@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { TourCard } from "@/components/home/TourCard";
+import { LISTING_CARD_SIZES, TourCard } from "@/components/home/TourCard";
 import { ActiveFilterChips } from "@/components/listing/ActiveFilterChips";
 import { Icon } from "@/components/ui/Icon";
 import { Pagination } from "@/components/ui/Pagination";
@@ -88,7 +88,7 @@ export function TourResults({ tours, region, initialFilters, showAll }: TourResu
             <>
               <div className="listing-grid">
                 {rows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE)
-                  .map(tour => <TourCard key={tour.id} tour={tour} />)}
+                  .map(tour => <TourCard key={tour.id} tour={tour} sizes={LISTING_CARD_SIZES} />)}
               </div>
               <Pagination page={currentPage} pageCount={pageCount} onChange={setPage} label="Phân trang tour" />
             </>

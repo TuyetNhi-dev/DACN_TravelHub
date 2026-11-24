@@ -103,7 +103,37 @@ body:not(:has(.adm-shell)) {
 /* ---------- Home: rhythm and warm section ---------- */
 .home-section--sun { background:
   radial-gradient(ellipse 60% 80% at 100% 0%, var(--sun-soft), transparent 70%), var(--canvas); }
-.home-deals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-6); margin-top: var(--space-6); }
+/* Light theme: white page with sea-blue tint sections. Dark mode keeps its own tokens. */
+:root:not([data-theme="dark"]) .home {
+  /* --blue falls just under 4.5:1 on the sea tint, so links on the section background take a deeper blue. */
+  --link-on-canvas: color-mix(in srgb, var(--blue) 80%, var(--ink));
+}
+:root:not([data-theme="dark"]) .home .home-section--tint { background: var(--blue-soft); }
+:root:not([data-theme="dark"]) .home .ui-view-all:not(:is(.soon-band, .home-section--deep) *) {
+  color: var(--link-on-canvas); }
+/* --accent-warm is under 4.5:1 even on white; the brand pink keeps the emphasis and passes on both backgrounds. */
+:root:not([data-theme="dark"]) .home .ui-section-head p strong { color: var(--brand); }
+
+/* Deep band ("Vì sao chọn SàiHành"): breaks the run of light sections in the lower half. */
+.home-section--deep { color: #fff; background:
+  radial-gradient(ellipse 50% 70% at 0% 0%, color-mix(in srgb, var(--brand) 32%, transparent), transparent 70%),
+  radial-gradient(ellipse 45% 65% at 100% 100%, color-mix(in srgb, var(--sun) 24%, transparent), transparent 70%),
+  var(--footer-bg); }
+.home-section--deep .ui-eyebrow { color: #ffd0ea; }
+.home-section--deep .ui-section-head h2, .home-section--deep .promise h3 { color: #fff; }
+.home-section--deep .ui-section-head p, .home-section--deep .promise p { color: var(--text-on-promo); }
+.home-section--deep .promise { border-color: var(--promo-line); background: rgba(255, 255, 255, .06); }
+.home-section--deep .promise-icon { color: var(--sun); background: color-mix(in srgb, var(--sun) 16%, transparent); }
+
+/* No deals right now: one quiet line instead of a large empty block in the middle of the page. */
+.home-deals-empty { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4);
+  margin: 0; padding: var(--space-4) var(--space-6); border-left: 4px solid var(--sun);
+  border-radius: var(--radius-sm); background: var(--panel); box-shadow: var(--shadow-sm);
+  color: var(--text-secondary); }
+.home-deals-empty > span { display: inline-flex; align-items: center; gap: var(--space-2); }
+.home-deals-empty svg { color: var(--sun-ink); }
+
+.home-deals { margin-top: var(--space-6); }
 .home-deals .fd-card { height: 100%; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
   transition: transform var(--duration-base) var(--ease-out), box-shadow var(--duration-base); }
 .home-deals .fd-card:hover { transform: translateY(-6px); box-shadow: var(--shadow-hover); }
@@ -213,7 +243,6 @@ body:not(:has(.adm-shell)) {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 1080px) {
-  .home-deals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .review-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .tour-highlights { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -233,7 +262,7 @@ body:not(:has(.adm-shell)) {
 }
 
 @media (max-width: 640px) {
-  .home-deals, .review-grid { grid-template-columns: minmax(0, 1fr); }
+  .review-grid { grid-template-columns: minmax(0, 1fr); }
   .review-card { padding: var(--space-6); }
   .tour-highlights { grid-template-columns: minmax(0, 1fr); }
   .tour-timeline li { grid-template-columns: 64px minmax(0, 1fr); }
