@@ -197,6 +197,9 @@ body:not(:has(.adm-shell)) {
   border-radius: var(--radius-lg); background: var(--panel); border: 1px solid var(--line-subtle);
   box-shadow: var(--shadow-sm); }
 .review-quote { position: absolute; top: 24px; right: 24px; color: var(--blue-soft); }
+.review-sample-badge { align-self: flex-start; padding: 3px 10px; border: 1px dashed var(--sun);
+  border-radius: var(--radius-pill); color: var(--sun-ink); background: var(--sun-soft);
+  font-size: var(--text-caption); font-weight: var(--weight-semibold); }
 .review-card blockquote { margin: 0; flex: 1; }
 .review-card blockquote p { margin: 0; color: var(--text-secondary); font-size: var(--text-body);
   line-height: var(--leading-body); }

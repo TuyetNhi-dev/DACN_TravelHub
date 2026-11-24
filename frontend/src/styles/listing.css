@@ -22,6 +22,12 @@
 .listing-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: var(--space-8); align-items: start; }
 
 .listing-filters { position: sticky; top: 96px; }
+/* The panel (month calendar included) is taller than a laptop screen; while it sticks, it scrolls on its own so
+   the duration and price filters stay reachable instead of hiding below the fold. */
+.listing-filters .listing-filters-body {
+  max-height: calc(100dvh - 96px - var(--space-4)); overflow-y: auto; overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
 .listing-filters-body {
   display: grid; gap: var(--space-6); padding: var(--space-6); border: 1px solid var(--card-border);
   border-radius: var(--radius-lg); background: var(--panel); box-shadow: var(--shadow-md);
@@ -90,6 +96,10 @@
   font-weight: 600; cursor: pointer;
 }
 .listing-chip:hover { background: var(--brand); color: var(--on-brand); }
+.listing-pills button:focus-visible, .listing-chip:focus-visible, .listing-chip-clear:focus-visible,
+.listing-context button:focus-visible, .listing-filters-title button:focus-visible {
+  outline: var(--focus-ring); outline-offset: 2px;
+}
 
 .listing-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: var(--space-6); }
 .listing-grid > .ui-card { height: 100%; }
@@ -143,6 +153,8 @@
   .listing-hero-inner { padding: var(--space-8) 0 calc(var(--space-8) + 24px); }
   .listing-sort { width: 100%; }
   .listing-sort select { flex: 1; min-width: 0; }
+  /* One card per row on phones: a wider photo shortens the scroll through a page of tours. */
+  .listing-grid .ui-media--card, .listing-page .ui-skeleton--media { aspect-ratio: 16 / 9; }
 }
 
 /* "Ngày khởi hành" as a month calendar (TourDateFilter.tsx): one month fits the 280px sidebar and the phone sheet. */

@@ -56,6 +56,7 @@ Quy ước chung:
 | GET | `/api/bookings/me`, `/api/bookings/{id}` | Đơn của chính khách |
 | POST | `/api/bookings/{id}/pay` | Thanh toán mô phỏng; hết hạn giữ chỗ trả 409 |
 | POST | `/api/bookings/{id}/cancel` | Hủy đơn |
+| GET | `/api/bookings/{id}/ticket` | Vé điện tử của đơn tour đã thanh toán (QR không chứa thông tin cá nhân); đơn chưa thanh toán trả 409, đơn của người khác hoặc không phải tour trả 404, chưa cấu hình `Ticket:SigningKey` trả 503 |
 | GET | `/api/cart` | Giỏ hàng của tài khoản |
 | POST | `/api/cart/items`; DELETE `/api/cart/items/{id}` | Thêm/sửa, xóa dòng |
 | POST | `/api/cart/merge` | Gộp giỏ của khách vãng lai khi đăng nhập |
@@ -78,3 +79,20 @@ Quy ước chung:
 | GET | `/api/admin/bookings` | `status`, `serviceType` |
 | GET | `/api/admin/bookings/{id}` | |
 | POST | `/api/admin/bookings/{id}/confirm`, `/reject`, `/complete` | Xác nhận cần mã xác nhận của đối tác |
+
+## Trợ lý AI
+
+| Phương thức | Đường dẫn | Ghi chú |
+|---|---|---|
+| POST | `/api/assistant/chat` | `{ message, history }`; khách vãng lai dùng được, cần header CSRF. Trả `{ reply, tours, sources }`: `tours` là `TourSummaryDto` từ tìm kiếm tour, `sources` là liên kết trang FAQ/chính sách/cẩm nang. Câu hỏi rỗng hoặc quá 500 ký tự trả 400, quá 6 câu/phút trả 429, chưa có khóa Gemini/Gemini lỗi/quá 15 giây trả 503 (`code: assistant_unavailable`). Xem [cài đặt](../setup/ai-assistant.md). |
+
+## Check-in đoàn (migration 017)
+
+Mọi nhân viên có phạm vi xem chi nhánh điều hành lịch được check-in; chỉ BRANCH_MANAGER/ADMIN của chi nhánh đó được hoàn tác. Check-in mở từ 1 ngày trước ngày đi tới ngày về, lịch không bị hủy hay đã kết thúc (ngoài khoảng đó trả 409). Mọi thao tác ghi đều ghi `audit_logs` trong cùng transaction, không ghi tên khách hay mã vé.
+
+| Phương thức | Đường dẫn | Ghi chú |
+|---|---|---|
+| GET | `/api/admin/departures/{id}/check-in` | Đơn đã thanh toán của lịch, từng hành khách và trạng thái check-in |
+| POST | `/api/admin/departures/{id}/check-in/scan` | `{ payload }` từ mã QR; kiểm tra chữ ký, version, lịch, đơn đã thanh toán; chỉ đọc, trả đơn của vé. Chữ ký sai 400, vé không có 404, sai lịch/đã cấp lại/chưa thanh toán 409 |
+| POST | `/api/admin/departures/{id}/check-ins` | `{ passengerIds }`; khách đã check-in trả 409 và không ghi gì |
+| DELETE | `/api/admin/departures/{id}/check-ins/{passengerId}` | Hoàn tác (quản lý); khách chưa check-in trả 404 |

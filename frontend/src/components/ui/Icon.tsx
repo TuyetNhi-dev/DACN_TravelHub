@@ -5,7 +5,7 @@ export type IconName =
   | "menu" | "close" | "minus" | "plus" | "chevron" | "heart" | "bus" | "eye" | "eyeOff"
   | "wifi" | "bed" | "bath" | "utensils" | "bell" | "waves" | "car" | "briefcase" | "accessibility" | "leaf"
   | "passport" | "cart" | "code" | "mail" | "compass" | "alert" | "lock" | "book" | "quote" | "sun"
-  | "grid" | "logout" | "list" | "printer" | "download" | "panel" | "history";
+  | "grid" | "logout" | "list" | "printer" | "download" | "panel" | "history" | "camera" | "scan" | "chat";
 
 export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   const paths: Record<IconName, ReactNode> = {
@@ -25,6 +25,15 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
     headphones: <><path d="M4 14v-2a8 8 0 0 1 16 0v2" /><path d="M18 19c0 1.1-.9 2-2 2h-1v-7h5v5ZM6 21H5c-1.1 0-2-.9-2-2v-5h5v7Z" /></>,
     wallet: <><path d="M3 6h15a2 2 0 0 1 2 2v11H5a2 2 0 0 1-2-2V6Z" /><path d="M3 7V5a2 2 0 0 1 2-2h12M15 12h7v4h-7a2 2 0 0 1 0-4Z" /></>,
     check: <path d="m5 12 4 4L19 6" />,
+    chat: <path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1.1-4.6A8 8 0 1 1 21 12ZM8.5 12h.01M12 12h.01M15.5 12h.01" />,
+    camera: <>
+      <path d="M3 8a2 2 0 0 1 2-2h2.5L9 4h6l1.5 2H19a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z" />
+      <circle cx="12" cy="13" r="3.5" />
+    </>,
+    scan: <>
+      <path d="M4 8V5a1 1 0 0 1 1-1h3M16 4h3a1 1 0 0 1 1 1v3" />
+      <path d="M20 16v3a1 1 0 0 1-1 1h-3M8 20H5a1 1 0 0 1-1-1v-3M7 12h10" />
+    </>,
     code: <path d="m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16" />,
     mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m3 7 9 6 9-6" /></>,
     cart: <><path d="M3 4h2.2l2.3 11h10.8l2-8H6.4" /><circle cx="9.5" cy="19" r="1.5" /><circle cx="17" cy="19" r="1.5" /></>,

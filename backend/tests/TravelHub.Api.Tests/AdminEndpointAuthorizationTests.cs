@@ -10,6 +10,7 @@ using TravelHub.Api.Features.Admin;
 using TravelHub.Api.Features.Admin.Access;
 using TravelHub.Api.Features.Admin.Audit;
 using TravelHub.Api.Features.Admin.Bookings;
+using TravelHub.Api.Features.Admin.CheckIn;
 using TravelHub.Api.Features.Admin.Context;
 using TravelHub.Api.Features.Admin.Dashboard;
 using TravelHub.Api.Features.Admin.Departures;
@@ -99,6 +100,14 @@ public sealed class AdminEndpointAuthorizationTests
                 (s, a) => Get<ManifestService>(s).GetAsync(a, "1", Ct)),
             ["GET /api/admin/departures/{id}/manifest.xlsx"] = (Need.Operator,
                 (s, a) => Get<ManifestService>(s).ExportAsync(a, "1", Ct)),
+            ["GET /api/admin/departures/{id}/check-in"] = (Need.Operator,
+                (s, a) => Get<CheckInService>(s).GetBoardAsync(a, "1", Ct)),
+            ["POST /api/admin/departures/{id}/check-in/scan"] = (Need.Operator, (s, a) => Get<CheckInService>(s)
+                .ScanAsync(a, "1", new ScanTicketRequest("SH1.7K2M9QXH4TBW.1.abc"), Ct)),
+            ["POST /api/admin/departures/{id}/check-ins"] = (Need.Operator, (s, a) => Get<CheckInService>(s)
+                .CheckInAsync(a, "1", new CheckInRequest(["1"]), Ct)),
+            ["DELETE /api/admin/departures/{id}/check-ins/{passengerId}"] = (Need.Manager,
+                (s, a) => Get<CheckInService>(s).UndoAsync(a, "1", "1", Ct)),
             ["GET /api/admin/bookings"] = (Need.Operator, (s, a) => Get<AdminBookingService>(s).ListAsync(a,
                 new AdminBookingQuery(null, null, null), Ct)),
             ["GET /api/admin/bookings/{id}"] = (Need.Operator,

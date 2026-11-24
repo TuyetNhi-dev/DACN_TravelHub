@@ -24,6 +24,20 @@ Nếu lịch dự án ngắn, hoàn thành kỳ nghỉ thông minh và check-in 
 
 ## 1. Trợ lý AI
 
+**Trạng thái: đã làm bản demo (không migration, không lưu lịch sử).** Chốt: Google Gemini API gói miễn phí, model
+`gemini-3.5-flash-lite` (cấu hình được), khóa ở user-secrets `Ai:GeminiApiKey` gửi qua header `x-goog-api-key`.
+Hướng dẫn: [docs/setup/ai-assistant.md](../setup/ai-assistant.md).
+
+- Backend `Features/Assistant/`: `IAiProvider` + adapter `GeminiProvider`; `AssistantService` cho tối đa 3 vòng
+  công cụ rồi một lần gọi cuối không công cụ, hạn 15 giây cả lượt; lỗi, thiếu khóa hay quá hạn trả 503.
+- Công cụ: `search_tours` (qua `TourService`, cùng bộ lọc `/tours`) và `get_policy` (kho tri thức xuất từ
+  `frontend/src/data` bằng `npm run export:assistant-knowledge`). Công cụ khác bị từ chối không chạy.
+- Model không nhận giá và ngày; thẻ tour render từ `TourSummaryDto`. Email, số điện thoại trong câu hỏi bị che trước
+  khi gửi; không đọc tài khoản hay đơn. Rate limit 6 câu/phút theo người dùng hoặc IP; câu hỏi ≤ 500 ký tự.
+- Giao diện: nút "Trợ lý" nổi góc phải mọi trang khách, panel góc phải (desktop) hoặc toàn màn hình (điện thoại),
+  3 câu gợi ý, trạng thái đang trả lời/lỗi/không khả dụng (kèm liên kết tìm tour thường).
+- Chưa làm: bộ đánh giá 30 câu so sánh nhà cung cấp, lưu số liệu sử dụng.
+
 **Phạm vi bản đầu:** nút chat nổi và mục “Trợ lý AI ✨”; model chỉ được chọn tool tìm kiếm tour/lịch khởi hành, đọc nội dung FAQ/chính sách/cẩm nang đã duyệt. Kết quả tour và giá do API nội bộ trả về; thẻ tour có CTA đặt tour. Ngoài phạm vi tri thức thì nói chưa có thông tin và đưa hotline. Không đặt tour, thanh toán, hay khẳng định còn chỗ ngoài dữ liệu API.
 
 | Hạng mục | Đề xuất |
@@ -51,6 +65,14 @@ Giá/điều kiện dưới đây được tra cứu ngày **24/11/2026**; giá 
 
 ## 2. Kỳ nghỉ thông minh
 
+**Trạng thái: đã làm bản đầu (frontend, không API, không migration).**
+
+- `frontend/src/lib/holiday-breaks.ts`: đợt nghỉ = chuỗi ngày liên tục gồm ngày lễ `official` của `vn-holidays.ts` và thứ Bảy, Chủ nhật liền kề; liệt kê từ hôm nay (giờ Việt Nam) tới hết 12 tháng. Nếu chỉ cách cuối tuần một ngày làm việc thì gợi ý xin nghỉ thêm ngày đó. Tết và 2/9 kèm ghi chú lịch nghỉ do Thủ tướng công bố hằng năm.
+- Tour phù hợp: lịch khởi hành mở bán (`upcomingDepartureDates`) mà cả chuyến, tính ngày về = ngày đi + `durationDays` − 1, nằm trọn trong đợt nghỉ; tour cần ngày nghỉ thêm xếp sau và có nhãn riêng.
+- Lọc điểm khởi hành dùng `filterByDeparture` như các danh sách tour khác, tức là lọc theo thành phố khởi hành của tour, không theo từng lịch.
+- Màn hình: trang `/ky-nghi`, mục "Đợt nghỉ lễ sắp tới" trên trang chủ, liên kết ở chân trang. Ngày được tính trên trình duyệt vì trang được prerender tĩnh.
+- Chưa làm: cảnh báo phụ thu lễ (chưa có dữ liệu phụ thu), `GET /api/holidays`.
+
 **Phạm vi:** trang `/ky-nghi` và một mục trang chủ; tạo khoảng nghỉ 12 tháng tới từ ngày lễ chính thức trong `vn-holidays.ts` cộng cuối tuần liền kề. Cho lọc điểm khởi hành; gợi ý tour có thời lượng vừa số ngày nghỉ. Cảnh báo phụ thu lễ chỉ hiển thị khi giá lịch khởi hành có dữ liệu phụ thu đã xác nhận.
 
 | Hạng mục | Đề xuất |
@@ -63,6 +85,20 @@ Giá/điều kiện dưới đây được tra cứu ngày **24/11/2026**; giá 
 | Ước lượng | 2–4 ngày công cho tính toán + UI; 1–2 ngày nếu cần API và kiểm tra thêm. |
 
 ## 3. Vé điện tử QR và check-in
+
+**Trạng thái: đã code bản đầu; migration 017 chờ duyệt và chưa chạy trên database nào.**
+
+Đã chốt: QR = `SH1.<mã vé>.<version>.<HMAC-SHA256>` ký bằng `Ticket:SigningKey` (user-secrets), không chứa thông tin
+cá nhân; thư viện `qrcode` (vẽ QR) và `jsqr` (quét camera, chạy cả iPhone Safari); mọi nhân viên trong phạm vi chi
+nhánh điều hành được check-in, chỉ quản lý/admin được hoàn tác; email vé để sau.
+
+- Migration `017_tour_tickets_and_check_in.sql`: `tour_tickets` (một vé mỗi mục đơn tour, tạo khi khách mở vé lần
+  đầu) và `passenger_check_ins` (khóa chính `passenger_id`, quét lặp hoặc đồng thời trả 409).
+- Khách: `/bookings/[id]/ve` (xem, in vé); nút "Xem vé điện tử" ở chi tiết đơn tour đã thanh toán.
+- Nhân viên: `/admin/departures/[id]/check-in` (mở từ "Danh sách đoàn"): quét QR bằng camera, hoặc tìm theo mã đơn
+  hay tên khách rồi chọn từng người. Check-in mở từ 1 ngày trước ngày đi tới ngày về. Audit ghi mã đơn và số khách,
+  không ghi tên hay mã vé.
+- Chưa làm: email vé, cấp lại vé (tăng `version`) từ admin, vé cho vé deal.
 
 **Phạm vi:** sau khi đơn tour chuyển `confirmed`, mỗi booking có vé xem/in được; email xác nhận có liên kết vé. Admin/nhân viên mở check-in theo chuyến, quét camera hoặc nhập mã dự phòng, đánh dấu từng hành khách. Bản đầu chỉ áp dụng tour confirmed; quyết định riêng trước khi hỗ trợ vé deal.
 

@@ -1,0 +1,126 @@
+/* Tour e-ticket (/bookings/[id]/ve). Colours come from tokens.css; the printout is plain black on white. */
+
+.ticket-layout { display: grid; grid-template-columns: minmax(0, 720px) minmax(260px, 320px); gap: 24px;
+  align-items: start; }
+.ticket-card { overflow: hidden; background: var(--panel); border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+
+/* ---------- Header band (brand gradient, white text: ≥ 4.5:1 on both ends in both themes) ---------- */
+.ticket-head { display: grid; gap: 8px; padding: 24px 28px;
+  background: linear-gradient(135deg, var(--promo-start), var(--promo-end)); color: var(--on-brand); }
+.ticket-head-top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.ticket-brand { display: inline-flex; align-items: center; gap: 8px; font-size: var(--text-eyebrow);
+  font-weight: var(--weight-bold); letter-spacing: .08em; text-transform: uppercase; }
+.ticket-status { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in srgb, var(--on-brand) 40%, transparent);
+  background: color-mix(in srgb, var(--on-brand) 16%, transparent); font-size: var(--text-caption);
+  font-weight: var(--weight-semibold); }
+.ticket-head h2 { margin: 4px 0 0; font-size: clamp(20px, 2.4vw, 26px); line-height: var(--leading-snug);
+  text-wrap: balance; }
+.ticket-head p { margin: 0; color: var(--text-on-promo); font-size: var(--text-small); }
+.ticket-head p strong { color: var(--on-brand); letter-spacing: .03em; }
+
+/* ---------- Route: departure → return ---------- */
+.ticket-route { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center;
+  gap: 16px; margin: 0; padding: 24px 28px 8px; }
+.ticket-route dt { color: var(--muted); font-size: var(--text-eyebrow); font-weight: var(--weight-semibold);
+  letter-spacing: .06em; text-transform: uppercase; }
+.ticket-route dd { margin: 4px 0 0; font-size: clamp(20px, 2.4vw, 24px); font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums; }
+.ticket-route dd.ticket-route-sub { margin-top: 2px; color: var(--text-secondary); font-size: var(--text-small);
+  font-weight: var(--weight-medium); }
+.ticket-route-end { text-align: right; }
+.ticket-route-line { position: relative; width: clamp(56px, 12vw, 140px); display: grid; place-items: center;
+  color: var(--blue); }
+.ticket-route-line::before { content: ""; position: absolute; inset: 50% 0 auto;
+  border-top: 2px dashed var(--line-strong); }
+.ticket-route-line svg { position: relative; box-sizing: content-box; padding: 8px; border-radius: 50%;
+  background: var(--blue-soft); }
+
+/* ---------- Perforation between the trip and the stub ---------- */
+.ticket-perforation { position: relative; height: 28px; margin: 12px 0; }
+.ticket-perforation::before { content: ""; position: absolute; inset: 50% 24px auto;
+  border-top: 2px dashed var(--line-strong); }
+.ticket-perforation::after { content: ""; position: absolute; inset: 0 -15px; pointer-events: none;
+  background: radial-gradient(circle at 0 50%, var(--canvas) 13px, transparent 14px),
+    radial-gradient(circle at 100% 50%, var(--canvas) 13px, transparent 14px); }
+
+/* ---------- Stub: QR + passengers ---------- */
+.ticket-stub { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 28px; padding: 0 28px 24px; }
+.ticket-qr { margin: 0; display: grid; justify-items: center; align-content: start; gap: 10px; }
+/* The QR keeps a white quiet zone in dark mode too, or phone cameras cannot read it. */
+.ticket-qr-plate { padding: 10px; border: 1px solid var(--line); border-radius: var(--radius-md); background: #fff; }
+.ticket-qr img { display: block; width: 200px; height: 200px; }
+/* Fixed dark grey (the light theme's --text-secondary): it sits on the plate, which stays white in both themes. */
+.ticket-qr-placeholder { width: 200px; height: 200px; display: grid; place-items: center; padding: 16px;
+  color: #47616d; font-size: var(--text-small); text-align: center; }
+.ticket-qr figcaption { display: grid; justify-items: center; gap: 2px; }
+.ticket-qr figcaption span { color: var(--muted); font-size: var(--text-eyebrow); font-weight: var(--weight-semibold);
+  letter-spacing: .06em; text-transform: uppercase; }
+.ticket-qr figcaption strong { color: var(--ink); font-size: 18px; letter-spacing: .14em;
+  font-variant-numeric: tabular-nums; }
+.ticket-qr .btn { display: inline-flex; align-items: center; gap: 6px; }
+
+.ticket-passengers-block h3 { display: flex; align-items: center; gap: 8px; margin: 0 0 12px;
+  font-size: var(--text-h4); }
+.ticket-passengers-block h3 svg { color: var(--blue); }
+.ticket-passengers-block h3 span { color: var(--muted); font-weight: var(--weight-medium); }
+.ticket-passengers { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.ticket-passengers li { display: flex; align-items: center; gap: 12px; padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface); }
+.ticket-passenger-index { width: 28px; height: 28px; flex-shrink: 0; display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--blue-soft); color: var(--ink); font-size: var(--text-caption); font-weight: var(--weight-bold);
+  font-variant-numeric: tabular-nums; }
+.ticket-passenger-name { min-width: 0; display: grid; font-weight: var(--weight-semibold); overflow-wrap: anywhere; }
+.ticket-passenger-name small { color: var(--muted); font-size: var(--text-caption); font-weight: var(--weight-regular);
+  }
+.ticket-boarded { margin-left: auto; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0;
+  color: var(--ink); font-size: var(--text-caption); font-weight: var(--weight-semibold); }
+.ticket-boarded svg { color: var(--green); }
+
+.ticket-actions { display: flex; flex-wrap: wrap; gap: 12px; padding: 20px 28px 24px;
+  border-top: 1px solid var(--line); }
+.ticket-actions .btn { display: inline-flex; align-items: center; gap: 8px; min-height: var(--tap-min); }
+
+/* ---------- Guide ---------- */
+.ticket-guide { display: grid; gap: 14px; padding: 24px; background: var(--panel); border: 1px solid var(--card-border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.ticket-guide h2 { margin: 0; font-size: var(--text-h4); }
+.ticket-guide ol { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; counter-reset: guide; }
+.ticket-guide li { position: relative; padding-left: 38px; color: var(--text-secondary); font-size: var(--text-small);
+  line-height: var(--leading-snug); counter-increment: guide; }
+.ticket-guide li::before { content: counter(guide); position: absolute; left: 0; top: -2px; width: 26px; height: 26px;
+  display: grid; place-items: center; border-radius: 50%; background: var(--blue-soft); color: var(--ink);
+  font-size: var(--text-caption); font-weight: var(--weight-bold); }
+.ticket-guide-warn { display: flex; align-items: flex-start; gap: 10px; margin: 0; padding: 12px 14px;
+  border-radius: var(--radius-sm); background: var(--sun-soft); color: var(--sun-ink); font-size: var(--text-small);
+  line-height: var(--leading-snug); }
+.ticket-guide-warn svg { flex-shrink: 0; margin-top: 1px; }
+
+@media (max-width: 960px) {
+  .ticket-layout { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+  .ticket-head, .ticket-route { padding-inline: 20px; }
+  .ticket-stub { grid-template-columns: minmax(0, 1fr); padding-inline: 20px; }
+  .ticket-actions { padding-inline: 20px; }
+  .ticket-actions .btn { flex: 1 1 auto; }
+}
+
+@media print {
+  body:has(.ticket-page) .header, body:has(.ticket-page) .site-footer, body:has(.ticket-page) .skip-link,
+  .ticket-no-print { display: none !important; }
+  body:has(.ticket-page) { background: #fff; }
+  .ticket-layout { display: block; }
+  .ticket-card { max-width: 720px; border-color: #000; color: #000; background: #fff; box-shadow: none; }
+  .ticket-head { background: none; color: #000; border-bottom: 2px solid #000; }
+  .ticket-head p, .ticket-head p strong, .ticket-route dt, .ticket-route dd, .ticket-route-sub,
+  .ticket-qr figcaption span, .ticket-qr figcaption strong, .ticket-passengers-block h3,
+  .ticket-passenger-name small, .ticket-boarded { color: #000; }
+  .ticket-status { border-color: #000; background: none; }
+  .ticket-perforation::after { display: none; }
+  .ticket-passengers li, .ticket-passenger-index { background: none; border: 1px solid #000; }
+}

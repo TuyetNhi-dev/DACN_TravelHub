@@ -98,7 +98,9 @@
 
 /* ---------- Carousel ---------- */
 .ui-carousel { position: relative; }
-.ui-carousel-track { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(280px, calc((100% - 48px) / 3));
+/* position: relative makes the track the containing block of absolutely positioned descendants (.sr-only text in
+   off-screen slides): without it they escape the track's overflow clip and widen the whole page. */
+.ui-carousel-track { position: relative; display: grid; grid-auto-flow: column; grid-auto-columns: minmax(280px, calc((100% - 48px) / 3));
   gap: 24px; margin: 0; padding: 8px 4px 24px; list-style: none; overflow-x: auto; scroll-snap-type: x mandatory;
   scroll-behavior: smooth; scrollbar-width: none; overscroll-behavior-x: contain; }
 .ui-carousel-track::-webkit-scrollbar { display: none; }

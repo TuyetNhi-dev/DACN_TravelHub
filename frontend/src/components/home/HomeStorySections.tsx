@@ -27,7 +27,7 @@ export function HomeStorySections() {
 
       <section className="home-section home-section--tint" aria-labelledby="reviews-title">
         <Reveal className="container">
-          <SectionHeader id="reviews-title" eyebrow="Khách nói gì" title="Cảm nhận sau chuyến đi" />
+          <SectionHeader id="reviews-title" eyebrow="Nội dung minh họa" title="Cảm nhận sau chuyến đi (minh họa)" />
           <HomeTestimonials />
         </Reveal>
       </section>

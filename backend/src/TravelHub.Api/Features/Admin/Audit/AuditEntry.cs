@@ -40,6 +40,8 @@ public static class AuditActions
     public const string BookingComplete = "booking.complete";
     public const string BookingCancel = "booking.cancel";
     public const string BookingNote = "booking.note";
+    public const string BookingCheckIn = "booking.check_in";
+    public const string BookingCheckInUndo = "booking.check_in_undo";
     public const string RequestStatus = "service_request.status";
     public const string RequestNote = "service_request.note";
     public const string RequestAssign = "service_request.assign";
@@ -52,7 +54,7 @@ public static class AuditActions
     {
         TourCreate, TourUpdate, TourStatus, TourClone, TourImages, TourItinerary, TourInclusions, DepartureCreate,
         DepartureBulkCreate, DepartureUpdate, DepartureStatus, BookingConfirm, BookingReject, BookingComplete,
-        BookingCancel, BookingNote, RequestStatus, RequestNote, RequestAssign, StaffAssign, StaffRevoke, UserLock,
+        BookingCancel, BookingNote, BookingCheckIn, BookingCheckInUndo, RequestStatus, RequestNote, RequestAssign, StaffAssign, StaffRevoke, UserLock,
         UserUnlock,
     };
 }

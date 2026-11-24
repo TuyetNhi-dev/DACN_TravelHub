@@ -5,6 +5,7 @@ import { FeaturedTours } from "@/components/home/FeaturedTours";
 import { HeroBanner } from "@/components/home/HeroBanner";
 import { HomeCollections } from "@/components/home/HomeCollections";
 import { HomeFlightDeals } from "@/components/home/HomeFlightDeals";
+import { HomeHolidayBreaks } from "@/components/home/HomeHolidayBreaks";
 import { HomeSearch } from "@/components/home/HomeSearch";
 import { HomeStorySections } from "@/components/home/HomeStorySections";
 import { HomeToursProvider } from "@/components/home/HomeToursProvider";
@@ -17,6 +18,7 @@ import { SectionHeader } from "@/components/ui/SectionHeader";
 import { SOON_DAYS } from "@/services/tours";
 import "@/styles/flight-deals.css";
 import "@/styles/flights.css";
+import "@/styles/holiday-breaks.css";
 
 export default function Home() {
   return (
@@ -57,6 +59,8 @@ export default function Home() {
             </div>
           </Reveal>
         </section>
+
+        <HomeHolidayBreaks />
 
         <section className="home-section" aria-labelledby="needs-title">
           <Reveal className="container">

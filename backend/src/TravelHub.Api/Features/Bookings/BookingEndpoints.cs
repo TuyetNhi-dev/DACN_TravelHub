@@ -1,5 +1,6 @@
 using TravelHub.Api.Common.Http;
 using TravelHub.Api.Features.Auth;
+using TravelHub.Api.Features.Tickets;
 
 namespace TravelHub.Api.Features.Bookings;
 
@@ -28,6 +29,9 @@ public static class BookingEndpoints
                 await service.ListForCustomerAsync(http.GetRequiredUserId(), ct))));
         group.MapGet("/{id}", async (string id, HttpContext http, BookingService service, CancellationToken ct) =>
             Results.Ok(new ItemResponse<BookingDetailDto>(
+                await service.GetForCustomerAsync(http.GetRequiredUserId(), id, ct))));
+        group.MapGet("/{id}/ticket", async (string id, HttpContext http, TicketService service,
+            CancellationToken ct) => Results.Ok(new ItemResponse<TourTicketDto>(
                 await service.GetForCustomerAsync(http.GetRequiredUserId(), id, ct))));
         group.MapPost("/{id}/pay", async (string id, PayBookingRequest request, HttpContext http,
                 BookingPaymentService service, CancellationToken ct) => Results.Ok(new ItemResponse<BookingDetailDto>(

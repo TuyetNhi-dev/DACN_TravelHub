@@ -1,0 +1,533 @@
+{
+  "source": "frontend/src/data (help-faq, policies, travel-guides)",
+  "entries": [
+    {
+      "id": "faq:dang-ky",
+      "kind": "faq",
+      "title": "Đăng ký tài khoản như thế nào?",
+      "section": "Tài khoản",
+      "url": "/tro-giup#dang-ky",
+      "text": "Vào Đăng nhập, chọn Đăng ký ngay, điền họ tên, email, mật khẩu (12–128 ký tự, nhập lại hai lần) và số điện thoại nếu muốn (không bắt buộc, dùng để điền sẵn liên hệ khi đặt tour). Tích ô đồng ý với Chính sách bảo vệ dữ liệu cá nhân và Thỏa thuận sử dụng rồi bấm Gửi mã OTP. Nhập mã 6 số trong email để kích hoạt tài khoản; bạn được đăng nhập luôn."
+    },
+    {
+      "id": "faq:ma-otp",
+      "kind": "faq",
+      "title": "Không nhận được mã xác nhận hoặc mã hết hạn?",
+      "section": "Tài khoản",
+      "url": "/tro-giup#ma-otp",
+      "text": "Mã có hiệu lực 10 phút. Bạn có thể gửi lại mã sau 60 giây. Nhập sai 5 lần thì mã bị hủy và cần gửi mã mới. Nếu đã đóng trang, bạn vẫn nhập mã được ở trang xác nhận email hoặc khi đăng nhập lại. Hãy kiểm tra cả thư mục Spam."
+    },
+    {
+      "id": "faq:google",
+      "kind": "faq",
+      "title": "Có đăng nhập bằng Google được không?",
+      "section": "Tài khoản",
+      "url": "/tro-giup#google",
+      "text": "Được, nếu nút \"Tiếp tục với Google\" hiện trên trang đăng nhập. Nếu email Google trùng với tài khoản SàiHành đã có, hai tài khoản được liên kết với nhau."
+    },
+    {
+      "id": "faq:quen-mat-khau",
+      "kind": "faq",
+      "title": "Tôi quên mật khẩu thì làm sao?",
+      "section": "Tài khoản",
+      "url": "/tro-giup#quen-mat-khau",
+      "text": "Bấm \"Quên mật khẩu?\" ở trang đăng nhập và nhập email. Nếu email đã đăng ký, bạn nhận mã 6 số có hiệu lực 10 phút; gửi lại được sau 60 giây, tối đa 5 mã mỗi giờ, nhập sai 5 lần thì mã bị hủy. Nhập mã và mật khẩu mới là xong; mọi phiên đăng nhập cũ của tài khoản bị đăng xuất. Để bảo mật, trang luôn trả cùng một thông báo dù email có đăng ký hay không.\nTài khoản tạo bằng Google cũng dùng cách này để đặt mật khẩu và đăng nhập bằng email."
+    },
+    {
+      "id": "faq:hoan-tat-dang-ky",
+      "kind": "faq",
+      "title": "Vì sao tôi thấy màn hình \"Hoàn tất đăng ký\"?",
+      "section": "Tài khoản",
+      "url": "/tro-giup#hoan-tat-dang-ky",
+      "text": "Tài khoản của bạn chưa đồng ý với Chính sách bảo vệ dữ liệu cá nhân và Thỏa thuận sử dụng (thường gặp khi đăng nhập bằng Google lần đầu, hoặc tài khoản tạo trước khi có bước này). Bạn cần tích đồng ý để dùng các tính năng cần đăng nhập như đặt tour, giỏ hàng, xem đơn; nếu không muốn, bạn có thể đăng xuất."
+    },
+    {
+      "id": "faq:dang-xuat",
+      "kind": "faq",
+      "title": "Vì sao tôi bị đăng xuất?",
+      "section": "Tài khoản",
+      "url": "/tro-giup#dang-xuat",
+      "text": "Phiên đăng nhập hết hạn sau 8 giờ. Phiên cũng có thể mất khi máy chủ khởi động lại. Bạn chỉ cần đăng nhập lại."
+    },
+    {
+      "id": "faq:cach-dat",
+      "kind": "faq",
+      "title": "Đặt tour gồm những bước nào?",
+      "section": "Đặt tour và giữ chỗ 10 phút",
+      "url": "/tro-giup#cach-dat",
+      "text": "Mở trang tour, chọn ngày khởi hành và số khách, nhập họ tên từng hành khách rồi bấm Giữ chỗ ngay. Bạn cần đăng nhập và đã lưu số điện thoại liên hệ trong tài khoản."
+    },
+    {
+      "id": "faq:giu-cho",
+      "kind": "faq",
+      "title": "Giữ chỗ 10 phút nghĩa là gì?",
+      "section": "Đặt tour và giữ chỗ 10 phút",
+      "url": "/tro-giup#giu-cho",
+      "text": "Ngay khi tạo đơn, số chỗ của bạn được trừ khỏi lịch khởi hành và giữ trong 10 phút. Thanh toán trong thời gian này thì đơn được xác nhận. Quá 10 phút chưa thanh toán, đơn tự hủy và chỗ được trả lại cho người khác."
+    },
+    {
+      "id": "faq:so-khach",
+      "kind": "faq",
+      "title": "Một đơn đặt được tối đa bao nhiêu khách?",
+      "section": "Đặt tour và giữ chỗ 10 phút",
+      "url": "/tro-giup#so-khach",
+      "text": "Tối đa 20 khách và không vượt quá số chỗ còn lại của lịch khởi hành. Đoàn lớn hơn vui lòng gửi yêu cầu Tour đoàn & công ty trong mục Dịch vụ cộng thêm."
+    },
+    {
+      "id": "faq:gia-tre-em",
+      "kind": "faq",
+      "title": "Giá trẻ em tính thế nào?",
+      "section": "Đặt tour và giữ chỗ 10 phút",
+      "url": "/tro-giup#gia-tre-em",
+      "text": "Mỗi lịch khởi hành có giá người lớn và có thể có giá trẻ em. Nếu lịch chưa có giá trẻ em, trẻ em tính theo giá người lớn. Tổng tiền luôn do hệ thống tính lại khi tạo đơn."
+    },
+    {
+      "id": "faq:khach-san-ve",
+      "kind": "faq",
+      "title": "Đặt khách sạn, vé máy bay có giữ chỗ ngay không?",
+      "section": "Đặt tour và giữ chỗ 10 phút",
+      "url": "/tro-giup#khach-san-ve",
+      "text": "Không. Giá khách sạn và vé máy bay là giá hợp đồng với đối tác, nhưng còn phòng, còn ghế hay không thì nhân viên phải xác nhận với đối tác trước, sau đó bạn mới thanh toán. Riêng vé deal có ghi \"Xác nhận ngay\" được giữ ghế 10 phút như tour."
+    },
+    {
+      "id": "faq:cach-thanh-toan",
+      "kind": "faq",
+      "title": "Thanh toán bằng cách nào?",
+      "section": "Thanh toán",
+      "url": "/tro-giup#cach-thanh-toan",
+      "text": "Hiện website dùng thanh toán mô phỏng cho đồ án: bấm \"Thanh toán (mô phỏng)\" trong trang đơn, không trừ tiền thật và không cần thông tin thẻ. Cổng VNPAY (môi trường thử nghiệm) đang được tích hợp."
+    },
+    {
+      "id": "faq:the",
+      "kind": "faq",
+      "title": "SàiHành có lưu thông tin thẻ của tôi không?",
+      "section": "Thanh toán",
+      "url": "/tro-giup#the",
+      "text": "Không. Website không hỏi thông tin thẻ. Khi dùng VNPAY, bạn nhập thẻ trên trang của VNPAY; SàiHành chỉ nhận mã giao dịch và kết quả thanh toán."
+    },
+    {
+      "id": "faq:het-han",
+      "kind": "faq",
+      "title": "Hết 10 phút mà tôi chưa thanh toán xong?",
+      "section": "Thanh toán",
+      "url": "/tro-giup#het-han",
+      "text": "Đơn tour tự hủy và chỗ được trả lại; bạn cần tạo đơn mới nếu lịch còn chỗ. Hệ thống kiểm tra lại thời hạn ngay lúc thanh toán, nên không thể thanh toán cho đơn đã hết hạn."
+    },
+    {
+      "id": "faq:tu-huy",
+      "kind": "faq",
+      "title": "Tôi tự hủy đơn được không?",
+      "section": "Hủy đơn",
+      "url": "/tro-giup#tu-huy",
+      "text": "Được, khi đơn chưa thanh toán, chưa được xác nhận và chưa đến ngày sử dụng dịch vụ. Mở đơn trong Đơn của tôi, nút Hủy đơn chỉ hiện khi đủ điều kiện."
+    },
+    {
+      "id": "faq:da-thanh-toan",
+      "kind": "faq",
+      "title": "Đơn đã thanh toán có hủy được không?",
+      "section": "Hủy đơn",
+      "url": "/tro-giup#da-thanh-toan",
+      "text": "Không tự hủy được trên website; vui lòng liên hệ tổng đài. Phí hủy theo thời điểm đang áp dụng thử nghiệm, xem Chính sách hủy & hoàn tiền."
+    },
+    {
+      "id": "faq:giu-cho-gio",
+      "kind": "faq",
+      "title": "Thêm vào giỏ có giữ chỗ không?",
+      "section": "Giỏ hàng",
+      "url": "/tro-giup#giu-cho-gio",
+      "text": "Không. Giỏ chỉ lưu lựa chọn (tour, ngày khởi hành, số khách), không giữ chỗ và không giữ giá. Giá và số chỗ trong giỏ là thông tin hiện tại; món đổi giá hoặc hết chỗ được cảnh báo rõ."
+    },
+    {
+      "id": "faq:gioi-han",
+      "kind": "faq",
+      "title": "Giỏ chứa được bao nhiêu món?",
+      "section": "Giỏ hàng",
+      "url": "/tro-giup#gioi-han",
+      "text": "Tối đa 10 món. Thêm lại một lịch khởi hành đã có trong giỏ thì số khách được cập nhật, không tạo món mới."
+    },
+    {
+      "id": "faq:chua-dang-nhap",
+      "kind": "faq",
+      "title": "Chưa đăng nhập có dùng giỏ được không?",
+      "section": "Giỏ hàng",
+      "url": "/tro-giup#chua-dang-nhap",
+      "text": "Được. Giỏ được lưu trong trình duyệt của bạn. Khi đăng nhập, giỏ được chuyển vào tài khoản; nếu một lịch có ở cả hai nơi, bản mới hơn được giữ. Món hết chỗ, ngừng bán hoặc vượt quá 10 món sẽ không được chuyển và bạn được báo số món đó."
+    },
+    {
+      "id": "faq:dat-tu-gio",
+      "kind": "faq",
+      "title": "Đặt từ giỏ như thế nào?",
+      "section": "Giỏ hàng",
+      "url": "/tro-giup#dat-tu-gio",
+      "text": "Bấm Đặt ngay ở từng món: trang tour mở ra với lịch và số khách đã điền sẵn, bạn nhập họ tên hành khách rồi giữ chỗ như bình thường. Mỗi tour được đặt và thanh toán riêng. Đặt xong, món đó tự rời khỏi giỏ."
+    },
+    {
+      "id": "faq:co-gi",
+      "kind": "faq",
+      "title": "SàiHành có những dịch vụ cộng thêm nào?",
+      "section": "Dịch vụ cộng thêm",
+      "url": "/tro-giup#co-gi",
+      "text": "Vé tham quan & vui chơi, thuê xe & đón sân bay, visa, tour đoàn & công ty. Bạn gửi yêu cầu, nhân viên liên hệ lại để tư vấn; đây không phải đơn đặt chỗ."
+    },
+    {
+      "id": "faq:can-dang-nhap",
+      "kind": "faq",
+      "title": "Gửi yêu cầu có cần đăng nhập không?",
+      "section": "Dịch vụ cộng thêm",
+      "url": "/tro-giup#can-dang-nhap",
+      "text": "Không. Bạn điền họ tên, số điện thoại, email (không bắt buộc) và tích đồng ý được liên hệ. Website không hỏi số hộ chiếu hay số căn cước. Mỗi máy chỉ gửi được một số yêu cầu trong 10 phút để chống spam."
+    },
+    {
+      "id": "faq:lien-he",
+      "kind": "faq",
+      "title": "Liên hệ",
+      "section": "Trợ giúp",
+      "url": "/tro-giup#lien-he",
+      "text": "Tổng đài hỗ trợ: 0123 456 789 (08:00 – 22:00 hằng ngày).\nEmail: hotro@saihanh.example.\nĐịa chỉ: Số 01 Đường Mô Phỏng, Phường Ví Dụ, TP. Hồ Chí Minh.\nThông tin liên hệ mô phỏng của đồ án sinh viên, không phải số điện thoại, email hay địa chỉ thật."
+    },
+    {
+      "id": "policy:privacy#du-lieu-thu-thap",
+      "kind": "policy",
+      "title": "Chính sách riêng tư: 1. Dữ liệu chúng tôi thu thập",
+      "section": "Chính sách riêng tư",
+      "url": "/privacy#du-lieu-thu-thap",
+      "text": "Tài khoản: họ tên, email, mật khẩu (chỉ lưu dạng băm, không ai đọc được mật khẩu gốc), số điện thoại liên hệ nếu bạn lưu. Nếu đăng nhập bằng Google, chúng tôi lưu thêm mã định danh tài khoản Google do Google cung cấp. Thời điểm bạn tích đồng ý với Chính sách bảo vệ dữ liệu cá nhân và Thỏa thuận sử dụng cũng được lưu.\nĐơn đặt chỗ: dịch vụ bạn chọn, ngày đi, số khách, giá đã tính, trạng thái đơn và thời điểm thanh toán.\nHành khách: họ tên từng người, loại khách (người lớn/trẻ em) và ngày sinh nếu bạn nhập (không bắt buộc).\nYêu cầu dịch vụ cộng thêm (vé tham quan, thuê xe, visa, tour đoàn): họ tên, số điện thoại, email nếu có, ghi chú và các thông tin của từng dịch vụ (ví dụ ngày đi, số người). Chúng tôi không hỏi và không lưu số hộ chiếu hay số căn cước, và không lưu địa chỉ IP của bạn.\nGiỏ hàng: tour, lịch khởi hành và số khách bạn đã lưu; khi đã đăng nhập, giỏ lưu theo tài khoản.\nMã xác nhận email: chỉ lưu dạng băm, hết hạn sau 10 phút."
+    },
+    {
+      "id": "policy:privacy#cookie",
+      "kind": "policy",
+      "title": "Chính sách riêng tư: 2. Cookie và bộ nhớ trình duyệt",
+      "section": "Chính sách riêng tư",
+      "url": "/privacy#cookie",
+      "text": "Chúng tôi chỉ dùng cookie cần thiết để website hoạt động, không dùng cookie quảng cáo hay theo dõi:\nCookie phiên đăng nhập: giữ bạn đăng nhập tối đa 8 giờ, sau đó cần đăng nhập lại.\nCookie chống giả mạo yêu cầu (CSRF): bảo vệ các thao tác như đặt chỗ, thanh toán, hủy đơn.\nBộ nhớ trình duyệt (localStorage) trên máy của bạn: khu vực khởi hành bạn chọn, giao diện sáng/tối và giỏ hàng khi chưa đăng nhập. Khi bạn đăng nhập, giỏ hàng này được chuyển vào tài khoản rồi xóa khỏi trình duyệt. Bạn có thể xóa dữ liệu này bất cứ lúc nào trong cài đặt trình duyệt."
+    },
+    {
+      "id": "policy:privacy#muc-dich",
+      "kind": "policy",
+      "title": "Chính sách riêng tư: 3. Chúng tôi dùng dữ liệu để làm gì",
+      "section": "Chính sách riêng tư",
+      "url": "/privacy#muc-dich",
+      "text": "Tạo và bảo vệ tài khoản, gửi mã xác nhận qua email.\nTạo đơn, giữ chỗ tour, tính tiền, để nhân viên liên hệ xác nhận và hỗ trợ bạn.\nLiên hệ lại theo yêu cầu dịch vụ cộng thêm bạn gửi (bạn phải tích đồng ý trước khi gửi).\nKhông dùng dữ liệu để quảng cáo và không bán dữ liệu cho bất kỳ ai."
+    },
+    {
+      "id": "policy:privacy#chia-se",
+      "kind": "policy",
+      "title": "Chính sách riêng tư: 4. Chia sẻ dữ liệu",
+      "section": "Chính sách riêng tư",
+      "url": "/privacy#chia-se",
+      "text": "Nhân viên và quản trị viên của SàiHành xem đơn và yêu cầu dịch vụ để xử lý; khách hàng chỉ xem được dữ liệu của chính mình.\nDịch vụ gửi email (Gmail SMTP) nhận địa chỉ email và nội dung thư chứa mã xác nhận.\nGoogle nhận yêu cầu đăng nhập khi bạn chọn \"Tiếp tục với Google\".\nThanh toán: hiện website chỉ có thanh toán mô phỏng, không trừ tiền và không hỏi thông tin thẻ. Khi tích hợp cổng VNPAY (môi trường thử nghiệm), bạn nhập thông tin thẻ trên trang của VNPAY; SàiHành không nhận và không lưu số thẻ, chỉ lưu mã giao dịch và kết quả thanh toán VNPAY gửi về."
+    },
+    {
+      "id": "policy:privacy#luu-tru",
+      "kind": "policy",
+      "title": "Chính sách riêng tư: 5. Lưu ở đâu và bao lâu",
+      "section": "Chính sách riêng tư",
+      "url": "/privacy#luu-tru",
+      "text": "Dữ liệu lưu trên máy chủ cơ sở dữ liệu MySQL do nhóm thực hiện đồ án quản lý, kết nối có mã hóa. Tài khoản, đơn và yêu cầu dịch vụ được giữ trong thời gian đồ án vận hành để bạn xem lại lịch sử; khi kết thúc đồ án, dữ liệu demo có thể được xóa toàn bộ. Món trong giỏ được xóa khi bạn xóa, khi bạn đặt lịch đó, hoặc khi lịch khởi hành bị xóa khỏi hệ thống."
+    },
+    {
+      "id": "policy:privacy#quyen",
+      "kind": "policy",
+      "title": "Chính sách riêng tư: 6. Quyền của bạn",
+      "section": "Chính sách riêng tư",
+      "url": "/privacy#quyen",
+      "text": "Bạn có thể xem và sửa số điện thoại trong trang Tài khoản, xem đơn trong trang Đơn của tôi và xóa món khỏi giỏ bất cứ lúc nào. Hiện website chưa có chức năng tự xóa tài khoản; để yêu cầu xem, sửa hoặc xóa dữ liệu khác, hãy liên hệ theo mục bên dưới. Chi tiết các quyền theo pháp luật nằm ở trang Chính sách bảo vệ dữ liệu cá nhân."
+    },
+    {
+      "id": "policy:privacy#lien-he",
+      "kind": "policy",
+      "title": "Chính sách riêng tư: 7. Liên hệ",
+      "section": "Chính sách riêng tư",
+      "url": "/privacy#lien-he",
+      "text": "Email: hotro@saihanh.example · Tổng đài: 0123 456 789 (08:00 – 22:00 hằng ngày). Đây là thông tin liên hệ mô phỏng của đồ án; trong bản demo, nhóm thực hiện tiếp nhận yêu cầu trực tiếp."
+    },
+    {
+      "id": "policy:bao-ve-du-lieu-ca-nhan#can-cu",
+      "kind": "policy",
+      "title": "Chính sách bảo vệ dữ liệu cá nhân: 1. Căn cứ pháp lý",
+      "section": "Chính sách bảo vệ dữ liệu cá nhân",
+      "url": "/bao-ve-du-lieu-ca-nhan#can-cu",
+      "text": "Chính sách này căn cứ các văn bản đang có hiệu lực sau:\nLuật Bảo vệ dữ liệu cá nhân số 91/2025/QH15, được Quốc hội thông qua ngày 26/6/2025, có hiệu lực từ 01/01/2026.\nNghị định số 356/2025/NĐ-CP quy định chi tiết Luật Bảo vệ dữ liệu cá nhân, có hiệu lực từ 01/01/2026. Nghị định này thay thế Nghị định 13/2023/NĐ-CP về bảo vệ dữ liệu cá nhân (đã hết hiệu lực).\nChính sách chỉ tóm tắt cách website áp dụng các văn bản trên, chưa đối chiếu với từng điều khoản cụ thể. Khi cần chính xác, vui lòng đọc toàn văn trên Cổng thông tin điện tử Chính phủ."
+    },
+    {
+      "id": "policy:bao-ve-du-lieu-ca-nhan#loai-du-lieu",
+      "kind": "policy",
+      "title": "Chính sách bảo vệ dữ liệu cá nhân: 2. Loại dữ liệu được xử lý",
+      "section": "Chính sách bảo vệ dữ liệu cá nhân",
+      "url": "/bao-ve-du-lieu-ca-nhan#loai-du-lieu",
+      "text": "Website chỉ xử lý dữ liệu cá nhân cơ bản: họ tên, email, số điện thoại, ngày sinh của hành khách (nếu bạn nhập), thông tin đơn đặt chỗ và yêu cầu dịch vụ. Website không chủ động thu thập dữ liệu cá nhân nhạy cảm (sức khỏe, tài chính, sinh trắc học, vị trí…), không hỏi số căn cước, hộ chiếu hay thông tin thẻ. Danh sách đầy đủ từng trường dữ liệu có ở trang Chính sách riêng tư."
+    },
+    {
+      "id": "policy:bao-ve-du-lieu-ca-nhan#muc-dich",
+      "kind": "policy",
+      "title": "Chính sách bảo vệ dữ liệu cá nhân: 3. Mục đích và cơ sở xử lý",
+      "section": "Chính sách bảo vệ dữ liệu cá nhân",
+      "url": "/bao-ve-du-lieu-ca-nhan#muc-dich",
+      "text": "Thực hiện dịch vụ bạn yêu cầu: tạo tài khoản, đặt chỗ, liên hệ xác nhận đơn và hỗ trợ.\nSự đồng ý của bạn: bạn chủ động tích đồng ý khi đăng ký tài khoản (hoặc ở màn hình Hoàn tất đăng ký khi đăng nhập bằng Google lần đầu) và khi gửi yêu cầu dịch vụ cộng thêm; thời điểm đồng ý được lưu lại. Khi chưa đồng ý, tài khoản không dùng được các tính năng cần đăng nhập.\nAn toàn hệ thống: phiên đăng nhập, chống giả mạo yêu cầu và giới hạn số lần thao tác để chống lạm dụng."
+    },
+    {
+      "id": "policy:bao-ve-du-lieu-ca-nhan#bao-ve",
+      "kind": "policy",
+      "title": "Chính sách bảo vệ dữ liệu cá nhân: 4. Biện pháp bảo vệ",
+      "section": "Chính sách bảo vệ dữ liệu cá nhân",
+      "url": "/bao-ve-du-lieu-ca-nhan#bao-ve",
+      "text": "Mật khẩu băm bằng thuật toán PBKDF2; mã xác nhận email chỉ lưu dạng băm, hết hạn sau 10 phút và bị hủy sau 5 lần nhập sai.\nPhân quyền: khách hàng chỉ truy cập dữ liệu của mình; nhân viên và quản trị viên mới xem được đơn và yêu cầu dịch vụ để xử lý.\nCâu lệnh truy vấn cơ sở dữ liệu luôn tham số hóa; kết nối tới cơ sở dữ liệu có mã hóa.\nKhông ghi mật khẩu, mã xác nhận hay thông tin cá nhân vào nhật ký hệ thống."
+    },
+    {
+      "id": "policy:bao-ve-du-lieu-ca-nhan#luu-tru",
+      "kind": "policy",
+      "title": "Chính sách bảo vệ dữ liệu cá nhân: 5. Thời gian lưu trữ",
+      "section": "Chính sách bảo vệ dữ liệu cá nhân",
+      "url": "/bao-ve-du-lieu-ca-nhan#luu-tru",
+      "text": "Dữ liệu được lưu trong thời gian đồ án vận hành và có thể được xóa toàn bộ khi kết thúc đồ án. Phiên đăng nhập hết hạn sau 8 giờ. Dữ liệu trong trình duyệt (localStorage) do bạn quản lý và có thể tự xóa."
+    },
+    {
+      "id": "policy:bao-ve-du-lieu-ca-nhan#ben-thu-ba",
+      "kind": "policy",
+      "title": "Chính sách bảo vệ dữ liệu cá nhân: 6. Bên nhận dữ liệu",
+      "section": "Chính sách bảo vệ dữ liệu cá nhân",
+      "url": "/bao-ve-du-lieu-ca-nhan#ben-thu-ba",
+      "text": "Dịch vụ gửi email (Gmail SMTP): địa chỉ email và thư chứa mã xác nhận.\nGoogle: khi bạn chọn đăng nhập bằng Google.\nVNPAY: khi cổng thanh toán VNPAY (môi trường thử nghiệm) được dùng, VNPAY xử lý thông tin thẻ trên trang của họ; SàiHành không nhận và không lưu số thẻ.\nDữ liệu không được bán hay chuyển cho bên khác vì mục đích quảng cáo."
+    },
+    {
+      "id": "policy:bao-ve-du-lieu-ca-nhan#quyen",
+      "kind": "policy",
+      "title": "Chính sách bảo vệ dữ liệu cá nhân: 7. Quyền của chủ thể dữ liệu",
+      "section": "Chính sách bảo vệ dữ liệu cá nhân",
+      "url": "/bao-ve-du-lieu-ca-nhan#quyen",
+      "text": "Theo pháp luật về bảo vệ dữ liệu cá nhân, bạn có các quyền như: được biết về việc xử lý dữ liệu; đồng ý hoặc không đồng ý, rút lại sự đồng ý; xem, chỉnh sửa hoặc yêu cầu chỉnh sửa dữ liệu; yêu cầu xóa, hạn chế xử lý hoặc phản đối việc xử lý dữ liệu; khiếu nại, tố cáo, khởi kiện và yêu cầu bồi thường theo quy định.\nTrên website, bạn tự sửa được số điện thoại liên hệ và xóa món trong giỏ. Các yêu cầu khác (ví dụ xóa tài khoản) hiện được nhóm xử lý thủ công khi bạn liên hệ; website chưa có chức năng tự xóa tài khoản."
+    },
+    {
+      "id": "policy:bao-ve-du-lieu-ca-nhan#su-co",
+      "kind": "policy",
+      "title": "Chính sách bảo vệ dữ liệu cá nhân: 8. Khi có sự cố",
+      "section": "Chính sách bảo vệ dữ liệu cá nhân",
+      "url": "/bao-ve-du-lieu-ca-nhan#su-co",
+      "text": "Nếu phát hiện dữ liệu bị lộ hoặc truy cập trái phép, nhóm sẽ khóa nguyên nhân, đánh giá phạm vi ảnh hưởng và thông báo cho người bị ảnh hưởng qua email đã đăng ký."
+    },
+    {
+      "id": "policy:bao-ve-du-lieu-ca-nhan#lien-he",
+      "kind": "policy",
+      "title": "Chính sách bảo vệ dữ liệu cá nhân: 9. Liên hệ",
+      "section": "Chính sách bảo vệ dữ liệu cá nhân",
+      "url": "/bao-ve-du-lieu-ca-nhan#lien-he",
+      "text": "Email: hotro@saihanh.example · Tổng đài: 0123 456 789 (08:00 – 22:00 hằng ngày). Đây là thông tin liên hệ mô phỏng của đồ án; trong bản demo, nhóm thực hiện tiếp nhận yêu cầu trực tiếp."
+    },
+    {
+      "id": "policy:terms#do-an",
+      "kind": "policy",
+      "title": "Thỏa thuận sử dụng: 1. Website đồ án mô phỏng",
+      "section": "Thỏa thuận sử dụng",
+      "url": "/terms#do-an",
+      "text": "SàiHành là website đồ án chuyên ngành của sinh viên HUTECH, không phải doanh nghiệp lữ hành thật. Tour, giá, lịch khởi hành, khách sạn, chuyến bay và thông tin liên hệ là dữ liệu mô phỏng. Không có dịch vụ du lịch thật nào được cung cấp và thanh toán hiện không trừ tiền thật."
+    },
+    {
+      "id": "policy:terms#tai-khoan",
+      "kind": "policy",
+      "title": "Thỏa thuận sử dụng: 2. Tài khoản",
+      "section": "Thỏa thuận sử dụng",
+      "url": "/terms#tai-khoan",
+      "text": "Bạn cung cấp họ tên và email chính xác. Tài khoản đăng ký bằng mật khẩu chỉ hoạt động sau khi bạn nhập đúng mã 6 số gửi tới email; mật khẩu tối thiểu 12 ký tự.\nBạn có thể đăng nhập bằng Google; nếu email đó đã có tài khoản SàiHành, hai tài khoản được liên kết.\nBạn tự bảo mật mật khẩu và mã xác nhận. SàiHành không bao giờ hỏi mã xác nhận qua điện thoại hay tin nhắn.\nCần lưu số điện thoại liên hệ trong tài khoản trước khi đặt chỗ."
+    },
+    {
+      "id": "policy:terms#dat-cho",
+      "kind": "policy",
+      "title": "Thỏa thuận sử dụng: 3. Đặt chỗ",
+      "section": "Thỏa thuận sử dụng",
+      "url": "/terms#dat-cho",
+      "text": "Tour: khi tạo đơn, chỗ được giữ trong 10 phút. Thanh toán trong thời gian này thì đơn được xác nhận; quá hạn thì đơn tự hủy và chỗ được trả lại.\nKhách sạn và vé máy bay: giá là giá hợp đồng với đối tác. Đơn chờ nhân viên xác nhận với đối tác trước, sau đó bạn mới thanh toán. SàiHành không cam kết còn phòng hay còn ghế trước khi xác nhận.\nVé deal (có ghi \"Xác nhận ngay\") được giữ ghế 10 phút như tour.\nGiỏ hàng chỉ lưu lựa chọn, không giữ chỗ và không giữ giá."
+    },
+    {
+      "id": "policy:terms#gia",
+      "kind": "policy",
+      "title": "Thỏa thuận sử dụng: 4. Giá có thể thay đổi",
+      "section": "Thỏa thuận sử dụng",
+      "url": "/terms#gia",
+      "text": "Giá hiển thị có thể thay đổi theo thời điểm đặt. Tổng tiền của đơn luôn do hệ thống tính lại theo giá của lịch khởi hành hoặc báo giá tại lúc đặt, không dựa trên số tiền hiển thị trên trình duyệt hay trong giỏ hàng."
+    },
+    {
+      "id": "policy:terms#su-dung",
+      "kind": "policy",
+      "title": "Thỏa thuận sử dụng: 5. Sử dụng đúng mục đích",
+      "section": "Thỏa thuận sử dụng",
+      "url": "/terms#su-dung",
+      "text": "Không dùng công cụ tự động gửi số lượng lớn yêu cầu; hệ thống giới hạn số lần thao tác để chống lạm dụng.\nKhông nhập thông tin của người khác khi chưa được họ đồng ý.\nKhông tìm cách truy cập dữ liệu của người dùng khác hoặc khu vực quản trị."
+    },
+    {
+      "id": "policy:terms#trach-nhiem",
+      "kind": "policy",
+      "title": "Thỏa thuận sử dụng: 6. Giới hạn trách nhiệm",
+      "section": "Thỏa thuận sử dụng",
+      "url": "/terms#trach-nhiem",
+      "text": "Vì đây là website mô phỏng, nhóm thực hiện không chịu trách nhiệm về quyết định du lịch thật dựa trên thông tin trên website. Nội dung cẩm nang du lịch chỉ mang tính tham khảo chung. Website có thể tạm dừng hoặc thay đổi chức năng bất cứ lúc nào trong quá trình làm đồ án."
+    },
+    {
+      "id": "policy:terms#lien-quan",
+      "kind": "policy",
+      "title": "Thỏa thuận sử dụng: 7. Chính sách liên quan",
+      "section": "Thỏa thuận sử dụng",
+      "url": "/terms#lien-quan",
+      "text": "Chính sách riêng tư và Chính sách bảo vệ dữ liệu cá nhân: cách website xử lý dữ liệu của bạn.\nChính sách hủy & hoàn tiền: khi nào bạn tự hủy được đơn."
+    },
+    {
+      "id": "policy:terms#lien-he",
+      "kind": "policy",
+      "title": "Thỏa thuận sử dụng: 8. Liên hệ",
+      "section": "Thỏa thuận sử dụng",
+      "url": "/terms#lien-he",
+      "text": "Email: hotro@saihanh.example · Tổng đài: 0123 456 789 (08:00 – 22:00 hằng ngày). Đây là thông tin liên hệ mô phỏng của đồ án; trong bản demo, nhóm thực hiện tiếp nhận yêu cầu trực tiếp."
+    },
+    {
+      "id": "policy:huy-va-hoan-tien#tu-huy",
+      "kind": "policy",
+      "title": "Chính sách hủy & hoàn tiền: 1. Khi nào bạn tự hủy được đơn",
+      "section": "Chính sách hủy & hoàn tiền",
+      "url": "/huy-va-hoan-tien#tu-huy",
+      "text": "Mở đơn từ trang Đơn của tôi, nút \"Hủy đơn\" chỉ hiện khi đơn đủ cả hai điều kiện:\nĐơn chưa thanh toán và chưa được xác nhận: đang giữ chỗ chờ thanh toán (tour, vé deal), đang chờ đối tác xác nhận, hoặc đã được đối tác xác nhận nhưng bạn chưa thanh toán (khách sạn, vé máy bay).\nChưa đến ngày sử dụng dịch vụ (ngày khởi hành hoặc ngày nhận phòng)."
+    },
+    {
+      "id": "policy:huy-va-hoan-tien#da-thanh-toan",
+      "kind": "policy",
+      "title": "Chính sách hủy & hoàn tiền: 2. Đơn đã thanh toán",
+      "section": "Chính sách hủy & hoàn tiền",
+      "url": "/huy-va-hoan-tien#da-thanh-toan",
+      "text": "Đơn đã thanh toán hoặc đã xác nhận không tự hủy được trên website. Vui lòng liên hệ tổng đài để được hỗ trợ."
+    },
+    {
+      "id": "policy:huy-va-hoan-tien#tu-dong-huy",
+      "kind": "policy",
+      "title": "Chính sách hủy & hoàn tiền: 3. Đơn tự hủy",
+      "section": "Chính sách hủy & hoàn tiền",
+      "url": "/huy-va-hoan-tien#tu-dong-huy",
+      "text": "Tour và vé deal: nếu không thanh toán trong 10 phút giữ chỗ, đơn tự hủy và chỗ được trả lại. Bạn không mất phí.\nKhách sạn và vé máy bay: nếu đối tác báo hết phòng hoặc hết chỗ, đơn chuyển sang trạng thái không thành công. Bạn chưa thanh toán ở bước này nên không mất phí."
+    },
+    {
+      "id": "policy:huy-va-hoan-tien#phi-huy",
+      "kind": "policy",
+      "title": "Chính sách hủy & hoàn tiền: 4. Phí hủy theo thời điểm (đang áp dụng thử nghiệm)",
+      "section": "Chính sách hủy & hoàn tiền",
+      "url": "/huy-va-hoan-tien#phi-huy",
+      "text": "Phí hủy tính theo số ngày trước ngày khởi hành hiện đang áp dụng thử nghiệm và chưa được hệ thống tự động tính. Khi tính năng này hoàn thiện, mức phí sẽ được công bố trên trang này trước khi áp dụng."
+    },
+    {
+      "id": "policy:huy-va-hoan-tien#hoan-tien",
+      "kind": "policy",
+      "title": "Chính sách hủy & hoàn tiền: 5. Hoàn tiền",
+      "section": "Chính sách hủy & hoàn tiền",
+      "url": "/huy-va-hoan-tien#hoan-tien",
+      "text": "Thanh toán hiện là mô phỏng, không trừ tiền thật, nên không phát sinh hoàn tiền thật.\nKhi dùng cổng VNPAY (môi trường thử nghiệm): nếu VNPAY báo đã trừ tiền nhưng thời gian giữ chỗ đã hết và đơn đã tự hủy, giao dịch được ghi nhận là cần hoàn tiền và nhân viên xử lý hoàn tiền thủ công qua VNPAY. Việc hoàn tiền này đang áp dụng thử nghiệm."
+    },
+    {
+      "id": "policy:huy-va-hoan-tien#lien-he",
+      "kind": "policy",
+      "title": "Chính sách hủy & hoàn tiền: 6. Liên hệ",
+      "section": "Chính sách hủy & hoàn tiền",
+      "url": "/huy-va-hoan-tien#lien-he",
+      "text": "Email: hotro@saihanh.example · Tổng đài: 0123 456 789 (08:00 – 22:00 hằng ngày). Đây là thông tin liên hệ mô phỏng của đồ án; trong bản demo, nhóm thực hiện tiếp nhận yêu cầu trực tiếp."
+    },
+    {
+      "id": "guide:thoi-diem-dep-da-lat-phu-quoc-ha-giang#da-lat",
+      "kind": "guide",
+      "title": "Thời điểm đẹp đi Đà Lạt, Phú Quốc và Hà Giang: Đà Lạt",
+      "section": "Thời điểm đẹp đi Đà Lạt, Phú Quốc và Hà Giang",
+      "url": "/cam-nang/thoi-diem-dep-da-lat-phu-quoc-ha-giang#da-lat",
+      "text": "Đà Lạt mát quanh năm, nhưng thường chia hai mùa rõ: mùa khô khoảng từ cuối năm đến đầu xuân, trời trong, ít mưa, hợp đi dạo và săn mây buổi sớm; mùa mưa khoảng giữa năm, chiều hay có mưa nhưng cảnh vật xanh và vắng khách hơn.\nCuối năm có nhiều loài hoa nở, trong đó dã quỳ thường vàng rực các triền đồi; thời điểm cụ thể thay đổi theo từng năm."
+    },
+    {
+      "id": "guide:thoi-diem-dep-da-lat-phu-quoc-ha-giang#phu-quoc",
+      "kind": "guide",
+      "title": "Thời điểm đẹp đi Đà Lạt, Phú Quốc và Hà Giang: Phú Quốc",
+      "section": "Thời điểm đẹp đi Đà Lạt, Phú Quốc và Hà Giang",
+      "url": "/cam-nang/thoi-diem-dep-da-lat-phu-quoc-ha-giang#phu-quoc",
+      "text": "Phú Quốc thường đẹp nhất vào mùa khô, khoảng từ cuối năm đến tháng tư năm sau: trời nắng, biển êm, nước trong, hợp tắm biển và đi tàu ra các đảo nhỏ.\nMùa mưa thường rơi vào khoảng giữa năm, có những đợt gió mạnh làm biển động ở một số bãi; bù lại giá dịch vụ thường dễ chịu hơn và đảo vắng hơn."
+    },
+    {
+      "id": "guide:thoi-diem-dep-da-lat-phu-quoc-ha-giang#ha-giang",
+      "kind": "guide",
+      "title": "Thời điểm đẹp đi Đà Lạt, Phú Quốc và Hà Giang: Hà Giang",
+      "section": "Thời điểm đẹp đi Đà Lạt, Phú Quốc và Hà Giang",
+      "url": "/cam-nang/thoi-diem-dep-da-lat-phu-quoc-ha-giang#ha-giang",
+      "text": "Hà Giang mỗi mùa một vẻ: mùa xuân có hoa đào, hoa mận nở trên bản; mùa thu là lúa chín trên ruộng bậc thang; cuối thu thường là mùa hoa tam giác mạch. Thời điểm từng mùa hoa thay đổi theo năm và theo độ cao.\nMùa hè thường mưa nhiều, đường đèo có thể sạt lở; mùa đông trời lạnh, có lúc có sương muối trên núi cao."
+    },
+    {
+      "id": "guide:kinh-nghiem-di-tour-gia-dinh#chon-tour",
+      "kind": "guide",
+      "title": "Kinh nghiệm đi tour cùng gia đình: Chọn tour phù hợp",
+      "section": "Kinh nghiệm đi tour cùng gia đình",
+      "url": "/cam-nang/kinh-nghiem-di-tour-gia-dinh#chon-tour",
+      "text": "Với gia đình có trẻ nhỏ hoặc ông bà, nên ưu tiên tour có lịch trình thong thả, ít di chuyển đường dài trong ngày và có thời gian nghỉ trưa. Các điểm biển như Phú Quốc, Nha Trang hay Đà Nẵng thường dễ đi cho cả nhà.\nXem kỹ lịch trình từng ngày trên trang tour và mục Giá tour bao gồm để biết bữa ăn, vé tham quan nào đã có."
+    },
+    {
+      "id": "guide:kinh-nghiem-di-tour-gia-dinh#dat-cho",
+      "kind": "guide",
+      "title": "Kinh nghiệm đi tour cùng gia đình: Đặt chỗ cho cả nhà",
+      "section": "Kinh nghiệm đi tour cùng gia đình",
+      "url": "/cam-nang/kinh-nghiem-di-tour-gia-dinh#dat-cho",
+      "text": "Đặt một đơn cho cả gia đình để mọi người cùng một lịch khởi hành. Nhập đúng họ tên từng người như trên giấy tờ; với trẻ em, chọn đúng số trẻ em để hệ thống áp giá trẻ em của lịch đó (nếu có).\nNếu chưa chốt ngày, hãy thêm vài lịch vào giỏ hàng để so sánh giá và số chỗ, rồi đặt khi cả nhà đã thống nhất. Lưu ý giỏ hàng không giữ chỗ."
+    },
+    {
+      "id": "guide:kinh-nghiem-di-tour-gia-dinh#chuan-bi",
+      "kind": "guide",
+      "title": "Kinh nghiệm đi tour cùng gia đình: Chuẩn bị cho trẻ và người lớn tuổi",
+      "section": "Kinh nghiệm đi tour cùng gia đình",
+      "url": "/cam-nang/kinh-nghiem-di-tour-gia-dinh#chuan-bi",
+      "text": "Chuẩn bị đồ dùng quen thuộc của trẻ, thuốc thông thường và thuốc riêng của người lớn tuổi. Mang theo giấy tờ tùy thân của người lớn và giấy tờ của trẻ theo yêu cầu khi đi máy bay."
+    },
+    {
+      "id": "guide:chuan-bi-hanh-ly#co-ban",
+      "kind": "guide",
+      "title": "Chuẩn bị hành lý cho chuyến đi trong nước: Đồ cần có cho mọi chuyến đi",
+      "section": "Chuẩn bị hành lý cho chuyến đi trong nước",
+      "url": "/cam-nang/chuan-bi-hanh-ly#co-ban",
+      "text": "Giấy tờ tùy thân, điện thoại và sạc dự phòng, thuốc cá nhân, vài bộ quần áo dễ phối và một đôi giày đi bộ thoải mái. Chụp lại giấy tờ quan trọng và lưu trên điện thoại."
+    },
+    {
+      "id": "guide:chuan-bi-hanh-ly#bien",
+      "kind": "guide",
+      "title": "Chuẩn bị hành lý cho chuyến đi trong nước: Đi biển",
+      "section": "Chuẩn bị hành lý cho chuyến đi trong nước",
+      "url": "/cam-nang/chuan-bi-hanh-ly#bien",
+      "text": "Đồ bơi, kem chống nắng, nón và kính mát, dép đi biển, túi chống nước cho điện thoại. Mang thêm áo khoác mỏng cho những chuyến tàu buổi sớm hoặc phòng có máy lạnh."
+    },
+    {
+      "id": "guide:chuan-bi-hanh-ly#nui",
+      "kind": "guide",
+      "title": "Chuẩn bị hành lý cho chuyến đi trong nước: Đi núi, vùng cao",
+      "section": "Chuẩn bị hành lý cho chuyến đi trong nước",
+      "url": "/cam-nang/chuan-bi-hanh-ly#nui",
+      "text": "Áo ấm nhiều lớp (dễ mặc thêm, cởi bớt), áo mưa mỏng, giày có độ bám tốt. Vùng cao như Sa Pa hay Hà Giang chênh lệch nhiệt độ ngày đêm lớn, kể cả vào mùa hè."
+    },
+    {
+      "id": "guide:chuan-bi-hanh-ly#gon-nhe",
+      "kind": "guide",
+      "title": "Chuẩn bị hành lý cho chuyến đi trong nước: Giữ hành lý gọn nhẹ",
+      "section": "Chuẩn bị hành lý cho chuyến đi trong nước",
+      "url": "/cam-nang/chuan-bi-hanh-ly#gon-nhe",
+      "text": "Ưu tiên đồ nhanh khô, cuộn quần áo thay vì gấp, và chừa chỗ cho quà mang về. Một vali gọn giúp di chuyển giữa các điểm trong tour nhanh hơn."
+    },
+    {
+      "id": "guide:du-lich-dip-tet#chon-ngay",
+      "kind": "guide",
+      "title": "Du lịch dịp Tết: lên kế hoạch sớm: Chọn ngày theo lịch âm",
+      "section": "Du lịch dịp Tết: lên kế hoạch sớm",
+      "url": "/cam-nang/du-lich-dip-tet#chon-ngay",
+      "text": "Tết Nguyên Đán theo lịch âm nên rơi vào ngày dương khác nhau mỗi năm. Hãy xem trang Lịch âm dương của SàiHành để biết ngày mùng 1 và các ngày lễ, rồi chọn lịch khởi hành phù hợp với kỳ nghỉ của cả nhà.\nNhiều gia đình muốn ở nhà đêm giao thừa và mùng 1, rồi đi chơi từ mùng 2 hoặc mùng 3; lịch khởi hành những ngày này thường được chọn nhiều."
+    },
+    {
+      "id": "guide:du-lich-dip-tet#dat-som",
+      "kind": "guide",
+      "title": "Du lịch dịp Tết: lên kế hoạch sớm: Đặt chỗ sớm",
+      "section": "Du lịch dịp Tết: lên kế hoạch sớm",
+      "url": "/cam-nang/du-lich-dip-tet#dat-som",
+      "text": "Dịp Tết nhu cầu đi lại tăng mạnh nên tour, phòng và vé thường hết chỗ sớm và giá có thể cao hơn ngày thường. Khi đã chọn được tour, hãy đặt sớm: chỗ của tour được giữ ngay khi bạn tạo đơn, trong 10 phút để thanh toán."
+    },
+    {
+      "id": "guide:du-lich-dip-tet#luu-y",
+      "kind": "guide",
+      "title": "Du lịch dịp Tết: lên kế hoạch sớm: Lưu ý khi đi chơi Tết",
+      "section": "Du lịch dịp Tết: lên kế hoạch sớm",
+      "url": "/cam-nang/du-lich-dip-tet#luu-y",
+      "text": "Một số cửa hàng, quán ăn đóng cửa những ngày đầu năm, nhất là mùng 1. Các điểm tham quan và lễ hội đầu xuân thường đông; nên đi sớm, giữ đồ cá nhân cẩn thận và tôn trọng phong tục nơi đến."
+    }
+  ]
+}

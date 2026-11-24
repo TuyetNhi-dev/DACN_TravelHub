@@ -10,6 +10,7 @@ import { useRequireSession } from "@/hooks/useRequireSession";
 import { useResource } from "@/hooks/useResource";
 import { ApiError } from "@/lib/api-client";
 import { holdsSeats, tourCheckoutStep } from "@/lib/booking-rules";
+import { hasTicket, ticketHref } from "@/lib/check-in";
 import { cancelMyBooking, getMyBooking } from "@/services/bookings";
 import type { BookingDetail } from "@/types/booking";
 import { BookingDetailView } from "./BookingDetailView";
@@ -42,6 +43,9 @@ export function CustomerBookingPage({ bookingId, justCreated }: { bookingId: str
           actions={(
             <>
               <PaymentPanel booking={state.data} onChanged={replace} onReload={retry} />
+              {hasTicket(state.data) && (
+                <Link className="btn btn-primary" href={ticketHref(state.data.id)}>Xem vé điện tử</Link>
+              )}
               <CustomerActions booking={state.data} onChanged={replace} />
             </>
           )} />

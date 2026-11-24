@@ -7,8 +7,10 @@ using TravelHub.Api.Common.Time;
 using TravelHub.Api.Data;
 using TravelHub.Api.Features.Admin;
 using TravelHub.Api.Features.Admin.Access;
+using TravelHub.Api.Features.Assistant;
 using TravelHub.Api.Features.Admin.Audit;
 using TravelHub.Api.Features.Admin.Bookings;
+using TravelHub.Api.Features.Admin.CheckIn;
 using TravelHub.Api.Features.Admin.Context;
 using TravelHub.Api.Features.Admin.Dashboard;
 using TravelHub.Api.Features.Admin.Departures;
@@ -23,6 +25,7 @@ using TravelHub.Api.Features.Health;
 using TravelHub.Api.Features.Hotels;
 using TravelHub.Api.Features.Payments;
 using TravelHub.Api.Features.ServiceRequests;
+using TravelHub.Api.Features.Tickets;
 using TravelHub.Api.Features.Tours;
 
 namespace TravelHub.Api.Configuration;
@@ -46,6 +49,10 @@ public static class ServiceRegistration
         services.AddScoped<BranchRepository>().AddScoped<BranchService>();
         services.Configure<EmailOptions>(config.GetSection("Email"));
         services.Configure<BookingOptions>(config.GetSection(BookingOptions.SectionName));
+        // A missing Ticket:SigningKey is allowed at startup; ticket and scan endpoints then answer 503.
+        services.Configure<TicketOptions>(config.GetSection(TicketOptions.SectionName));
+        services.AddScoped<TicketRepository>().AddScoped<TicketService>();
+        AddAssistant(services, config);
         // Payments: gateways are stateless. Missing Vnpay secrets are allowed at startup; VnPayPaymentGateway
         // reports "chưa cấu hình" when called, and simulated payment keeps working.
         services.Configure<VnPayOptions>(config.GetSection(VnPayOptions.SectionName));
@@ -83,8 +90,25 @@ public static class ServiceRegistration
         services.AddScoped<AdminTourRepository>().AddScoped<AdminTourWriter>().AddScoped<AdminTourService>();
         services.AddScoped<AdminDepartureRepository>().AddScoped<AdminDepartureService>();
         services.AddScoped<ManifestRepository>().AddScoped<ManifestService>();
+        services.AddScoped<CheckInRepository>().AddScoped<CheckInService>();
         services.AddScoped<StaffRepository>().AddScoped<StaffService>();
         services.AddScoped<BookingActivityRepository>().AddScoped<BookingActivityService>();
+    }
+
+    /// <summary>
+    /// Assistant: a missing Ai:GeminiApiKey is allowed at startup; the chat endpoint then answers 503. The HTTP timeout
+    /// is a backstop only: AssistantService gives the whole turn (all model calls) AssistantRules.Timeout.
+    /// </summary>
+    private static void AddAssistant(IServiceCollection services, IConfiguration config)
+    {
+        services.Configure<AiOptions>(config.GetSection(AiOptions.SectionName));
+        services.AddHttpClient<IAiProvider, GeminiProvider>(client =>
+        {
+            client.BaseAddress = GeminiProvider.BaseAddress;
+            client.Timeout = AssistantRules.Timeout + TimeSpan.FromSeconds(5);
+        });
+        services.AddSingleton(_ => AssistantKnowledge.LoadEmbedded());
+        services.AddScoped<ITourCatalog, TourCatalog>().AddScoped<AssistantToolbox>().AddScoped<AssistantService>();
     }
 
     public static void MapTravelHubEndpoints(this IEndpointRouteBuilder app)
@@ -101,5 +125,6 @@ public static class ServiceRegistration
         app.MapAdminSystemEndpoints();
         app.MapServiceRequestEndpoints();
         app.MapCartEndpoints();
+        app.MapAssistantEndpoints();
     }
 }

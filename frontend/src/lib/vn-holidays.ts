@@ -135,9 +135,15 @@ export interface UpcomingHoliday {
   daysLeft: number;
 }
 
-const TET_NEW_YEAR = 'Tết Nguyên Đán';
+export const TET_NEW_YEAR = 'Tết Nguyên Đán';
 const isTetDay = (h: VnHoliday) => h.calendar === 'lunar' && h.lunar.month === 1 && h.lunar.day <= 3;
 const isTetEve = (h: VnHoliday) => h.calendar === 'lunar' && h.lunar.month === 12 && h.name.startsWith('Tất niên');
+
+/** Tất niên or mùng 1–3: the days the law fixes for the Tết holiday. */
+export const isTetHoliday = (h: VnHoliday) => isTetDay(h) || isTetEve(h);
+
+/** The exact days off around this holiday are announced every year, so a computed break is only an estimate. */
+export const hasYearlySchedule = (h: VnHoliday) => h.note === TET_SCHEDULE_NOTE || h.note === NATIONAL_DAY_NOTE;
 
 function daysBetween(from: string, to: string): number {
   const [fy, fm, fd] = from.split('-').map(Number);

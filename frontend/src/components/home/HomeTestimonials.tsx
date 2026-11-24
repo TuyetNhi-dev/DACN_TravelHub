@@ -14,6 +14,8 @@ export function HomeTestimonials() {
         {SAMPLE_REVIEWS.map(review => (
           <li key={review.id} className="review-card" data-reveal-item>
             <span className="review-quote" aria-hidden="true"><Icon name="quote" size={28} /></span>
+            {/* On every card, so a cropped screenshot of one review still says it is not a real customer. */}
+            <span className="review-sample-badge">Nội dung minh họa</span>
             <ReviewScore score={review.score} />
             <blockquote><p>{review.text}</p></blockquote>
             <p className="review-author"><b>{review.author}</b><span>{review.trip}</span></p>

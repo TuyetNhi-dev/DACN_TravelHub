@@ -60,6 +60,8 @@ export const AUDIT_ACTIONS: { value: string; label: string }[] = [
   { value: "departure.status", label: "Đổi trạng thái lịch" }, { value: "booking.confirm", label: "Xác nhận đơn" },
   { value: "booking.reject", label: "Từ chối đơn" }, { value: "booking.complete", label: "Hoàn tất đơn" },
   { value: "booking.cancel", label: "Hủy đơn" }, { value: "booking.note", label: "Ghi chú đơn" },
+  { value: "booking.check_in", label: "Check-in khách" },
+  { value: "booking.check_in_undo", label: "Hoàn tác check-in" },
   { value: "service_request.status", label: "Đổi trạng thái yêu cầu" },
   { value: "service_request.note", label: "Ghi chú yêu cầu" },
   { value: "service_request.assign", label: "Nhận/trả yêu cầu" }, { value: "staff.assign", label: "Gán vai trò" },
