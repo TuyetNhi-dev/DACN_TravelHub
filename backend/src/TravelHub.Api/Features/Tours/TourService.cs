@@ -10,17 +10,52 @@ public sealed class TourService(TourRepository repository, VietnamClock clock)
     public static readonly IReadOnlySet<string> RegionCodes = new HashSet<string> { "NORTH", "CENTRAL", "SOUTH" };
 
     /// <summary>Every matching published tour (no paging), as GET /api/tours answers without page.</summary>
-    public Task<IReadOnlyList<TourSummaryDto>> ListAsync(TourSearchQuery query, CancellationToken ct) =>
-        repository.SearchAsync(clock.Today, TourSearchRules.Parse(query), null, ct);
+    public async Task<IReadOnlyList<TourSummaryDto>> ListAsync(TourSearchQuery query, CancellationToken ct) =>
+        await repository.SearchAsync(clock.Today, await ParseAsync(query, ct), null, ct);
 
     public async Task<(IReadOnlyList<TourSummaryDto> Rows, int Total)> ListPagedAsync(TourSearchQuery query,
         int page, int pageSize, CancellationToken ct)
     {
-        var search = TourSearchRules.Parse(query);
+        var search = await ParseAsync(query, ct);
         var today = clock.Today;
         var total = await repository.CountAsync(today, search, ct);
         var rows = await repository.SearchAsync(today, search, ((page - 1) * pageSize, pageSize), ct);
         return (rows, total);
+    }
+
+    /// <summary>Validates the query, then turns a departure region into the ids of its departure locations.</summary>
+    private async Task<TourSearch> ParseAsync(TourSearchQuery query, CancellationToken ct)
+    {
+        var search = TourSearchRules.Parse(query);
+        if (search.DepartureRegion is not { } region) return search;
+        var locations = await repository.ListDepartureLocationsAsync(ct);
+        return search with
+        {
+            DepartureLocationIds = locations.Where(l => DepartureRegions.Contains(region, l.Name)).Select(l => l.Id)
+                .ToList(),
+        };
+    }
+
+    /// <summary>
+    /// The /tours date filter: tours per departure day of one month, under every other filter of the list. Its own
+    /// dateFrom/dateTo and the sort do not apply: the calendar is how the day gets chosen.
+    /// </summary>
+    public async Task<IReadOnlyList<TourDayCountDto>> CountByDepartureDayAsync(TourSearchQuery query, string? month,
+        CancellationToken ct)
+    {
+        var today = clock.Today;
+        var first = TourSearchRules.ParseCalendarMonth(month, today);
+        var search = await ParseAsync(query with { DateFrom = null, DateTo = null, Sort = null }, ct);
+        return await repository.CountByDepartureDayAsync(today, search, first, first.AddMonths(1), ct);
+    }
+
+    /// <summary>Search box suggestions (ROADMAP 8.2); too short a text answers empty without touching the database.</summary>
+    public async Task<TourSuggestionsDto> SuggestAsync(string? q, CancellationToken ct)
+    {
+        if (TourSearchRules.ParseSuggestion(q) is not { } text) return TourSuggestionsDto.Empty;
+        var destinations = await repository.SuggestDestinationsAsync(text, TourSearchRules.SuggestDestinationLimit, ct);
+        var tours = await repository.SuggestToursAsync(text, TourSearchRules.SuggestTourLimit, ct);
+        return new TourSuggestionsDto(destinations, tours);
     }
 
     public Task<IReadOnlyList<TourDestinationDto>> ListDestinationsAsync(CancellationToken ct) =>

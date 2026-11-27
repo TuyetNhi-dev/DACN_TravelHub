@@ -1,8 +1,9 @@
 "use client";
 
 import { FilterSheet } from "@/components/listing/FilterSheet";
-import { formatCurrency, vietnamToday } from "@/lib/format";
+import { formatCurrency } from "@/lib/format";
 import { DURATION_OPTIONS, type TourFilters } from "@/lib/tour-display";
+import { TourDateFilter, type DateFilterData } from "./TourDateFilter";
 
 const PRICE_STEP = 100_000;
 /** Same width as the .listing-layout breakpoint in listing.css. */
@@ -14,6 +15,7 @@ interface TourFiltersPanelProps {
   resultCount: number;
   destinations: string[];
   priceCeiling: number;
+  dateFilter: DateFilterData;
   onChange: <K extends keyof TourFilters>(key: K, value: TourFilters[K]) => void;
   onReset: () => void;
 }
@@ -37,7 +39,7 @@ export function TourFiltersPanel(props: TourFiltersPanelProps) {
   );
 }
 
-function FilterFields({ filters, destinations, priceCeiling, onChange }: TourFiltersPanelProps) {
+function FilterFields({ filters, destinations, priceCeiling, dateFilter, onChange }: TourFiltersPanelProps) {
   return (
     <>
       <label className="listing-field">
@@ -47,11 +49,7 @@ function FilterFields({ filters, destinations, priceCeiling, onChange }: TourFil
           {destinations.map(value => <option key={value} value={value}>{value}</option>)}
         </select>
       </label>
-      <label className="listing-field">
-        <span>Ngày khởi hành</span>
-        <input type="date" min={vietnamToday()} value={filters.date}
-          onChange={event => onChange("date", event.target.value)} />
-      </label>
+      <TourDateFilter value={filters.date} onChange={date => onChange("date", date)} {...dateFilter} />
       <fieldset className="listing-field">
         <legend>Thời lượng</legend>
         <div className="listing-pills">

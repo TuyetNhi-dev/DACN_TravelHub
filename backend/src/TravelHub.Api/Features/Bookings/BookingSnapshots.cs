@@ -8,7 +8,7 @@ public static class BookingSnapshots
     private const string TourTerms =
         "Chỗ được giữ cho đơn này. Nhân viên SàiHành sẽ liên hệ để xác nhận và hướng dẫn thanh toán.";
     private const string SupplierTerms =
-        "Giá tham khảo từ đối tác, chưa phải xác nhận. SàiHành sẽ báo lại khi đối tác xác nhận còn chỗ.";
+        "Giá hợp đồng với đối tác. Đơn chưa được xác nhận: SàiHành sẽ báo lại khi đối tác xác nhận còn chỗ.";
 
     private static readonly Dictionary<string, string> CabinLabels = new()
     {

@@ -6,16 +6,20 @@
 .fd-chip:focus-visible{outline:3px solid var(--blue);outline-offset:3px}
 .fd-grid{list-style:none;margin:0;padding:0;display:grid;gap:16px;
   grid-template-columns:repeat(auto-fill,minmax(min(250px,100%),1fr))}
-.fd-card{height:100%;display:grid;gap:6px;align-content:start;background:var(--panel);border:1px solid var(--line);
+/* Column layout with the button pushed to the bottom, so cards in a row line up even when the pills wrap. */
+.fd-card{height:100%;display:flex;flex-direction:column;gap:6px;background:var(--panel);border:1px solid var(--line);
   border-radius:16px;padding:20px}
 .fd-card.is-featured{border:2px solid var(--accent-warm)}
 .fd-badge{justify-self:start;font-size:max(11px, var(--text-min));font-weight:600;letter-spacing:.4px;color:var(--green);
   background:var(--blue-soft);border-radius:999px;padding:4px 10px}
 .fd-card.is-featured .fd-badge{color:var(--accent-warm)}
-.fd-card h2{font-size:18px!important;margin:6px 0 0!important}
+.fd-card h2,.fd-card h3{font-size:18px!important;margin:6px 0 0!important}
 .fd-card p{margin:0}
 .fd-route,.fd-updated{font-size:max(12px, var(--text-min))!important;color:var(--muted)!important}
 .fd-price strong{color:var(--blue);font-size:22px}
-.fd-card .btn{margin-top:10px}
+/* flights.css sets `.sf small{display:block}`; the price reads as one line: "từ 420.000 đ / khách". */
+.fd-card .fd-price small{display:inline;color:var(--muted)}
+.fd-card .fd-updated{margin-bottom:4px}
+.fd-card .btn{margin-top:auto}
 .fd-pills{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .fd-notice{margin-bottom:20px}

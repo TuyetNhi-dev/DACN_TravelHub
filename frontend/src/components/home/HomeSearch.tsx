@@ -17,8 +17,8 @@ const TABS: { id: Tab; label: string; icon: IconName }[] = [
 
 const HINTS: Record<Tab, string> = {
   tour: "Tour trọn gói giữ chỗ ngay khi đặt.",
-  hotel: "Giá phòng là giá tham khảo từ đối tác, chờ xác nhận khi đặt.",
-  flight: "Giá vé là giá tham khảo từ đối tác, chờ xác nhận khi đặt.",
+  hotel: "Giá phòng là giá hợp đồng với đối tác, chờ xác nhận còn phòng khi đặt.",
+  flight: "Giá vé là giá hợp đồng với đối tác, chờ xác nhận còn chỗ khi đặt.",
 };
 
 /** Hands the search to the matching listing page, where filtering happens against the API. */

@@ -36,7 +36,7 @@ export function FlightCard({ offer, passengers, action, showTerms = false }: Fli
       </div>
       <div className="sf-price">
         <strong>{formatCurrency(offer.referencePrice)}</strong>
-        <small>{offer.remainingSeats === null ? "/ khách · giá tham khảo" : "/ khách · giá deal"}</small>
+        <small>{offer.remainingSeats === null ? "/ khách · giá hợp đồng" : "/ khách · giá deal"}</small>
         {passengers > 1 && <small>{formatCurrency(offer.referencePrice * passengers)} cho {passengers} khách</small>}
       </div>
       {showTerms && (

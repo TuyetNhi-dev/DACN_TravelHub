@@ -1,4 +1,5 @@
 using TravelHub.Api.Common.Http;
+using TravelHub.Api.Features.Admin.CheckIn;
 using TravelHub.Api.Features.Admin.Context;
 using TravelHub.Api.Features.Admin.Dashboard;
 using TravelHub.Api.Features.Admin.Departures;
@@ -77,6 +78,22 @@ public static class AdminCatalogEndpoints
             var (content, fileName) = await service.ExportAsync(http.GetRequiredAccount(), id, ct);
             return Results.File(content, ManifestExcel.ContentType, fileName);
         });
+        MapCheckIn(departures);
+    }
+
+    private static void MapCheckIn(RouteGroupBuilder departures)
+    {
+        departures.MapGet("/{id}/check-in", async (string id, HttpContext http, CheckInService service,
+            CancellationToken ct) => Item(await service.GetBoardAsync(http.GetRequiredAccount(), id, ct)));
+        departures.MapPost("/{id}/check-in/scan", async (string id, ScanTicketRequest request, HttpContext http,
+            CheckInService service, CancellationToken ct) =>
+            Item(await service.ScanAsync(http.GetRequiredAccount(), id, request, ct)));
+        departures.MapPost("/{id}/check-ins", async (string id, CheckInRequest request, HttpContext http,
+            CheckInService service, CancellationToken ct) =>
+            Item(await service.CheckInAsync(http.GetRequiredAccount(), id, request, ct)));
+        departures.MapDelete("/{id}/check-ins/{passengerId}", async (string id, string passengerId,
+            HttpContext http, CheckInService service, CancellationToken ct) =>
+            Item(await service.UndoAsync(http.GetRequiredAccount(), id, passengerId, ct)));
     }
 
     private static IResult Item<T>(T data) => Results.Ok(new ItemResponse<T>(data));

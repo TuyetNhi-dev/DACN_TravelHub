@@ -9,7 +9,8 @@ using A = TravelHub.Api.Features.Admin.Audit.AuditActions;
 
 namespace TravelHub.Api.Features.Admin.Tours;
 
-public sealed record AdminTourQuery(string? Scope, string? Status, string? Query, int? Page, int? PageSize);
+public sealed record AdminTourQuery(string? Scope, string? Status, string? Query, int? Page, int? PageSize,
+    string? RegionId = null, string? BranchId = null, string? CategoryId = null, string? Sort = null);
 
 /// <summary>Tour editor. Every operator reads; branch managers and admins write inside their scope.</summary>
 public sealed class AdminTourService(AdminAccessService accessService, AdminTourRepository repository,
@@ -25,14 +26,34 @@ public sealed class AdminTourService(AdminAccessService accessService, AdminTour
         AdminTourQuery query, CancellationToken ct)
     {
         var (access, scope) = await accessService.SelectAsync(account, query.Scope, ct);
-        if (query.Status is not null && !AdminTourStatus.All.Contains(query.Status))
-            throw ApiException.BadRequest("Trạng thái lọc không hợp lệ.");
+        var filter = Filter(query);
         var size = Math.Clamp(query.PageSize ?? DefaultPageSize, 1, 100);
-        var text = string.IsNullOrWhiteSpace(query.Query) ? null : query.Query.Trim();
-        var filter = new AdminTourFilter(query.Status, text);
         var (rows, total) = await repository.ListAsync(filter, scope, clock.Today,
             (Math.Max(1, query.Page ?? 1) - 1) * size, size, ct);
         return (rows.Select(r => r.Summary with { CanEdit = access.Manage.Covers(r.BranchId) }).ToList(), total);
+    }
+
+    /// <summary>Validates the list filters; ids and the sort key are checked before any SQL is built.</summary>
+    private static AdminTourFilter Filter(AdminTourQuery query)
+    {
+        var errors = new ValidationErrors();
+        errors.AddIf(query.Status is not null && !AdminTourStatus.All.Contains(query.Status), "status",
+            "Trạng thái lọc không hợp lệ.");
+        errors.AddIf(!AdminTourSort.IsKnown(query.Sort), "sort", "Cách sắp xếp không hợp lệ.");
+        var region = OptionalId(query.RegionId, "regionId", errors);
+        var branch = OptionalId(query.BranchId, "branchId", errors);
+        var category = OptionalId(query.CategoryId, "categoryId", errors);
+        errors.ThrowIfAny();
+        var text = string.IsNullOrWhiteSpace(query.Query) ? null : query.Query.Trim();
+        return new AdminTourFilter(query.Status, text, region, branch, category, query.Sort ?? AdminTourSort.Newest);
+    }
+
+    private static ulong? OptionalId(string? raw, string field, ValidationErrors errors)
+    {
+        if (string.IsNullOrEmpty(raw)) return null;
+        if (ResourceId.TryParse(raw, out var id)) return id;
+        errors.Add(field, "Mã lọc không hợp lệ.");
+        return null;
     }
 
     public async Task<AdminTourDetailDto> GetAsync(Account account, string rawId, CancellationToken ct)
@@ -91,23 +112,26 @@ public sealed class AdminTourService(AdminAccessService accessService, AdminTour
     }
 
     public Task<AdminTourDetailDto> SaveImagesAsync(Account account, string rawId, SaveTourImagesRequest request,
-        CancellationToken ct) => SaveChildrenAsync(account, rawId, AdminTourValidator.Images(request), A.TourImages,
-        "ảnh", (id, items, audit) => writer.ReplaceImagesAsync(id, items, audit, ct), ct);
+        CancellationToken ct) => SaveChildrenAsync(account, rawId, () => AdminTourValidator.Images(request),
+        A.TourImages, "ảnh", (id, items, audit) => writer.ReplaceImagesAsync(id, items, audit, ct), ct);
 
     public Task<AdminTourDetailDto> SaveItineraryAsync(Account account, string rawId, SaveItineraryRequest request,
-        CancellationToken ct) => SaveChildrenAsync(account, rawId, AdminTourValidator.Itinerary(request),
+        CancellationToken ct) => SaveChildrenAsync(account, rawId, () => AdminTourValidator.Itinerary(request),
         A.TourItinerary, "ngày lịch trình", (id, items, audit) => writer.ReplaceItineraryAsync(id, items, audit, ct),
         ct);
 
     public Task<AdminTourDetailDto> SaveInclusionsAsync(Account account, string rawId,
         SaveInclusionsRequest request, CancellationToken ct) => SaveChildrenAsync(account, rawId,
-        AdminTourValidator.Inclusions(request), A.TourInclusions, "mục giá bao gồm/không bao gồm",
+        () => AdminTourValidator.Inclusions(request), A.TourInclusions, "mục giá bao gồm/không bao gồm",
         (id, items, audit) => writer.ReplaceInclusionsAsync(id, items, audit, ct), ct);
 
+    /// <summary>Role first (403), then the form (400), then the tour and its branch (404/403).</summary>
     private async Task<AdminTourDetailDto> SaveChildrenAsync<T>(Account account, string rawId,
-        IReadOnlyList<T> items, string action, string noun, Func<ulong, IReadOnlyList<T>, AuditEntry, Task> save,
-        CancellationToken ct)
+        Func<IReadOnlyList<T>> validate, string action, string noun,
+        Func<ulong, IReadOnlyList<T>, AuditEntry, Task> save, CancellationToken ct)
     {
+        await accessService.RequireManagerAsync(account, ct);
+        var items = validate();
         var (access, tour) = await ManagedAsync(account, rawId, ct);
         var audit = await accessService.AuditAsync(access, action, AuditEntities.Tour, tour.Id, BranchOf(tour),
             $"Cập nhật {items.Count} {noun} của tour {tour.Code}", null, ct);
@@ -159,6 +183,7 @@ public sealed class AdminTourService(AdminAccessService accessService, AdminTour
         ["code"] = t.Code, ["title"] = t.Title, ["destinationId"] = t.DestinationId, ["categoryId"] = t.CategoryId,
         ["operatingBranchId"] = t.BranchId, ["durationDays"] = t.DurationDays,
         ["durationNights"] = t.DurationNights, ["basePrice"] = t.BasePrice, ["description"] = t.Description,
+        ["cancellationPolicy"] = t.CancellationPolicy, ["travelNotes"] = t.TravelNotes,
     };
 
     private static Dictionary<string, object?> Fields(ValidTour t) => new()
@@ -166,7 +191,8 @@ public sealed class AdminTourService(AdminAccessService accessService, AdminTour
         ["code"] = t.Code, ["title"] = t.Title, ["destinationId"] = Id(t.DestinationId),
         ["categoryId"] = t.CategoryId is { } c ? Id(c) : null, ["operatingBranchId"] = Id(t.OperatingBranchId),
         ["durationDays"] = t.DurationDays, ["durationNights"] = t.DurationNights, ["basePrice"] = t.BasePrice,
-        ["description"] = t.Description,
+        ["description"] = t.Description, ["cancellationPolicy"] = t.CancellationPolicy,
+        ["travelNotes"] = t.TravelNotes,
     };
 
     private static ulong BranchOf(AdminTourDetailDto tour) => Parse(tour.BranchId);

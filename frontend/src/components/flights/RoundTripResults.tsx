@@ -86,7 +86,7 @@ function SelectionBar({ search, selection }: { search: FlightSearch; selection: 
         {" · "}
         {inbound ? `Về: ${inbound.flightNumber}` : "Chưa chọn chiều về"}
         <br />
-        <strong>{formatCurrency(total)}</strong> tạm tính cho {search.passengers} khách · giá tham khảo
+        <strong>{formatCurrency(total)}</strong> tạm tính cho {search.passengers} khách · giá hợp đồng
       </p>
       {outbound && inbound
         ? <Link className="btn btn-primary" href={"/flights/booking?" + params}>Tiếp tục đặt 2 chiều</Link>

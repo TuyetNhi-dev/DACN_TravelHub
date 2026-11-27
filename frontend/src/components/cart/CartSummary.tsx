@@ -1,3 +1,4 @@
+import { TrustNotes } from "@/components/ui/TrustNotes";
 import { canBook } from "@/lib/cart-rules";
 import { formatCurrency } from "@/lib/format";
 import type { Cart } from "@/types/cart";
@@ -24,6 +25,7 @@ export function CartSummary({ cart }: { cart: Cart }) {
         Giỏ hàng chỉ lưu lựa chọn, chưa giữ chỗ. Mỗi tour được đặt và thanh toán riêng: bấm &quot;Đặt ngay&quot; ở
         từng món để giữ chỗ 10 phút.
       </p>
+      <TrustNotes compact />
     </aside>
   );
 }

@@ -1,19 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Icon } from "@/components/ui/Icon";
 import { ErrorState, LoadingState } from "@/components/ui/StateMessage";
 import { useResource } from "@/hooks/useResource";
-import { tourDuration } from "@/lib/tour-display";
 import { getTour } from "@/services/tours";
 import type { CartChoice } from "@/types/cart";
 import type { TourDetail as Detail } from "@/types/tour";
 import { DepartureTable } from "./DepartureTable";
 import { TourBookingPanel } from "./TourBookingPanel";
-import { TourDepartureCalendar } from "./TourDepartureCalendar";
 import { TourHeader } from "./TourHeader";
+import { TourHighlights } from "./TourHighlights";
 import { TourInclusions } from "./TourInclusions";
-import { TourMobileBookBar } from "./TourMobileBookBar";
+import { openBookingPanel, TourMobileBookBar } from "./TourMobileBookBar";
 
 const BOOKING_PANEL_ID = "tour-booking";
 
@@ -39,7 +37,7 @@ interface TourDetailContentProps {
 
 function TourDetailContent({ detail, prefill }: TourDetailContentProps) {
   const { tour, itinerary, departures, images, inclusions } = detail;
-  // Shared by the departure calendar and the booking panel's dropdown so both always agree.
+  // Shared by the departure table and the booking panel's dropdown so both always agree.
   // A departure pre-filled from the cart is used only while it can still be booked.
   const [departureId, setDepartureId] = useState<string | null>(() =>
     departures.find(departure => departure.isBookable && departure.id === prefill.departureId)?.id
@@ -49,16 +47,12 @@ function TourDetailContent({ detail, prefill }: TourDetailContentProps) {
       <TourHeader tour={tour} images={images} />
       <div className="container detail-layout">
         <article className="detail-content">
-          <div className="overview-strip">
-            <span><Icon name="clock" /><small>Thời lượng</small><b>{tourDuration(tour)}</b></span>
-            <span><Icon name="map" /><small>Khởi hành từ</small><b>{tour.departureFrom ?? "Đang cập nhật"}</b></span>
-            <span><Icon name="bus" /><small>Phương tiện</small><b>{tour.transport ?? "Đang cập nhật"}</b></span>
-          </div>
-          {tour.description && <section><h2>Điểm nổi bật</h2><p>{tour.description}</p></section>}
+          <TourHighlights tour={tour} departures={departures} />
+          {tour.description && <section><h2>Giới thiệu hành trình</h2><p>{tour.description}</p></section>}
           <section>
             <h2>Lịch trình</h2>
             {itinerary.length ? (
-              <ol className="sh-timeline">
+              <ol className="sh-timeline tour-timeline">
                 {itinerary.map(day => (
                   <li key={day.dayNumber}>
                     <b>Ngày {day.dayNumber}</b>
@@ -71,10 +65,11 @@ function TourDetailContent({ detail, prefill }: TourDetailContentProps) {
           <TourInclusions inclusions={inclusions} />
           <section>
             <h2>Lịch khởi hành</h2>
-            {departures.length > 0 && (
-              <TourDepartureCalendar departures={departures} selectedId={departureId} onSelect={setDepartureId} />
-            )}
-            <DepartureTable departures={departures} />
+            <DepartureTable departures={departures} selectedId={departureId} onSelect={id => {
+              setDepartureId(id);
+              // On phones the panel sits below the table: bring it into view so the choice is visible.
+              openBookingPanel(BOOKING_PANEL_ID, true);
+            }} />
           </section>
           <section>
             <h2>Lưu ý khi đặt tour</h2>

@@ -53,7 +53,7 @@ sáng và tối ([theme](../design/theme.md)). Với mỗi trang:
 
 - Không tràn ngang, chữ không bị cắt, nút bấm được bằng bàn phím (Tab, Enter, Esc) và có focus nhìn thấy.
 - Có đủ trạng thái đang tải, rỗng và lỗi (thử dừng backend rồi bấm "Thử lại").
-- Khách sạn và chuyến bay hiển thị "giá tham khảo, chờ xác nhận".
+- Khách sạn và chuyến bay hiển thị "giá hợp đồng, chờ xác nhận chỗ".
 
 ## Luồng đầu-cuối cần thử bằng tay
 

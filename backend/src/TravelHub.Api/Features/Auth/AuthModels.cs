@@ -71,6 +71,8 @@ public static class AccountStatus
     public const string Active = "active";
     /// <summary>Registered but the email address is not confirmed yet; cannot sign in.</summary>
     public const string Pending = "pending";
+    /// <summary>Locked by an admin; every session is rejected on its next request (SessionValidator).</summary>
+    public const string Disabled = "disabled";
 }
 
 /// <summary>Machine-readable "code" in problem JSON for errors the frontend reacts to specifically.</summary>

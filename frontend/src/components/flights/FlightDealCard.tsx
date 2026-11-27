@@ -6,17 +6,18 @@ import type { FlightDeal } from "@/types/flight";
 import { ConfirmationBadges } from "./DealBadges";
 
 /** A route's headline deal; featured ones are staff picks, so neither is called "the cheapest". */
-export function FlightDealCard({ deal }: { deal: FlightDeal }) {
+export function FlightDealCard({ deal, headingLevel = 2 }: { deal: FlightDeal; headingLevel?: 2 | 3 }) {
   const day = vietnamDay(deal.departAt);
+  const Heading = headingLevel === 2 ? "h2" : "h3";
   return (
     <article className={deal.isFeatured ? "fd-card is-featured" : "fd-card"}>
       <div className="fd-pills">
         <span className="fd-badge">{deal.isFeatured ? "Ưu đãi nổi bật" : "Giá deal"}</span>
         <ConfirmationBadges remainingSeats={deal.remainingSeats} />
       </div>
-      <h2>
+      <Heading>
         {deal.originCity} <span aria-hidden="true">→</span><span className="sr-only">đến</span> {deal.destinationCity}
-      </h2>
+      </Heading>
       <p className="fd-route">{deal.originCode} – {deal.destinationCode} · {deal.airline} {deal.flightNumber}</p>
       <p className="fd-date">{weekdayName(day)}, {formatDate(day)} · {formatTime(deal.departAt)}</p>
       <p className="fd-price">

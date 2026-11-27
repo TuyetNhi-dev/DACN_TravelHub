@@ -155,7 +155,7 @@ export const termsOfUse: ContentDocument = {
     { id: "dat-cho", heading: "3. Đặt chỗ", items: [
       "Tour: khi tạo đơn, chỗ được giữ trong 10 phút. Thanh toán trong thời gian này thì đơn được xác nhận; quá hạn "
         + "thì đơn tự hủy và chỗ được trả lại.",
-      "Khách sạn và vé máy bay: giá là giá tham khảo của đối tác. Đơn chờ nhân viên xác nhận với đối tác trước, sau "
+      "Khách sạn và vé máy bay: giá là giá hợp đồng với đối tác. Đơn chờ nhân viên xác nhận với đối tác trước, sau "
         + "đó bạn mới thanh toán. SàiHành không cam kết còn phòng hay còn ghế trước khi xác nhận.",
       "Vé deal (có ghi \"Xác nhận ngay\") được giữ ghế 10 phút như tour.",
       "Giỏ hàng chỉ lưu lựa chọn, không giữ chỗ và không giữ giá.",

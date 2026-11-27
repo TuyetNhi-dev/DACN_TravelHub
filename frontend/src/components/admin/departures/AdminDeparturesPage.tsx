@@ -32,7 +32,7 @@ export function AdminDeparturesPage({ initialTourId }: { initialTourId: string }
 function DepartureQueue({ initialTourId }: { initialTourId: string }) {
   const { scope } = useAdmin();
   const [filter, setFilter] = useState<DepartureFilter>(
-    { tourId: initialTourId, from: "", to: "", status: "", page: 1 });
+    { tourId: initialTourId, from: "", to: "", status: "", branchId: "", page: 1 });
   const [editing, setEditing] = useState<AdminDeparture | null>(null);
   const list = useResource(`admin-departures:${scope}:${JSON.stringify(filter)}`,
     signal => getAdminDepartures(filter, scope, signal));
@@ -47,7 +47,8 @@ function DepartureQueue({ initialTourId }: { initialTourId: string }) {
 
   return (
     <>
-      <DepartureFilters filter={filter} onChange={change} onRefresh={list.retry} />
+      <DepartureFilters filter={filter} onChange={change} onRefresh={list.retry}
+        branches={lookups.state.status === "ready" ? lookups.state.data.branches : []} />
       {editing && lookups.state.status === "error" && (
         <ErrorState error={lookups.state.error} onRetry={lookups.retry} />
       )}
@@ -75,15 +76,21 @@ interface FiltersProps {
   filter: DepartureFilter;
   onChange: (patch: Partial<DepartureFilter>) => void;
   onRefresh: () => void;
+  branches: { id: string; name: string }[];
 }
 
-function DepartureFilters({ filter, onChange, onRefresh }: FiltersProps) {
+function DepartureFilters({ filter, onChange, onRefresh, branches }: FiltersProps) {
   return (
     <div className="sh-toolbar" role="search" aria-label="Lọc lịch khởi hành">
       <label className="sh-field">
         Từ ngày
         <input type="date" value={filter.from} onChange={event => onChange({ from: event.target.value })} />
       </label>
+      <label className="sh-field">Chi nhánh<select value={filter.branchId}
+        onChange={event => onChange({ branchId: event.target.value })}>
+        <option value="">Tất cả trong phạm vi</option>{branches.map(branch =>
+          <option key={branch.id} value={branch.id}>{branch.name}</option>)}
+      </select></label>
       <label className="sh-field">
         Đến ngày
         <input type="date" value={filter.to} onChange={event => onChange({ to: event.target.value })} />

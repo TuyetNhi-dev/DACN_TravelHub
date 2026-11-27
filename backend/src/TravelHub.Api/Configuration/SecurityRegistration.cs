@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using TravelHub.Api.Common.Errors;
+using TravelHub.Api.Features.Assistant;
 using TravelHub.Api.Features.Auth;
 using TravelHub.Api.Features.Bookings;
 using TravelHub.Api.Features.Cart;
@@ -20,6 +21,8 @@ public static class SecurityRegistration
     private const int ServiceRequestsPerWindow = 5;
     // The guest cart page asks for live prices on every visit; generous, but still a cap per client IP.
     private const int CartQuotesPerMinute = 60;
+    // Each chat turn may cost up to four model calls on a shared free-tier quota.
+    public const int AssistantChatsPerMinute = 6;
     private static readonly TimeSpan ServiceRequestWindow = TimeSpan.FromMinutes(10);
 
     public static IServiceCollection AddTravelHubSecurity(this IServiceCollection services, IHostEnvironment env)
@@ -91,7 +94,13 @@ public static class SecurityRegistration
             ClientIp(context), ServiceRequestsPerWindow, ServiceRequestWindow));
         options.AddPolicy(CartEndpoints.QuoteRateLimitPolicy,
             context => FixedWindow(ClientIp(context), CartQuotesPerMinute));
+        options.AddPolicy(AssistantEndpoints.RateLimitPolicy, AssistantPartition);
     }
+
+    /// <summary>Assistant chats per signed-in user, or per client IP for guests.</summary>
+    public static RateLimitPartition<string> AssistantPartition(HttpContext context) => FixedWindow(
+        context.User.FindFirstValue(ClaimTypes.NameIdentifier) is { } user ? "user:" + user : "ip:" + ClientIp(context),
+        AssistantChatsPerMinute);
 
     /// <summary>
     /// Browsers reach the API through the Next.js proxy, so without this every client shares the proxy's IP and

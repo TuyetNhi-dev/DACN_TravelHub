@@ -17,7 +17,8 @@ interface ListingHeroProps {
 export function ListingHero({ crumbs, eyebrow, title, description, image, children }: ListingHeroProps) {
   return (
     <header className="listing-hero">
-      <Image src={image.src} alt="" fill priority sizes="100vw" className="listing-hero-photo" />
+      <Image src={image.src} alt="" fill loading="eager" fetchPriority="high" sizes="100vw"
+        className="listing-hero-photo" />
       <div className="listing-hero-shade" aria-hidden="true" />
       <div className="container listing-hero-inner">
         <Breadcrumb items={crumbs} />

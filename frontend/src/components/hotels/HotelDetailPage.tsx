@@ -71,7 +71,7 @@ function HotelDetailContent({ detail, initialStay }: { detail: HotelDetail; init
           <p><Icon name="map" size={17} />{hotel.address ?? hotel.city}</p>
         </div>
         <div className="detail-price">
-          <small>Giá tham khảo từ</small><strong>{formatCurrency(hotel.referencePricePerNight)}</strong><span>/ đêm</span>
+          <small>Giá hợp đồng từ</small><strong>{formatCurrency(hotel.referencePricePerNight)}</strong><span>/ đêm</span>
         </div>
       </div>
       <figure className="sh-hotel-gallery">

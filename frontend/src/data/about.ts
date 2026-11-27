@@ -26,8 +26,8 @@ export const aboutPage: ContentDocument = {
     { id: "su-menh", heading: "Sứ mệnh", items: [
       "Đặt tour không lo mất chỗ: chỗ được giữ ngay khi tạo đơn, trong 10 phút để bạn thanh toán; quá hạn thì chỗ "
         + "được trả lại cho người khác.",
-      "Tư vấn rõ ràng: khách sạn và vé máy bay luôn ghi \"giá tham khảo, chờ xác nhận\" cho tới khi nhân viên xác nhận "
-        + "với đối tác; dịch vụ cộng thêm như visa, thuê xe được tư vấn qua yêu cầu riêng.",
+      "Tư vấn rõ ràng: khách sạn và vé máy bay luôn ghi \"giá hợp đồng, chờ xác nhận chỗ\" cho tới khi "
+        + "nhân viên xác nhận với đối tác; dịch vụ cộng thêm như visa, thuê xe được tư vấn qua yêu cầu riêng.",
       "Lịch âm cho người Việt: lịch âm dương và ngày lễ hiển thị ngay trên lịch khởi hành, để bạn chọn ngày đi hợp "
         + "với dịp lễ, Tết hay ngày rằm.",
     ] },

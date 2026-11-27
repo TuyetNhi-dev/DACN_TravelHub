@@ -1,10 +1,6 @@
-import Image from "next/image";
-import Link from "next/link";
 import { PROJECT_NOTICE } from "@/components/content/ContentPage";
 import { TRAVEL_GUIDES } from "@/data/travel-guides";
-import { getDestinationImages } from "@/lib/media";
-
-const CARD_SIZES = "(max-width: 767px) 100vw, (max-width: 1100px) 50vw, 360px";
+import { GuideCard } from "./GuideCard";
 
 export function GuideList() {
   return (
@@ -17,22 +13,7 @@ export function GuideList() {
           <p className="content-notice" role="note">{PROJECT_NOTICE}</p>
         </header>
         <ul className="guide-grid">
-          {TRAVEL_GUIDES.map(guide => {
-            const image = getDestinationImages(guide.coverPlace)[0];
-            return (
-              <li key={guide.slug} className="guide-card">
-                <div className="guide-card-media">
-                  {image && <Image src={image.src} alt="" fill sizes={CARD_SIZES} />}
-                </div>
-                <div className="guide-card-body">
-                  <span className="guide-card-tags">{guide.tags.join(" · ")}</span>
-                  <h2><Link href={`/cam-nang/${guide.slug}`}>{guide.title}</Link></h2>
-                  <p>{guide.summary}</p>
-                  <span className="guide-card-updated">Cập nhật: {guide.updated}</span>
-                </div>
-              </li>
-            );
-          })}
+          {TRAVEL_GUIDES.map(guide => <GuideCard key={guide.slug} guide={guide} />)}
         </ul>
       </div>
     </main>

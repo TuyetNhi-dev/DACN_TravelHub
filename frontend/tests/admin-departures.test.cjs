@@ -14,12 +14,20 @@ const departure = (changes = {}) => ({
   ...changes,
 });
 
-test('status toggle mirrors the server: close open, reopen only a future closed one, never a cancelled one', () => {
+test('status actions mirror DepartureStatus.Next and the date checks of DepartureRules.CheckTransition', () => {
   const today = '2026-11-30';
-  assert.equal(lib.statusToggleFor(departure(), today).status, 'closed');
-  assert.equal(lib.statusToggleFor(departure({ status: 'closed' }), today).status, 'open');
-  assert.equal(lib.statusToggleFor(departure({ status: 'closed', departureDate: '2026-11-30' }), today), null);
-  assert.equal(lib.statusToggleFor(departure({ status: 'cancelled' }), today), null);
+  const statuses = changes => plain(lib.departureActions(departure(changes), today)).map(action => action.status);
+  assert.deepEqual(statuses({}), ['closed', 'guaranteed', 'cancelled']);
+  assert.deepEqual(statuses({ status: 'closed' }), ['open', 'guaranteed', 'cancelled']);
+  assert.deepEqual(statuses({ status: 'closed', departureDate: today }), ['guaranteed', 'cancelled']);
+  assert.deepEqual(statuses({ status: 'guaranteed' }), ['cancelled']);
+  assert.deepEqual(statuses({ status: 'guaranteed', departureDate: today }), ['in_progress', 'cancelled']);
+  assert.deepEqual(statuses({ status: 'in_progress', departureDate: '2026-11-29' }), []);
+  assert.deepEqual(statuses({ status: 'in_progress', departureDate: '2026-11-29', returnDate: today }), ['completed']);
+  assert.deepEqual(statuses({ status: 'completed' }), []);
+  assert.deepEqual(statuses({ status: 'cancelled' }), []);
+  const needsReason = plain(lib.departureActions(departure(), today)).filter(action => action.needsReason);
+  assert.deepEqual(needsReason.map(action => action.status), ['cancelled']);
 });
 
 test('seat summary flags a group still below its minimum size', () => {
@@ -43,13 +51,18 @@ test('a new departure starts from the tour branch and base price', () => {
 });
 
 test('manifest summary counts guests and explains seats held outside the listed orders', () => {
-  const booking = { adults: 2, children: 1, passengers: [] };
-  const manifest = { departure: departure({ reservedSeats: 7, minGuests: 6 }), bookings: [booking], totalGuests: 3 };
-  assert.deepEqual(plain(lib.manifestSummary(manifest)),
-    { guests: 3, bookings: 1, belowMinimum: false, heldOutsideList: 4 });
+  const paid = { adults: 2, children: 1, status: 'confirmed', passengers: [] };
+  const holding = { adults: 1, children: 0, status: 'pending', passengers: [] };
+  const manifest = {
+    departure: departure({ reservedSeats: 7, minGuests: 6 }), bookings: [paid, holding], totalGuests: 4,
+  };
+  assert.deepEqual(plain(lib.manifestSummary(manifest)), {
+    guests: 4, adults: 3, children: 1, bookings: 2, paidBookings: 1, belowMinimum: false, heldOutsideList: 3,
+  });
   const empty = { departure: departure({ reservedSeats: 0 }), bookings: [], totalGuests: 0 };
-  assert.deepEqual(plain(lib.manifestSummary(empty)),
-    { guests: 0, bookings: 0, belowMinimum: true, heldOutsideList: 0 });
+  assert.deepEqual(plain(lib.manifestSummary(empty)), {
+    guests: 0, adults: 0, children: 0, bookings: 0, paidBookings: 0, belowMinimum: true, heldOutsideList: 0,
+  });
   assert.equal(lib.manifestHref('11'), '/admin/departures/11/manifest');
 });
 

@@ -6,7 +6,7 @@ import {
 } from "@/lib/admin-decode";
 import type {
   AdminContext, AdminDeparture, AdminLookups, AdminTourDetail, AdminTourSummary, BulkResult, Dashboard,
-  DepartureTerms, Inclusion, ItineraryDay, Manifest, Paged, SaveTourInput, TourImageInput, TourStatus,
+  DepartureStatus, DepartureTerms, Inclusion, ItineraryDay, Manifest, Paged, SaveTourInput, TourImageInput, TourStatus,
 } from "@/types/admin";
 
 const R = "quản trị";
@@ -37,11 +37,16 @@ export interface TourFilter {
   status: TourStatus | "";
   query: string;
   page: number;
+  regionId: string;
+  branchId: string;
+  categoryId: string;
+  /** One of TOUR_SORTS (lib/admin-tours.ts); the server accepts only those keys. */
+  sort: string;
 }
 
 export async function getAdminTours(filter: TourFilter, scope: string, signal?: AbortSignal)
   : Promise<Paged<AdminTourSummary>> {
-  const url = `${BASE}/tours${query({ scope, status: filter.status, query: filter.query.trim(), page: filter.page })}`;
+  const url = `${BASE}/tours${query({ scope, ...filter, query: filter.query.trim() })}`;
   return pagedListEnvelope(await apiGet(url, signal), decodeTourSummary, R);
 }
 
@@ -86,6 +91,9 @@ export interface DepartureFilter {
   to: string;
   status: string;
   page: number;
+  branchId: string;
+  /** Rows per page; the calendar view asks for a whole month at once. */
+  pageSize?: number;
 }
 
 export async function getAdminDepartures(filter: DepartureFilter, scope: string, signal?: AbortSignal)
@@ -120,8 +128,10 @@ export async function updateDeparture(departureId: string, terms: Omit<Departure
   return itemEnvelope(await apiPut(`${BASE}/departures/${id(departureId)}`, terms), decodeDeparture, R);
 }
 
-export async function setDepartureStatus(departureId: string, status: "open" | "closed"): Promise<AdminDeparture> {
-  const value = await apiPost(`${BASE}/departures/${id(departureId)}/status`, { status });
+/** reason is required by the server when cancelling, and ignored otherwise. */
+export async function setDepartureStatus(departureId: string, status: DepartureStatus, reason: string | null = null)
+  : Promise<AdminDeparture> {
+  const value = await apiPost(`${BASE}/departures/${id(departureId)}/status`, { status, reason });
   return itemEnvelope(value, decodeDeparture, R);
 }
 

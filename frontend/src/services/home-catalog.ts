@@ -3,7 +3,7 @@ import { getHotels } from "@/services/hotels";
 import type { FlightOffer } from "@/types/flight";
 import type { HotelSummary } from "@/types/hotel";
 
-const HOME_HOTELS = 4;
+const HOME_HOTELS = 8;
 const HOME_FLIGHTS = 6;
 
 /** Home teaser: hotels that have a partner reference price. Never implies a room is available. */

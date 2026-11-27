@@ -91,9 +91,8 @@
   .mc-solar { font-size: 15px; }
   .mc-dot { top: 3px; right: 3px; width: 6px; height: 6px; }
   .mc-extra { font-size: max(9px, var(--text-min)); }
-  /* Seven 44px touch cells need ~310px: thinner gaps, and the tour calendar bleeds into its card padding. */
+  /* Seven 44px touch cells need ~310px: thinner gaps, and the calendars bleed into their card padding. */
   .mc-month { border-spacing: 1px; }
-  .tour-calendar .mc { margin-inline: -12px; }
   .home-planner-calendar .mc, .lich-card .mc { margin-inline: -16px; }
   /* At a readable 14px the seat note no longer fits a 44px cell; seats stay in the cell's aria-label, the
      departure cards below and the booking dropdown. Sold-out days keep their muted style and legend entry. */
@@ -159,7 +158,3 @@
 .lich-list .is-traditional b { color: var(--cal-traditional); }
 .lich-note { font-size: max(12px, var(--text-min)); color: var(--muted); margin: 12px 0 0; }
 @media (max-width: 900px) { .lich-layout { grid-template-columns: minmax(0, 1fr); } }
-
-/* ---------- Tour departure calendar ---------- */
-.tour-calendar { margin-bottom: 18px; }
-.tour-calendar-hint { font-size: max(12px, var(--text-min)); color: var(--muted); margin: 8px 0 0; }

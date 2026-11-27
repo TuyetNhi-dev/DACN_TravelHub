@@ -9,7 +9,7 @@ namespace TravelHub.Api.Features.Admin.Access;
 /// Entry point of every /api/admin service: turns the signed-in account into an <see cref="AdminAccess"/> and
 /// refuses with 403 before any data is read. Scoped, so the branch list is loaded at most once per request.
 /// </summary>
-public sealed class AdminAccessService(OrganizationRepository organization)
+public sealed class AdminAccessService(IBranchDirectory organization)
 {
     private const string NotOperator = "Bạn không có quyền truy cập trang quản trị.";
     private IReadOnlyList<BranchRef>? branches;

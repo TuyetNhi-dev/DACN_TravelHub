@@ -1,12 +1,13 @@
 import { CtaBand } from "@/components/home/CtaBand";
 import { DepartingSoon } from "@/components/home/DepartingSoon";
-import { DestinationMosaic } from "@/components/home/DestinationMosaic";
+import { DestinationAccordion } from "@/components/home/DestinationAccordion";
 import { FeaturedTours } from "@/components/home/FeaturedTours";
-import { FlightFares } from "@/components/home/FlightFares";
 import { HeroBanner } from "@/components/home/HeroBanner";
 import { HomeCollections } from "@/components/home/HomeCollections";
-import { HomePromises } from "@/components/home/HomePromises";
+import { HomeFlightDeals } from "@/components/home/HomeFlightDeals";
+import { HomeHolidayBreaks } from "@/components/home/HomeHolidayBreaks";
 import { HomeSearch } from "@/components/home/HomeSearch";
+import { HomeStorySections } from "@/components/home/HomeStorySections";
 import { HomeToursProvider } from "@/components/home/HomeToursProvider";
 import { HomeTripPlanner } from "@/components/home/HomeTripPlanner";
 import { HotelHighlights } from "@/components/home/HotelHighlights";
@@ -15,6 +16,9 @@ import { QUOTE_LABEL } from "@/components/ui/PriceTag";
 import { Reveal } from "@/components/ui/Reveal";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 import { SOON_DAYS } from "@/services/tours";
+import "@/styles/flight-deals.css";
+import "@/styles/flights.css";
+import "@/styles/holiday-breaks.css";
 
 export default function Home() {
   return (
@@ -27,21 +31,21 @@ export default function Home() {
       <HomeCollections />
 
       <HomeToursProvider>
-        <section className="home-section" aria-labelledby="destinations-title">
-          <Reveal className="container">
-            <SectionHeader id="destinations-title" eyebrow="Đi đâu tiếp theo?" title="Điểm đến được yêu thích"
-              description="Từ vịnh biển di sản tới phố cổ, cao nguyên và đảo ngọc."
-              link={{ href: "/tours", label: "Tất cả tour" }} />
-            <DestinationMosaic />
-          </Reveal>
-        </section>
-
         <section className="home-section home-section--tint" aria-labelledby="featured-title">
           <Reveal className="container">
             <SectionHeader id="featured-title" eyebrow="Tour trọn gói" title="Tour trọn gói SàiHành"
               description="Chọn vùng điểm đến. Lịch khởi hành và giá lấy trực tiếp từ hệ thống SàiHành."
               link={{ href: "/tours", label: "Xem tất cả tour" }} />
             <FeaturedTours />
+          </Reveal>
+        </section>
+
+        <section className="home-section" aria-labelledby="destinations-title">
+          <Reveal className="container">
+            <SectionHeader id="destinations-title" eyebrow="Đi đâu tiếp theo?" title="Điểm đến được yêu thích"
+              description="Từ vịnh biển di sản tới phố cổ, cao nguyên và đảo ngọc."
+              link={{ href: "/tours", label: "Tất cả tour" }} />
+            <DestinationAccordion />
           </Reveal>
         </section>
 
@@ -55,6 +59,8 @@ export default function Home() {
             </div>
           </Reveal>
         </section>
+
+        <HomeHolidayBreaks />
 
         <section className="home-section" aria-labelledby="needs-title">
           <Reveal className="container">
@@ -74,22 +80,16 @@ export default function Home() {
         </Reveal>
       </section>
 
-      <section className="home-section" aria-labelledby="fares-title">
+      <section className="home-section home-section--sun" aria-labelledby="deals-title">
         <Reveal className="container">
-          <SectionHeader id="fares-title" eyebrow="Vé máy bay" title="Giá vé tham khảo"
-            description={<>Giá rẻ nhất mỗi chặng trong danh mục đối tác. <strong>{QUOTE_LABEL}.</strong></>}
-            link={{ href: "/flights", label: "Tìm chuyến bay" }} />
-          <FlightFares />
+          <SectionHeader id="deals-title" eyebrow="Săn deal vé máy bay" title="Vé deal, xác nhận ngay"
+            description="Quỹ ghế SàiHành đã ký với hãng: giữ ghế khi đặt, thanh toán trong hạn là có vé."
+            link={{ href: "/flights/deals", label: "Xem tất cả vé deal" }} />
+          <HomeFlightDeals />
         </Reveal>
       </section>
 
-      <section className="home-section home-section--tint" aria-labelledby="promise-title">
-        <Reveal className="container">
-          <SectionHeader id="promise-title" eyebrow="Vì sao chọn SàiHành" title="Đặt chỗ rõ ràng, không hứa suông"
-            description="Những điều hệ thống đặt chỗ của SàiHành thực sự đảm bảo." />
-          <HomePromises />
-        </Reveal>
-      </section>
+      <HomeStorySections />
 
       <div className="container home-cta"><CtaBand /></div>
     </main>

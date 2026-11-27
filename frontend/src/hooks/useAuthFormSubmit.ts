@@ -4,7 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { ApiError } from "@/lib/api-client";
-import { safeReturnPath } from "@/lib/auth";
+import { postLoginPath } from "@/lib/auth";
 import { normalizeVietnamesePhone, VIETNAMESE_PHONE_MESSAGE } from "@/lib/phone-vn";
 import { login, register } from "@/services/auth";
 import { EMAIL_NOT_VERIFIED } from "@/types/auth";
@@ -37,9 +37,9 @@ export function useAuthFormSubmit(mode: AuthMode) {
   }
 
   async function signIn(values: Values) {
-    await login({ email: values.email, password: values.password });
+    const session = await login({ email: values.email, password: values.password });
     await refresh();
-    router.replace(safeReturnPath(new URLSearchParams(window.location.search).get("next")));
+    router.replace(postLoginPath(new URLSearchParams(window.location.search).get("next"), session.user));
   }
 
   function fail(failure: unknown, email: string) {

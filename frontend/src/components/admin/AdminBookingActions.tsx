@@ -18,6 +18,7 @@ const SUCCESS_MESSAGES: Record<AdminAction, string> = {
   confirm: "Đã ghi nhận đối tác xác nhận. Khách có thể thanh toán.",
   reject: "Đã từ chối đơn và trả lại chỗ (nếu có).",
   complete: "Đã đánh dấu hoàn thành.",
+  cancel: "Đã hủy đơn.",
 };
 
 /**
@@ -49,37 +50,67 @@ export function AdminBookingActions({ booking, onChanged }: AdminBookingActionsP
       {message && (
         <p className={message.kind === "error" ? "sh-error" : "sh-success"} role="status">{message.text}</p>
       )}
-      {actions.partner && <PartnerConfirmForm busy={busy} onRun={run} />}
-      {actions.releaseHold && (
-        <>
-          <p className="sh-hotel-caption">
-            Đơn giữ chỗ (tour, vé deal) được xác nhận tự động khi khách thanh toán trong hạn.
-          </p>
-          <button className="btn btn-outline" type="button" disabled={busy !== null} onClick={() => void run("reject")}>
-            {busy === "reject" ? "Đang xử lý…" : "Hủy giữ chỗ"}
-          </button>
-        </>
-      )}
-      {actions.complete && (
-        <button className="btn btn-outline" disabled={busy !== null} onClick={() => void run("complete")}>
-          {busy === "complete" ? "Đang xử lý…" : "Đánh dấu hoàn thành"}
-        </button>
-      )}
-      {!actions.partner && !actions.releaseHold && !actions.complete && (
-        <p className="sh-hotel-caption">Đơn không còn thao tác chờ xử lý.</p>
-      )}
+      <BookingActionControls actions={actions} busy={busy} onRun={run} />
     </div>
   );
 }
 
-function availableActions(booking: BookingDetail) {
+interface AvailableActions {
+  partner: boolean;
+  releaseHold: boolean;
+  complete: boolean;
+  cancel: boolean;
+}
+
+function availableActions(booking: BookingDetail): AvailableActions {
   const seatHold = holdsSeats(booking);
   const lastDay = booking.endDate ?? booking.startDate;
   return {
     partner: !seatHold && booking.itemStatus === "awaiting_supplier",
     releaseHold: seatHold && booking.itemStatus === "pending",
+    cancel: ["pending", "awaiting_supplier", "awaiting_payment"].includes(booking.itemStatus),
     complete: booking.itemStatus === "confirmed" && lastDay !== null && lastDay < vietnamToday(),
   };
+}
+
+function BookingActionControls({ actions, busy, onRun }: {
+  actions: AvailableActions; busy: AdminAction | null;
+  onRun: (action: AdminAction, code?: string) => Promise<void>;
+}) {
+  const hasAction = actions.partner || actions.releaseHold || actions.complete || actions.cancel;
+  return <>
+    {actions.partner && <PartnerConfirmForm busy={busy} onRun={onRun} />}
+    {actions.releaseHold && <HoldRelease busy={busy} onRun={onRun} />}
+    {actions.complete && <button className="btn btn-outline" disabled={busy !== null}
+      onClick={() => void onRun("complete")}>
+      {busy === "complete" ? "Đang xử lý…" : "Đánh dấu hoàn thành"}
+    </button>}
+    {actions.cancel && !actions.releaseHold && <CancelBookingButton busy={busy} onRun={onRun} />}
+    {!hasAction && <p className="sh-hotel-caption">Đơn không còn thao tác chờ xử lý.</p>}
+  </>;
+}
+
+function HoldRelease({ busy, onRun }: {
+  busy: AdminAction | null; onRun: (action: AdminAction) => Promise<void>;
+}) {
+  return <>
+    <p className="sh-hotel-caption">Đơn giữ chỗ được xác nhận tự động khi khách thanh toán trong hạn.</p>
+    <button className="btn btn-outline" type="button" disabled={busy !== null}
+      onClick={() => void onRun("cancel")}>
+      {busy === "cancel" ? "Đang xử lý…" : "Hủy đơn và trả chỗ"}
+    </button>
+  </>;
+}
+
+function CancelBookingButton({ busy, onRun }: {
+  busy: AdminAction | null; onRun: (action: AdminAction) => Promise<void>;
+}) {
+  function cancel() {
+    if (window.confirm("Hủy đơn chưa thanh toán này?")) void onRun("cancel");
+  }
+  return <button className="btn btn-outline" type="button" disabled={busy !== null} onClick={cancel}>
+    {busy === "cancel" ? "Đang xử lý…" : "Hủy đơn"}
+  </button>;
 }
 
 interface PartnerConfirmFormProps {

@@ -28,10 +28,12 @@ export function DepartureTable({ departures, onEdit, onChanged }: TableProps) {
   const today = vietnamToday();
 
   async function toggle(departure: AdminDeparture, action: StatusToggle) {
+    const reason = action.needsReason ? cancellationReason(departure) : null;
+    if (action.needsReason && !reason) return;
     setBusyId(departure.id);
     setMessage(null);
     try {
-      onChanged(await setDepartureStatus(departure.id, action.status));
+      onChanged(await setDepartureStatus(departure.id, action.status, reason));
       setMessage({ kind: "success", text: `${action.label} lịch ${formatDate(departure.departureDate)}.` });
     } catch (error) {
       if (!(error instanceof ApiError)) throw error;
@@ -50,7 +52,7 @@ export function DepartureTable({ departures, onEdit, onChanged }: TableProps) {
           <thead><tr>{COLUMNS.map(column => <th key={column}>{column}</th>)}</tr></thead>
           <tbody>
             {departures.map(departure => (
-              <DepartureRow key={departure.id} departure={departure} toggle={statusToggleFor(departure, today)}
+              <DepartureRow key={departure.id} departure={departure} actions={statusToggleFor(departure, today)}
                 busy={busyId === departure.id} onEdit={onEdit} onToggle={action => void toggle(departure, action)} />
             ))}
           </tbody>
@@ -60,15 +62,21 @@ export function DepartureTable({ departures, onEdit, onChanged }: TableProps) {
   );
 }
 
+function cancellationReason(departure: AdminDeparture): string | null {
+  const confirmText = `Hủy chuyến này? Có ${departure.activeBookings} đơn bị ảnh hưởng.`;
+  if (!window.confirm(confirmText)) return null;
+  return window.prompt("Nhập lý do hủy chuyến:")?.trim() || null;
+}
+
 interface RowProps {
   departure: AdminDeparture;
-  toggle: StatusToggle | null;
+  actions: StatusToggle[];
   busy: boolean;
   onEdit: (departure: AdminDeparture) => void;
   onToggle: (action: StatusToggle) => void;
 }
 
-function DepartureRow({ departure, toggle, busy, onEdit, onToggle }: RowProps) {
+function DepartureRow({ departure, actions, busy, onEdit, onToggle }: RowProps) {
   const seats = seatSummary(departure);
   const status = DEPARTURE_STATUS[departure.status];
   return (
@@ -96,11 +104,10 @@ function DepartureRow({ departure, toggle, busy, onEdit, onToggle }: RowProps) {
           {departure.canEdit && (
             <button type="button" className="btn btn-outline btn-small" onClick={() => onEdit(departure)}>Sửa</button>
           )}
-          {departure.canEdit && toggle && (
-            <button type="button" className="btn btn-ghost btn-small" disabled={busy} onClick={() => onToggle(toggle)}>
-              {busy ? "Đang lưu…" : toggle.label}
-            </button>
-          )}
+          {departure.canEdit && actions.map(action => <button key={action.status} type="button"
+            className={action.status === "cancelled" ? "btn btn-ghost btn-small adm-action-danger" :
+              "btn btn-ghost btn-small"}
+            disabled={busy} onClick={() => onToggle(action)}>{busy ? "Đang lưu…" : action.label}</button>)}
         </div>
       </td>
     </tr>

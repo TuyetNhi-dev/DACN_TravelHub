@@ -15,7 +15,9 @@ public sealed class AdminDepartureRepository(MySqlConnectionFactory connections)
     private const string Select = """
         SELECT d.id, d.tour_id, t.code AS tour_code, t.title AS tour_title, d.operating_branch_id,
             b.name AS branch_name, d.departure_location_id, l.name AS departure_from, d.departure_date, d.return_date,
-            d.capacity, d.reserved_seats, d.min_guests, d.adult_price, d.child_price, d.status
+            d.capacity, d.reserved_seats, d.min_guests, d.adult_price, d.child_price, d.status, d.cancel_reason,
+            (SELECT COUNT(*) FROM tour_booking_details td JOIN booking_items i ON i.id = td.booking_item_id
+             WHERE td.tour_departure_id = d.id AND i.status NOT IN ('cancelled', 'failed')) AS active_bookings
         FROM tour_departures d
         JOIN tours t ON t.id = d.tour_id
         JOIN branches b ON b.id = d.operating_branch_id
@@ -91,11 +93,16 @@ public sealed class AdminDepartureRepository(MySqlConnectionFactory connections)
             return rows > 0;
         }, ct);
 
-    public Task<bool> SetStatusAsync(ulong id, string status, AuditEntry audit, CancellationToken ct) =>
+    /// <summary>Moves the departure only if it is still in <paramref name="from"/>; a reason is kept on cancel.</summary>
+    public Task<bool> SetStatusAsync(ulong id, string from, string status, string? reason, AuditEntry audit,
+        CancellationToken ct) =>
         connections.InTransactionAsync(async tx =>
         {
-            var rows = await tx.ExecuteAsync("UPDATE tour_departures SET status = @status WHERE id = @id", ct,
-                ("@status", status), ("@id", id));
+            var rows = await tx.ExecuteAsync("""
+                UPDATE tour_departures SET status = @status, cancel_reason = @reason,
+                    cancelled_at = IF(@reason IS NULL, NULL, UTC_TIMESTAMP(6))
+                WHERE id = @id AND status = @from
+                """, ct, ("@status", status), ("@reason", reason), ("@id", id), ("@from", from));
             if (rows > 0) await AuditLogWriter.WriteAsync(tx.Connection, tx.Inner, audit, ct);
             return rows > 0;
         }, ct);
@@ -118,6 +125,7 @@ public sealed class AdminDepartureRepository(MySqlConnectionFactory connections)
         SqlFilter.AddIfPresent(sql, command, "d.departure_date >= @from", "@from", filter.From);
         SqlFilter.AddIfPresent(sql, command, "d.departure_date <= @to", "@to", filter.To);
         SqlFilter.AddIfPresent(sql, command, "d.status = @status", "@status", filter.Status);
+        SqlFilter.AddIfPresent(sql, command, "d.operating_branch_id = @branchId", "@branchId", filter.BranchId);
         return sql.ToString();
     }
 
@@ -126,5 +134,6 @@ public sealed class AdminDepartureRepository(MySqlConnectionFactory connections)
         r.GetString("branch_name"), r.GetId("departure_location_id"), r.GetString("departure_from"),
         r.GetDateOnly("departure_date"), r.GetDateOnly("return_date"), r.GetInt32("capacity"),
         r.GetInt32("reserved_seats"), r.GetInt32("min_guests"), r.GetDecimal("adult_price"),
-        r.GetNullableDecimal("child_price"), r.GetString("status"), false), r.GetUInt64("operating_branch_id"));
+        r.GetNullableDecimal("child_price"), r.GetString("status"), false, r.GetInt32("active_bookings"),
+        r.GetNullableString("cancel_reason")), r.GetUInt64("operating_branch_id"));
 }

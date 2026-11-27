@@ -5,8 +5,14 @@ namespace TravelHub.Api.Features.Admin.Access;
 
 public sealed record RegionRef(ulong Id, string Code, string Name);
 
+/// <summary>Where <see cref="AdminAccessService"/> reads the branch tree; tests pass a fixed list, not MySQL.</summary>
+public interface IBranchDirectory
+{
+    Task<IReadOnlyList<BranchRef>> ListBranchesAsync(CancellationToken ct);
+}
+
 /// <summary>Regions and branches: a few rows, read once per request by <see cref="AdminAccessService"/>.</summary>
-public sealed class OrganizationRepository(MySqlConnectionFactory connections)
+public sealed class OrganizationRepository(MySqlConnectionFactory connections) : IBranchDirectory
 {
     public async Task<IReadOnlyList<BranchRef>> ListBranchesAsync(CancellationToken ct)
     {
